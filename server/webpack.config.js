@@ -3,7 +3,11 @@
 const path = require("path");
 const webpack = require('webpack');
 
-module.exports = {
+let options = {
+    minify: true
+};
+
+let config = {
     entry: [
         "babel-polyfill",
         "./build/src/startServer.js"
@@ -20,6 +24,7 @@ module.exports = {
         __filename: false,
         __dirname: false
     },
+    plugins: loadPlugins(),
     module: {
         loaders: [
             {
@@ -35,3 +40,21 @@ module.exports = {
     },
     devtool: "source-map"
 };
+
+function loadPlugins() {
+    let result = [];
+
+    let minifyPlugin = new webpack.optimize.UglifyJsPlugin({
+        compress: {
+            warnings: false
+        }
+    });
+
+    if (options.minify) {
+        result.push(minifyPlugin);
+    }
+
+    return result;
+}
+
+module.exports = config;

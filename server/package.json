@@ -2,7 +2,7 @@
   "name": "server",
   "private": true,
   "scripts": {
-    "package": "node ./tasks/package"
+    "build": "webpack"
   },
   "author": "",
   "license": "ISC",
