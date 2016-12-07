@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "private": true,
+  "scripts": {
+    "package": "node ./tasks/package"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.15.2",
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
+    "detect-port": "^1.0.5",
+    "express": "^4.14.0",
+    "jsonfile": "^2.4.0",
+    "lodash": "^4.16.5",
+    "moment": "^2.15.2",
+    "morgan": "^1.7.0",
+    "multiparty": "^4.1.2",
+    "opn": "^4.0.2",
+    "parse5": "^2.2.3"
+  },
+  "devDependencies": {
+    "json-loader": "^0.5.4",
+    "webpack": "^1.13.3",
+    "tslint": "^3.15.1"
+  }
+}

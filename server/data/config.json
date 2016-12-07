@@ -1,0 +1,45 @@
+{
+  "app": {
+    "appName": "Admin Center",
+    "isDevLocal": true,
+    "logErrors": true
+  },
+  "web": {
+    "port": 7000,
+    "sessionSecret": "secret_value_!?!"
+  },
+  "db": {
+    "adminCenter": {
+      "host": "localhost",
+      "dbName": "DPAdmin",
+      "username": "admin",
+      "password": "password123"
+    },
+    "nepm": {
+      "host": "localhost",
+      "dbName": "NEPM",
+      "username": "admin",
+      "password": "password123"
+    }
+  },
+  "auth": {
+    "useAuth": true,
+    "defaultUserName": "olga.zabelina",
+    "usersEmails": [
+      "Neil.Mercer@douglaspartners.com.au",
+      "Alex.Patterson@douglaspartners.com.au",
+      "Olga.Zabelina@douglaspartners.com.au"
+    ]
+  },
+  "ldap": {
+    "url": "ldap://dpsyddc01:389",
+    "bindDn": "cn=LDAP Query,cn=users,dc=douglas,dc=local",
+    "bindCredentials": "dp_ldap_lookup",
+    "searchBase": "ou=Douglas Partners,dc=douglas,dc=local",
+    "searchFilter": "(samaccountname={{username}})"
+  },
+  "jt": {
+    "urlBase": "http://localhost:50910/api",
+    "token": "2d2eede0-6d90-486c-b937-a3da338ec8d5"
+  }
+}

@@ -1,0 +1,4 @@
+data/local
+node_modules
+build
+.idea
