@@ -5,12 +5,12 @@ import pathHelper from './helpers/pathHelper';
 let config = {
     port: 4088,
     isDevLocal: process.env['NODE_ENV'] === 'development',
-    appID: 'Bookmarks Archive',
+    appID: 'My App',
     dbPath: ''
 };
 
-function tryReadConfigFile(fileName) {
-    let filePath = pathHelper.getDataRelative('config', fileName);
+function tryReadConfigFile(...path) {
+    let filePath = pathHelper.getDataRelative(...path);
 
     try {
         return jsonfile.readFileSync(filePath);
@@ -20,11 +20,11 @@ function tryReadConfigFile(fileName) {
     }
 }
 
-let defaultFile = tryReadConfigFile('settings.json');
+let defaultFile = tryReadConfigFile('config.json');
 _.merge(config, defaultFile);
 
 if (config.isDevLocal) {
-    let localFile = tryReadConfigFile('local.json');
+    let localFile = tryReadConfigFile('local', 'config.local.json');
     _.merge(config, localFile);
 }
 
