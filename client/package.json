@@ -2,12 +2,14 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
+    "jquery": "^3.1.1",
     "react": "^15.4.1",
-    "react-dom": "^15.4.1"
+    "react-dom": "^15.4.1",
+    "toastr": "^2.1.2"
   },
+  "proxy": "http://localhost:3333",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

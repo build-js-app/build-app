@@ -3,7 +3,7 @@ import * as jsonfile from 'jsonfile';
 import pathHelper from './helpers/pathHelper';
 
 let config = {
-    port: 4088,
+    port: 3000,
     isDevLocal: process.env['NODE_ENV'] === 'development',
     appID: 'My App',
     dbPath: ''
