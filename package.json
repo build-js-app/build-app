@@ -4,7 +4,11 @@
   "description": "Build full-stack JS app",
   "main": "index.js",
   "scripts": {
+    "build": "node ./tasks/build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "fs-extra": "^1.0.0"
   },
   "author": "Yegor Sytnyk",
   "license": "ISC"
