@@ -4,12 +4,13 @@ const path = require("path");
 const webpack = require('webpack');
 
 module.exports = {
-    entry: {
-        app: "./build/src/app.js"
-    },
+    entry: [
+        "babel-polyfill",
+        "./build/src/startServer.js"
+    ],
     output: {
         path: "./build",
-        filename: 'app.js'
+        filename: 'server.js'
     },
     resolve: {
         extensions: ["", ".js"]
@@ -21,23 +22,16 @@ module.exports = {
     },
     module: {
         loaders: [
-            // {
-            //     test: /\.js$/,
-            //     exclude: /node_modules/,
-            //     loader: "babel-loader",
-            //     query: {
-            //         // plugins: [
-            //         //     'transform-async-to-generator',
-            //         //     'transform-es2015-modules-commonjs'
-            //         // ]
-            //     }
-            // }
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: "babel-loader"
+            },
             {
                 test: /\.json$/,
                 loader: "json-loader"
             }
         ]
     },
-    //externals: [nodeExternals()],
     devtool: "source-map"
 };
