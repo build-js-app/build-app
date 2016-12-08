@@ -36,13 +36,12 @@ function getClientRelativePath(...paths: string[]) {
     return path.join.apply(this, args);
 }
 
-
 function getRootPath() {
     if (isDevLocal()) {
         return path.join(__dirname, '../../..');
     }
 
-    return path.join(__dirname, './');
+    return path.join(__dirname, '../');
 }
 
 function getClientPath() {

@@ -35,7 +35,7 @@ function packageRelative(relativePath) {
 
 fs.emptyDirSync(config.paths.package);
 
-fs.copySync(config.paths.serverBundle, packageRelative('app.js'));
+fs.copySync(config.paths.serverBundle, packageRelative('./server/server.js'));
 
 fs.copySync(config.paths.clientBuild, packageRelative('./client'));
 
@@ -51,5 +51,7 @@ if (removeMapFiles) {
 fs.emptyDirSync(packageRelative('./data/config'));
 
 fs.copySync(rootRelative('./server/data/'), packageRelative('./data/'));
+
+fs.copySync(rootRelative('./tasks/templates/index.js'), packageRelative('./index.js'));
 
 console.log('Done');
