@@ -10,7 +10,7 @@ let config = {
 };
 
 function tryReadConfigFile(...path) {
-    let filePath = pathHelper.getDataRelative(...path);440
+    let filePath = pathHelper.getDataRelative(...path);
 
     try {
         return jsonfile.readFileSync(filePath);

@@ -1,72 +1,57 @@
 import * as path from 'path';
 import * as _ from 'lodash';
 
-let rootPath = getRootPath();
-let dataPath = getDataPath();
-let clientPath = getClientPath();
+let profileData = {
+    production: {
+        root: '../',
+        data: './data',
+        client: './client'
+    },
+    development: {
+        root: '../../..',
+        data: './data',
+        client: '../client/build'
+    }
+};
 
-let profile = null;
+let rootPath = getRootPath();
 
 export default {
     path,
-    init,
     getRelative: getRelativePath,
     getDataRelative: getDataRelativePath,
     getClientRelative: getClientRelativePath
 };
 
-function init(pathProfile) {
-    profile = pathProfile;
+function getDataRelativePath(...paths) {
+    return getRelativePath('data', ...paths)
 }
 
-function getRelativePath(profile, ...paths: string[]) {
-    let args = _.toArray(arguments);
-
-    args.unshift(rootPath);
-
-    return path.join.apply(this, args);
+function getClientRelativePath(...paths) {
+    return getRelativePath('client', ...paths)
 }
 
-function getDataRelativePath(...paths: string[]) {
-    let args = _.toArray(arguments);
+function getRelativePath(profileFolder, ...paths: string[]) {
+    let folderRelative = profileData[getCurrentProfile()][profileFolder];
 
-    args.unshift(dataPath);
+    if (!folderRelative) throw Error(`Cannot find relative folder profile '${profileFolder}'`);
 
-    return path.join.apply(this, args);
-}
+    paths.unshift(folderRelative);
+    paths.unshift(rootPath);
 
-function getClientRelativePath(...paths: string[]) {
-    let args = _.toArray(arguments);
-
-    args.unshift(clientPath);
-
-    return path.join.apply(this, args);
+    return path.join.apply(this, paths);
 }
 
 function getRootPath() {
-    if (isDevLocal()) {
-        return path.join(__dirname, '../../..');
-    }
+    let rootRelative = profileData[getCurrentProfile()].root;
 
-    return path.join(__dirname, '../');
+    if (!rootRelative) throw Error('Cannot find root folder');
+
+    return path.join(__dirname, rootRelative);
 }
 
-function getClientPath() {
-    if (isDevLocal()) {
-        return getRelativePath('../client/build');
-    }
+function getCurrentProfile(){
+    let env = process.env['NODE_ENV'];
 
-    return getRelativePath('./client');
-}
-
-function getDataPath() {
-    if (process.env['NODE_DATA_DIR']) {
-        return process.env['NODE_DATA_DIR'];
-    }
-
-    return path.join(rootPath, 'data');
-}
-
-function isDevLocal() {
-    return process.env['NODE_ENV'] === 'development';
+    return env ? env : 'development';
 }
