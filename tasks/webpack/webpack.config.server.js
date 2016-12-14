@@ -10,10 +10,10 @@ let options = {
 let config = {
     entry: [
         "babel-polyfill",
-        "./build/src/startServer.js"
+        "./server/build/src/startServer.js"
     ],
     output: {
-        path: "./build",
+        path: "./server/build",
         filename: 'server.js'
     },
     resolve: {
