@@ -9,11 +9,10 @@ let options = {
 
 let config = {
     entry: [
-        "babel-polyfill",
-        "./server/build/src/startServer.js"
+        "babel-polyfill"
     ],
     output: {
-        path: "./server/build",
+        path: "",
         filename: 'server.js'
     },
     resolve: {

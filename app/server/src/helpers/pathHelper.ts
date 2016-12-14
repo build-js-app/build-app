@@ -5,14 +5,21 @@ let rootPath = getRootPath();
 let dataPath = getDataPath();
 let clientPath = getClientPath();
 
+let profile = null;
+
 export default {
-    path: path,
+    path,
+    init,
     getRelative: getRelativePath,
     getDataRelative: getDataRelativePath,
     getClientRelative: getClientRelativePath
 };
 
-function getRelativePath(...paths: string[]) {
+function init(pathProfile) {
+    profile = pathProfile;
+}
+
+function getRelativePath(profile, ...paths: string[]) {
     let args = _.toArray(arguments);
 
     args.unshift(rootPath);

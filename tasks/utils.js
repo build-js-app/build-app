@@ -3,8 +3,9 @@ var fs = require('fs-extra');
 var path = require('path');
 var config = require('./config');
 
-var appDirectory = getRoot();
-var packageDirectory = rootRelative(config.paths.package);
+var rootDirectory = getRoot();
+var appDirectory = 'd:\\Projects\\build-app\\app';//getRoot();
+var packageDirectory = appRelative(config.paths.package);
 
 module.exports = {
     log: log,
@@ -12,6 +13,7 @@ module.exports = {
     ensureEmptyDir: ensureEmptyDir,
     path: {
         rootRelative: rootRelative,
+        appRelative: appRelative,
         packageRelative: packageRelative,
         getRoot: getRoot
     }
@@ -27,7 +29,7 @@ function log(message, color) {
 
 function copy(from, to) {
     if (from.startsWith('.')) {
-        from = rootRelative(from);
+        from = appRelative(from);
     }
 
     if (to.startsWith('.')) {
@@ -38,6 +40,10 @@ function copy(from, to) {
 }
 
 function rootRelative(relativePath) {
+    return path.resolve(rootDirectory, relativePath);
+}
+
+function appRelative(relativePath) {
     return path.resolve(appDirectory, relativePath);
 }
 
@@ -51,7 +57,7 @@ function getRoot() {
 
 function ensureEmptyDir(path) {
     if (path.startsWith('.')) {
-        path = rootRelative(path);
+        path = appRelative(path);
     }
 
     fs.emptyDirSync(path);

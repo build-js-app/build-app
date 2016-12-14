@@ -29,7 +29,7 @@ function build() {
         copyDataFolder();
 
         //index file to run app with production env params
-        utils.copy('./tasks/templates/index.js', './index.js');
+        utils.copy(utils.path.rootRelative('./tasks/templates/index.js'), './index.js');
 
         utils.log('All Done!', 'green');
     });
@@ -38,7 +38,27 @@ function build() {
 function buildServer(cb) {
     console.log('Creating server bundle...');
 
+    if (config.useTs) {
+        var exec = require('child_process').execSync;
+
+        try {
+            exec('tsc', {
+                cwd: utils.path.appRelative('./server')
+            });
+
+            utils.log('TypeScript was compiled.', 'green');
+        } catch (err) {
+            utils.log('Cannot compile TypeScript', 'red');
+            process.exit(1);
+        }
+    }
+
     var webpackConfig = require('./webpack/webpack.config.server');
+
+    webpackConfig.entry.push(utils.path.appRelative(config.paths.serverEntry));
+
+    webpackConfig.output.path = utils.path.appRelative('./server/build');
+
     webpack(webpackConfig).run((err, stats) => {
         if (err) {
             printErrors('Failed to compile.', [err]);
