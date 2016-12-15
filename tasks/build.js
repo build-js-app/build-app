@@ -3,6 +3,7 @@ var config = require('./config');
 var webpack = require('webpack');
 var chalk = require('chalk');
 var fs = require('fs-extra');
+var spawn = require('cross-spawn').sync;
 
 var removeMapFiles = true;
 
@@ -37,17 +38,16 @@ function buildServer(cb) {
     console.log('Creating server bundle...');
 
     if (config.server.sourceLang === 'ts') {
-        var exec = require('child_process').execSync;
+        var result = spawn('tsc', [], {
+            stdio: 'inherit',
+            cwd: utils.path.appRelative('./server')
+        });
 
-        try {
-            exec('tsc', {
-                cwd: utils.path.appRelative('./server')
-            });
-
-            utils.log('TypeScript was compiled.', 'green');
-        } catch (err) {
+        if (result.status !== 0) {
             utils.log('Cannot compile TypeScript', 'red');
             process.exit(1);
+        } else {
+            utils.log('TypeScript was compiled.', 'green');
         }
     }
 
