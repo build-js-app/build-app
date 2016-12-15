@@ -59,6 +59,20 @@ function buildServer(cb) {
 
     webpackConfig.resolveLoader.root = utils.path.rootRelative('node_modules');
 
+    if (!config.server.bundleNodeModules) {
+        var nodeModules = {};
+        var nodeModulesPath = utils.path.appRelative('./server/node_modules');
+        fs.readdirSync(nodeModulesPath)
+            .filter(function(x) {
+                return ['.bin'].indexOf(x) === -1;
+            })
+            .forEach(function(mod) {
+                nodeModules[mod] = 'commonjs ' + mod;
+            });
+
+        webpackConfig.externals = nodeModules;
+    }
+
     webpack(webpackConfig).run((err, stats) => {
         if (err) {
             printErrors('Failed to compile.', [err]);
@@ -76,6 +90,15 @@ function buildServer(cb) {
         }
 
         utils.copy(config.paths.serverBundle, './server/server.js');
+
+        var serverPackagePath = utils.path.appRelative('./server/package.json');
+        var serverPackageJson = fs.readJsonSync(serverPackagePath);
+
+        var buildPackageJson = {
+            dependencies: serverPackageJson.dependencies
+        };
+
+        fs.outputJsonSync(utils.path.packageRelative('./package.json'), buildPackageJson);
 
         utils.log('Done.', 'green');
 

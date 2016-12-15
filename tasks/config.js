@@ -8,6 +8,7 @@ module.exports = {
     server: {
         sourceLang: 'ts', //ts / js_next / js_es6 / js
         removeMapFiles: true,
-        minify: true
+        minify: true,
+        bundleNodeModules: false
     }
 };
