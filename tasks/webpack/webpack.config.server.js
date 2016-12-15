@@ -18,6 +18,9 @@ let config = {
     resolve: {
         extensions: ["", ".js"]
     },
+    resolveLoader: {
+        root: ''
+    },
     target: 'node',
     node: {
         __filename: false,
@@ -29,7 +32,11 @@ let config = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: "babel-loader"
+                loader: "babel-loader",
+                query: {
+                    babelrc: false,
+                    presets: [require.resolve('babel-preset-es2015')],
+                },
             },
             {
                 test: /\.json$/,

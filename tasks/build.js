@@ -1,15 +1,3 @@
-/*
-    Assume client is build
-    Assume server TS is build
-    Run webpack in server to produce server bundle
-    Create/Clear package folder
-    Copy server bundle
-    Copy client build to client folder
-    Optionally remove map files from client build
-    Copy start scripts
-    Copy default data
- */
-
 var utils = require('./utils');
 var config = require('./config');
 var webpack = require('webpack');
@@ -18,7 +6,13 @@ var fs = require('fs-extra');
 
 var removeMapFiles = true;
 
+process.env.NODE_ENV = 'production';
+
 function build() {
+    var startTime = new Date();
+
+    utils.log('Build project in ' + chalk.cyan(utils.path.getAppPath()) + '.');
+
     utils.ensureEmptyDir(config.paths.package);
 
     buildServer(() => {
@@ -31,14 +25,18 @@ function build() {
         //index file to run app with production env params
         utils.copy(utils.path.rootRelative('./tasks/templates/index.js'), './index.js');
 
+        var endTime = new Date();
+        var compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+
         utils.log('All Done!', 'green');
+        utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
     });
 }
 
 function buildServer(cb) {
     console.log('Creating server bundle...');
 
-    if (config.useTs) {
+    if (config.server.sourceLang === 'ts') {
         var exec = require('child_process').execSync;
 
         try {
@@ -58,6 +56,8 @@ function buildServer(cb) {
     webpackConfig.entry.push(utils.path.appRelative(config.paths.serverEntry));
 
     webpackConfig.output.path = utils.path.appRelative('./server/build');
+
+    webpackConfig.resolveLoader.root = utils.path.rootRelative('node_modules');
 
     webpack(webpackConfig).run((err, stats) => {
         if (err) {
@@ -150,6 +150,11 @@ function copyDataFolder() {
     utils.ensureEmptyDir(utils.path.packageRelative('./data/config'));
 
     utils.copy('./server/data/', './data/');
+
+    let localDataPath = utils.path.packageRelative('./data/local');
+
+    //TODO do not copy
+    fs.removeSync(localDataPath);
 }
 
 build();

@@ -5,5 +5,9 @@ module.exports = {
         serverEntry: './server/build/src/startServer.js',
         clientBuild: './client/build'
     },
-    useTs: true
+    server: {
+        sourceLang: 'ts', //ts / js_next / js_es6 / js
+        removeMapFiles: true,
+        minify: true
+    }
 };
