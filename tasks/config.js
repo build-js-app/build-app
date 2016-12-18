@@ -1,4 +1,8 @@
-module.exports = {
+var _ = require('lodash');
+var fs = require('fs-extra');
+var path = require('path');
+
+var config = module.exports = {
     paths: {
         package: './build',
         serverBundle: './server/build/server.js',
@@ -12,3 +16,11 @@ module.exports = {
         bundleNodeModules: true
     }
 };
+
+try {
+    var localConfig = fs.readJsonSync(path.join(process.env.APP_DIR, './app-build.json'));
+
+    _.merge(config, localConfig);
+
+    console.log('Using config from app-build.json file.');
+} catch (err) {}

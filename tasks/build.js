@@ -1,5 +1,5 @@
 //TODO
-process.env.APP_DIR = 'd:\\Projects\\makeapp-admin';
+process.env.APP_DIR = 'd:\\Projects\\DP\\Admin_Center'; //'d:\\Projects\\makeapp-admin';
 process.env.NODE_ENV = 'production';
 
 var pathHelper = require('./helpers/pathHelper');

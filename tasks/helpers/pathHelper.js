@@ -2,7 +2,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var config = require('../config');
 
-var appDir = process.env.APP_DIR ? process.env.APP_DIR : getRoot();
+var appDir = process.env.APP_DIR;
 var rootDir = getRoot();
 var packageDir = appRelative(config.paths.package);
 
