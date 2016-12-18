@@ -1,4 +1,9 @@
-var utils = require('./utils');
+//TODO
+process.env.APP_DIR = 'd:\\Projects\\makeapp-admin';
+process.env.NODE_ENV = 'production';
+
+var pathHelper = require('./helpers/pathHelper');
+var utils = require('./helpers/utils');
 var config = require('./config');
 var webpack = require('webpack');
 var chalk = require('chalk');
@@ -7,12 +12,10 @@ var spawn = require('cross-spawn').sync;
 
 var removeMapFiles = true;
 
-process.env.NODE_ENV = 'production';
-
 function build() {
     var startTime = new Date();
 
-    utils.log('Build project in ' + chalk.cyan(utils.path.getAppPath()) + '.');
+    utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
     utils.ensureEmptyDir(config.paths.package);
 
@@ -24,7 +27,7 @@ function build() {
         copyDataFolder();
 
         //index file to run app with production env params
-        utils.copy(utils.path.rootRelative('./tasks/templates/index.js'), './index.js');
+        utils.copy(pathHelper.rootRelative('./tasks/templates/index.js'), './index.js');
 
         var endTime = new Date();
         var compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
@@ -40,7 +43,7 @@ function buildServer(cb) {
     if (config.server.sourceLang === 'ts') {
         var result = spawn('tsc', [], {
             stdio: 'inherit',
-            cwd: utils.path.appRelative('./server')
+            cwd: pathHelper.appRelative('./server')
         });
 
         if (result.status !== 0) {
@@ -53,15 +56,15 @@ function buildServer(cb) {
 
     var webpackConfig = require('./webpack/webpack.config.server');
 
-    webpackConfig.entry.push(utils.path.appRelative(config.paths.serverEntry));
+    webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
 
-    webpackConfig.output.path = utils.path.appRelative('./server/build');
+    webpackConfig.output.path = pathHelper.appRelative('./server/build');
 
-    webpackConfig.resolveLoader.root = utils.path.rootRelative('node_modules');
+    webpackConfig.resolveLoader.root = pathHelper.rootRelative('node_modules');
 
     if (!config.server.bundleNodeModules) {
         var nodeModules = {};
-        var nodeModulesPath = utils.path.appRelative('./server/node_modules');
+        var nodeModulesPath = pathHelper.appRelative('./server/node_modules');
         fs.readdirSync(nodeModulesPath)
             .filter(function(x) {
                 return ['.bin'].indexOf(x) === -1;
@@ -91,14 +94,14 @@ function buildServer(cb) {
 
         utils.copy(config.paths.serverBundle, './server/server.js');
 
-        var serverPackagePath = utils.path.appRelative('./server/package.json');
+        var serverPackagePath = pathHelper.appRelative('./server/package.json');
         var serverPackageJson = fs.readJsonSync(serverPackagePath);
 
         var buildPackageJson = {
             dependencies: serverPackageJson.dependencies
         };
 
-        fs.outputJsonSync(utils.path.packageRelative('./package.json'), buildPackageJson);
+        fs.outputJsonSync(pathHelper.packageRelative('./package.json'), buildPackageJson);
 
         utils.log('Done.', 'green');
 
@@ -158,7 +161,7 @@ function buildClient() {
     utils.copy(config.paths.clientBuild, './client');
 
     if (removeMapFiles) {
-        let files = fs.walkSync(utils.path.packageRelative('./client'));
+        let files = fs.walkSync(pathHelper.packageRelative('./client'));
         for (let file of files) {
             if (file.endsWith('.map')) {
                 fs.removeSync(file);
@@ -170,11 +173,11 @@ function buildClient() {
 }
 
 function copyDataFolder() {
-    utils.ensureEmptyDir(utils.path.packageRelative('./data/config'));
+    utils.ensureEmptyDir(pathHelper.packageRelative('./data/config'));
 
     utils.copy('./server/data/', './data/');
 
-    let localDataPath = utils.path.packageRelative('./data/local');
+    let localDataPath = pathHelper.packageRelative('./data/local');
 
     //TODO do not copy
     fs.removeSync(localDataPath);

@@ -9,6 +9,6 @@ module.exports = {
         sourceLang: 'ts', //ts / js_next / js_es6 / js
         removeMapFiles: true,
         minify: true,
-        bundleNodeModules: false
+        bundleNodeModules: true
     }
 };
