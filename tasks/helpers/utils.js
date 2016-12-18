@@ -3,10 +3,12 @@ var fs = require('fs-extra');
 var config = require('./../config');
 var moment = require('moment');
 var pathHelper = require('./pathHelper');
+var spawn = require('cross-spawn').sync;
 
 module.exports = {
     log: log,
     copy: copy,
+    runCommand: runCommand,
     ensureEmptyDir: ensureEmptyDir,
     getFormattedTimeInterval: getFormattedTimeInterval
 };
@@ -41,5 +43,27 @@ function ensureEmptyDir(path) {
 
 function getFormattedTimeInterval(start, end) {
     return moment.utc(moment(end).diff(moment(start))).format('HH:mm:ss');
+}
+
+function runCommand(cmd, args, options) {
+    var result = spawn(cmd, args, {
+        stdio: 'inherit',
+        cwd: options.path
+    });
+
+    if (result.status !== 0) {
+        if (options.errorMessage) {
+            log(options.errorMessage, 'red');
+        }
+        if (!options.ignoreError) {
+            process.exit(1);
+        }
+    } else {
+        if (options.successMessage) {
+            log(options.successMessage, 'green');
+        }
+    }
+
+    return result;
 }
 

@@ -8,7 +8,6 @@ var config = require('./config');
 var webpack = require('webpack');
 var chalk = require('chalk');
 var fs = require('fs-extra');
-var spawn = require('cross-spawn').sync;
 
 var removeMapFiles = true;
 
@@ -34,6 +33,24 @@ function build() {
 
         utils.log('All Done!', 'green');
         utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+
+        if (config.server.run) {
+            if (!config.server.bundleNodeModules) {
+                utils.log('Installing dependencies...');
+
+                utils.runCommand('npm', ['install'], {
+                    path: pathHelper.packageRelative('.'),
+                    errorMessage: 'Cannot install app dependencies',
+                    successMessage: 'Done.'
+                })
+            }
+
+            utils.log('Starting server...');
+
+            utils.runCommand('node', ['index.js'], {
+                path: pathHelper.packageRelative('.')
+            });
+        }
     });
 }
 
@@ -41,17 +58,11 @@ function buildServer(cb) {
     console.log('Creating server bundle...');
 
     if (config.server.sourceLang === 'ts') {
-        var result = spawn('tsc', [], {
-            stdio: 'inherit',
-            cwd: pathHelper.appRelative('./server')
+        utils.runCommand('tsc', [], {
+            path: pathHelper.appRelative('./server'),
+            errorMessage: 'Cannot compile TypeScript',
+            successMessage: 'TypeScript was compiled.'
         });
-
-        if (result.status !== 0) {
-            utils.log('Cannot compile TypeScript', 'red');
-            process.exit(1);
-        } else {
-            utils.log('TypeScript was compiled.', 'green');
-        }
     }
 
     var webpackConfig = require('./webpack/webpack.config.server');
