@@ -32,6 +32,6 @@ function packageRelative(relativePath) {
 }
 
 function getRoot() {
-    return fs.realpathSync(process.cwd());
+    return fs.realpathSync(path.resolve(__dirname, '../..'));
 }
 

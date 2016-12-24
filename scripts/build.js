@@ -1,13 +1,16 @@
-//TODO
-process.env.APP_DIR = 'd:\\Projects\\DP\\Admin_Center'; //'d:\\Projects\\makeapp-admin';
+var fs = require('fs-extra');
+var webpack = require('webpack');
+var chalk = require('chalk');
+
+if (!process.env.APP_DIR) {
+    process.env.APP_DIR = fs.realpathSync(process.cwd());
+}
 process.env.NODE_ENV = 'production';
 
 var pathHelper = require('./helpers/pathHelper');
 var utils = require('./helpers/utils');
 var config = require('./config');
-var webpack = require('webpack');
-var chalk = require('chalk');
-var fs = require('fs-extra');
+
 
 var removeMapFiles = true;
 
@@ -26,7 +29,7 @@ function build() {
         copyDataFolder();
 
         //index file to run app with production env params
-        utils.copy(pathHelper.rootRelative('./tasks/templates/index.js'), './index.js');
+        utils.copy(pathHelper.rootRelative('./scripts/templates/index.js'), './index.js');
 
         var endTime = new Date();
         var compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
@@ -72,6 +75,7 @@ function buildServer(cb) {
     webpackConfig.output.path = pathHelper.appRelative('./server/build');
 
     webpackConfig.resolveLoader.root = pathHelper.rootRelative('node_modules');
+    webpackConfig.resolve.fallback = pathHelper.rootRelative('node_modules');
 
     if (!config.server.bundleNodeModules) {
         var nodeModules = {};
