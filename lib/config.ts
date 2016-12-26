@@ -1,10 +1,10 @@
-var _ = require('lodash');
-var fs = require('fs-extra');
-var path = require('path');
+import * as _ from 'lodash';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
-var config = module.exports = {
+let config = {
     paths: {
-        package: './build',
+        buildPackage: './build',
         serverBundle: './server/build/server.js',
         serverEntry: './server/build/src/startServer.js',
         clientBuild: './client/build'
@@ -19,9 +19,11 @@ var config = module.exports = {
 };
 
 try {
-    var localConfig = fs.readJsonSync(path.join(process.env.APP_DIR, './app-build.json'));
+    let localConfig = fs.readJsonSync(path.join(process.env.APP_DIR, './app-build.json'));
 
     _.merge(config, localConfig);
 
     console.log('Using config from app-build.json file.');
 } catch (err) {}
+
+export default config;

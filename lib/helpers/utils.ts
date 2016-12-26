@@ -1,11 +1,13 @@
-var chalk = require('chalk');
-var fs = require('fs-extra');
-var config = require('./../config');
-var moment = require('moment');
-var pathHelper = require('./pathHelper');
-var spawn = require('cross-spawn').sync;
+import * as chalk from 'chalk';
+import * as fs from 'fs-extra';
+import * as config from './../config';
+import * as moment from 'moment';
+import pathHelper from './pathHelper';
 
-module.exports = {
+import * as crossSpawn from 'cross-spawn';
+let spawn = crossSpawn.sync;
+
+export default {
     log: log,
     copy: copy,
     runCommand: runCommand,
@@ -13,7 +15,7 @@ module.exports = {
     getFormattedTimeInterval: getFormattedTimeInterval
 };
 
-function log(message, color) {
+function log(message = '', color = null) {
     if (color) {
         console.log(chalk[color](message));
     } else {

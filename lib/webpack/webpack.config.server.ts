@@ -1,7 +1,5 @@
-"use strict";
-
-const path = require("path");
-const webpack = require('webpack');
+import * as path from 'path';
+import * as webpack from 'webpack';
 
 let options = {
     minify: true

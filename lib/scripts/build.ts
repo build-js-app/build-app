@@ -1,16 +1,15 @@
-var fs = require('fs-extra');
-var webpack = require('webpack');
-var chalk = require('chalk');
+import * as fs from 'fs-extra';
+import * as webpack from 'webpack';
+import * as chalk from 'chalk';
 
 if (!process.env.APP_DIR) {
     process.env.APP_DIR = fs.realpathSync(process.cwd());
 }
 process.env.NODE_ENV = 'production';
 
-var pathHelper = require('./helpers/pathHelper');
-var utils = require('./helpers/utils');
-var config = require('./config');
-
+import pathHelper from './../helpers/pathHelper';
+import utils from './../helpers/utils';
+import config from './../config';
 
 var removeMapFiles = true;
 
@@ -19,7 +18,7 @@ function build() {
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-    utils.ensureEmptyDir(config.paths.package);
+    utils.ensureEmptyDir(config.paths.buildPackage);
 
     buildServer(() => {
         buildClient();
@@ -29,7 +28,7 @@ function build() {
         copyDataFolder();
 
         //index file to run app with production env params
-        utils.copy(pathHelper.rootRelative('./scripts/templates/index.js'), './index.js');
+        utils.copy(pathHelper.rootRelative('./templates/general/serverIndex.js'), './index.js');
 
         var endTime = new Date();
         var compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
@@ -68,7 +67,7 @@ function buildServer(cb) {
         });
     }
 
-    var webpackConfig = require('./webpack/webpack.config.server');
+    var webpackConfig = require('./../webpack/webpack.config.server.js');
 
     webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
 
@@ -133,40 +132,6 @@ function printErrors(summary, errors) {
     errors.forEach(err => {
         utils.log(err.message || err);
         utils.log();
-    });
-}
-
-// Print a detailed summary of build files.
-function printFileSizes(stats, previousSizeMap) {
-    var assets = stats.toJson().assets
-        .filter(asset => /\.(js|css)$/.test(asset.name))
-        .map(asset => {
-            var fileContents = fs.readFileSync(paths.appBuild + '/' + asset.name);
-            var size = gzipSize(fileContents);
-            var previousSize = previousSizeMap[removeFileNameHash(asset.name)];
-            var difference = getDifferenceLabel(size, previousSize);
-            return {
-                folder: path.join('build', path.dirname(asset.name)),
-                name: path.basename(asset.name),
-                size: size,
-                sizeLabel: filesize(size) + (difference ? ' (' + difference + ')' : '')
-            };
-        });
-    assets.sort((a, b) => b.size - a.size);
-    var longestSizeLabelLength = Math.max.apply(null,
-        assets.map(a => stripAnsi(a.sizeLabel).length)
-    );
-    assets.forEach(asset => {
-        var sizeLabel = asset.sizeLabel;
-        var sizeLength = stripAnsi(sizeLabel).length;
-        if (sizeLength < longestSizeLabelLength) {
-            var rightPadding = ' '.repeat(longestSizeLabelLength - sizeLength);
-            sizeLabel += rightPadding;
-        }
-        console.log(
-            '  ' + sizeLabel +
-            '  ' + chalk.dim(asset.folder + path.sep) + chalk.cyan(asset.name)
-        );
     });
 }
 

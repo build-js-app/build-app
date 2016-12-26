@@ -12,6 +12,7 @@
     ]
   },
   "dependencies": {
+    "@types/node": "^6.0.53",
     "body-parser": "^1.15.2",
     "cors": "^2.8.1",
     "detect-port": "^1.0.5",
