@@ -6,7 +6,7 @@ let config = {
     paths: {
         buildPackage: './build',
         serverBundle: './server/build/server.js',
-        serverEntry: './server/build/src/startServer.js',
+        serverEntry: './server/build/src/index.js',
         clientBuild: './client/build'
     },
     server: {

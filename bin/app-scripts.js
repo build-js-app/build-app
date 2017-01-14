@@ -19,6 +19,6 @@ switch (script) {
         break;
     default:
         console.log('Unknown script "' + script + '".');
-        console.log('Perhaps you need to update build-app-scripts?');
+        console.log('Perhaps you need to update app-scripts?');
         break;
 }
