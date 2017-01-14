@@ -8,11 +8,13 @@ import * as crossSpawn from 'cross-spawn';
 let spawn = crossSpawn.sync;
 
 export default {
-    log: log,
-    copy: copy,
-    runCommand: runCommand,
-    ensureEmptyDir: ensureEmptyDir,
-    getFormattedTimeInterval: getFormattedTimeInterval
+    log,
+    logOperation,
+    logOperationAsync,
+    copy,
+    runCommand,
+    ensureEmptyDir,
+    getFormattedTimeInterval
 };
 
 function log(message = '', color = null) {
@@ -48,24 +50,78 @@ function getFormattedTimeInterval(start, end) {
 }
 
 function runCommand(cmd, args, options) {
-    var result = spawn(cmd, args, {
+    let displayProgress = !!options.title;
+    if (displayProgress) {
+        process.stdout.write(`${options.title}... `);
+    }
+
+    let start = new Date();
+
+    let result = spawn(cmd, args, {
         stdio: 'inherit',
         cwd: options.path
     });
 
     if (result.status !== 0) {
-        if (options.errorMessage) {
-            log(options.errorMessage, 'red');
+        if (displayProgress) {
+            let message = 'operation failed.';
+            log(message, 'red');
         }
+
         if (!options.ignoreError) {
             process.exit(1);
         }
     } else {
-        if (options.successMessage) {
-            log(options.successMessage, 'green');
+        if (displayProgress) {
+            let end = new Date();
+            logDone(start, end);
         }
     }
 
     return result;
 }
 
+function logOperation(title: string, operation: Function) {
+    process.stdout.write(`${title}... `);
+
+    let start = new Date();
+
+    try {
+        operation();
+
+        let end = new Date();
+        logDone(start, end);
+    } catch (err) {
+        let message = 'operation failed.';
+        log(message, 'red');
+        process.exit(1);
+    }
+}
+
+function logOperationAsync(title: string, operation): any {
+    process.stdout.write(`${title}... `);
+    let start = new Date();
+
+    return operation
+        .then((result) => {
+            let end = new Date();
+            logDone(start, end);
+
+            return result;
+        })
+        .catch((err) => {
+            let message = 'operation failed.';
+            log(message, 'red');
+            console.log(err);
+            process.exit(1);
+        });
+}
+
+function logDone(start, end) {
+    let runTime = getFormattedTimeInterval(start, end);
+    if (runTime === '00:00:00') {
+        log('done.', 'green');
+    } else {
+        log(`${chalk.green('done')} in ${chalk.cyan(runTime)}.`);
+    }
+}

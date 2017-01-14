@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
+import * as Promise from 'bluebird';
 
 if (!process.env.APP_DIR) {
     process.env.APP_DIR = fs.realpathSync(process.cwd());
@@ -20,54 +21,80 @@ function build() {
 
     utils.ensureEmptyDir(config.paths.buildPackage);
 
-    buildServer(() => {
-        buildClient();
+    buildServer()
+        .then(() => {
+            return buildClient();
+        })
+        .then(() => {
+            utils.log('Post build:');
 
-        utils.log('Copying assets...');
+            utils.logOperation('Copying data folder', () => {
+                copyDataFolder();
 
-        copyDataFolder();
-
-        //index file to run app with production env params
-        utils.copy(pathHelper.rootRelative('./templates/general/serverIndex.js'), './index.js');
-
-        var endTime = new Date();
-        var compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
-
-        utils.log('All Done!', 'green');
-        utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
-
-        if (config.server.run) {
-            if (!config.server.bundleNodeModules) {
-                utils.log('Installing dependencies...');
-
-                utils.runCommand('npm', ['install'], {
-                    path: pathHelper.packageRelative('.'),
-                    errorMessage: 'Cannot install app dependencies',
-                    successMessage: 'Done.'
-                })
-            }
-
-            utils.log('Starting server...');
-
-            utils.runCommand('node', ['index.js'], {
-                path: pathHelper.packageRelative('.')
+                //index file to run app with production env params
+                utils.copy(pathHelper.rootRelative('./templates/general/serverIndex.js'), './index.js');
             });
-        }
-    });
+
+            let endTime = new Date();
+            let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+
+            utils.log('Build package was crated!', 'green');
+            utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+
+            if (config.server.run) {
+                if (!config.server.bundleNodeModules) {
+                    utils.log('Installing dependencies...');
+
+                    utils.runCommand('npm', ['install'], {
+                        path: pathHelper.packageRelative('.'),
+                        title: 'Installing app dependencies'
+                    })
+                }
+
+                utils.log('Starting server...');
+
+                utils.runCommand('node', ['index.js'], {
+                    path: pathHelper.packageRelative('.')
+                });
+            }
+        });
 }
 
-function buildServer(cb) {
-    console.log('Creating server bundle...');
+function buildServer() {
+    console.log('Server build:');
 
     if (config.server.sourceLang === 'ts') {
         utils.runCommand('tsc', [], {
             path: pathHelper.appRelative('./server'),
-            errorMessage: 'Cannot compile TypeScript',
-            successMessage: 'TypeScript was compiled.'
+            title: 'Compiling TypeScript'
         });
     }
 
-    var webpackConfig = require('./../webpack/webpack.config.server.js');
+    let buildServerJsAction = new Promise((resolve, reject) => {
+        buildServerJs(() => {
+            resolve();
+        })
+    });
+
+    return utils.logOperationAsync('Transpiling JavaScript', buildServerJsAction)
+        .then(() => {
+            utils.logOperation('Copying assets', () => {
+                utils.copy(config.paths.serverBundle, './server/server.js');
+
+                let serverPackagePath = pathHelper.appRelative('./server/package.json');
+                let serverPackageJson = fs.readJsonSync(serverPackagePath);
+
+                let buildPackageJson = {
+                    dependencies: serverPackageJson.dependencies
+                };
+
+                fs.outputJsonSync(pathHelper.packageRelative('./package.json'), buildPackageJson);
+            });
+        });
+}
+
+function buildServerJs(callback) {
+    let webpackConfig = require('./../webpack/webpack.config.server.js');
 
     webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
 
@@ -77,13 +104,13 @@ function buildServer(cb) {
     webpackConfig.resolve.fallback = pathHelper.rootRelative('node_modules');
 
     if (!config.server.bundleNodeModules) {
-        var nodeModules = {};
-        var nodeModulesPath = pathHelper.appRelative('./server/node_modules');
+        let nodeModules = {};
+        let nodeModulesPath = pathHelper.appRelative('./server/node_modules');
         fs.readdirSync(nodeModulesPath)
-            .filter(function(x) {
+            .filter(function (x) {
                 return ['.bin'].indexOf(x) === -1;
             })
-            .forEach(function(mod) {
+            .forEach(function (mod) {
                 nodeModules[mod] = 'commonjs ' + mod;
             });
 
@@ -106,22 +133,7 @@ function buildServer(cb) {
             process.exit(1);
         }
 
-        utils.copy(config.paths.serverBundle, './server/server.js');
-
-        var serverPackagePath = pathHelper.appRelative('./server/package.json');
-        var serverPackageJson = fs.readJsonSync(serverPackagePath);
-
-        var buildPackageJson = {
-            dependencies: serverPackageJson.dependencies
-        };
-
-        fs.outputJsonSync(pathHelper.packageRelative('./package.json'), buildPackageJson);
-
-        utils.log('Done.', 'green');
-
-        if (cb) {
-            cb();
-        }
+        if (callback) callback();
     });
 }
 
@@ -136,20 +148,24 @@ function printErrors(summary, errors) {
 }
 
 function buildClient() {
-    utils.log('Copy client build (should be created already)...');
+    utils.log('Build client:');
 
-    utils.copy(config.paths.clientBuild, './client');
+    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
 
-    if (removeMapFiles) {
-        let files = fs.walkSync(pathHelper.packageRelative('./client'));
-        for (let file of files) {
-            if (file.endsWith('.map')) {
-                fs.removeSync(file);
+    utils.logOperation('Copying assets', () => {
+        utils.copy(config.paths.clientBuild, './client');
+
+        if (removeMapFiles) {
+            let files = fs.walkSync(pathHelper.packageRelative('./client'));
+            for (let file of files) {
+                if (file.endsWith('.map')) {
+                    fs.removeSync(file);
+                }
             }
         }
-    }
+    });
 
-    utils.log('Done.', 'green')
+    return Promise.resolve();
 }
 
 function copyDataFolder() {
