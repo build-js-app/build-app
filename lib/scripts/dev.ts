@@ -48,12 +48,17 @@ function dev() {
         })
     };
 
+    let nodemonInstance = null;
+
     compile(() => {
         let entry = pathHelper.appRelative(config.paths.serverBundle);
-        nodemon({script: entry, watch: entry, flags: [], nodeArgs: ['--debug=9999']})
-            .on('quit', process.exit)
-            .on('restart', function () {
-            });
+        nodemonInstance = nodemon({script: entry, flags: [], nodeArgs: [`--debug=${config.dev.serverDebugPort}`]})
+            .on('quit', process.exit);
+
+        process.on('uncaughtException', function(err) {
+            console.log(err);
+            nodemonInstance.emit('quit');
+        });
     });
 
     let compileRequested = false;
@@ -62,7 +67,8 @@ function dev() {
 
         _.delay(() => {
             compile(() => {
-                compileRequested = false
+                compileRequested = false;
+                nodemonInstance.emit('restart');
             });
         }, 200);
     };

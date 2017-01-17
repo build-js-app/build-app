@@ -17,6 +17,9 @@ let config = {
         bundleNodeModules: true,
         run: false
     },
+    dev: {
+        serverDebugPort: 9999
+    },
     postBuild: {
         removeMapFiles: true
     }
