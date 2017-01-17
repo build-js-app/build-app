@@ -1,21 +1,24 @@
+initEnvVars();
+
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as Promise from 'bluebird';
-
-if (!process.env.APP_DIR) {
-    process.env.APP_DIR = fs.realpathSync(process.cwd());
-}
-process.env.NODE_ENV = 'production';
-
+import webpackConfig from '../config/webpack.config.server';
+import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
-import config from './../config';
+import config from '../config/config';
 
-var removeMapFiles = true;
+function initEnvVars() {
+    if (!process.env.APP_DIR) {
+        process.env.APP_DIR = fs.realpathSync(process.cwd());
+    }
+    process.env.NODE_ENV = 'production';
+}
 
 function build() {
-    var startTime = new Date();
+    let startTime = new Date();
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
@@ -94,56 +97,12 @@ function buildServer() {
 }
 
 function buildServerJs(callback) {
-    let webpackConfig = require('./../webpack/webpack.config.server.js');
+    let config = webpackConfig.load();
 
-    webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
-
-    webpackConfig.output.path = pathHelper.appRelative('./server/build');
-
-    webpackConfig.resolveLoader.root = pathHelper.rootRelative('node_modules');
-    webpackConfig.resolve.fallback = pathHelper.rootRelative('node_modules');
-
-    if (!config.server.bundleNodeModules) {
-        let nodeModules = {};
-        let nodeModulesPath = pathHelper.appRelative('./server/node_modules');
-        fs.readdirSync(nodeModulesPath)
-            .filter(function (x) {
-                return ['.bin'].indexOf(x) === -1;
-            })
-            .forEach(function (mod) {
-                nodeModules[mod] = 'commonjs ' + mod;
-            });
-
-        webpackConfig.externals = nodeModules;
-    }
-
-    webpack(webpackConfig).run((err, stats) => {
-        if (err) {
-            printErrors('Failed to compile.', [err]);
-            process.exit(1);
-        }
-
-        if (stats.compilation.errors.length) {
-            printErrors('Failed to compile.', stats.compilation.errors);
-            process.exit(1);
-        }
-
-        if (process.env.CI && stats.compilation.warnings.length) {
-            printErrors('Failed to compile.', stats.compilation.warnings);
-            process.exit(1);
-        }
+    webpack(config).run((err, stats) => {
+        webpackHelper.handleErrors(err, stats, true);
 
         if (callback) callback();
-    });
-}
-
-// Print out errors
-function printErrors(summary, errors) {
-    utils.log(summary, 'red');
-    utils.log();
-    errors.forEach(err => {
-        utils.log(err.message || err);
-        utils.log();
     });
 }
 
@@ -155,7 +114,7 @@ function buildClient() {
     utils.logOperation('Copying assets', () => {
         utils.copy(config.paths.clientBuild, './client');
 
-        if (removeMapFiles) {
+        if (config.postBuild.removeMapFiles) {
             let files = fs.walkSync(pathHelper.packageRelative('./client'));
             for (let file of files) {
                 if (file.endsWith('.map')) {

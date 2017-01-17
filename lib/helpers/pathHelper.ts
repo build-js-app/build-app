@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import config from '../config';
+import config from '../config/config';
 
 let appDir = process.env.APP_DIR;
 if (!appDir) throw new Error('ENV param APP_DIR is not initialized');

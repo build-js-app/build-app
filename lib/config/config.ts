@@ -6,15 +6,19 @@ let config = {
     paths: {
         buildPackage: './build',
         serverBundle: './server/build/server.js',
+        serverSrc: './server/src',
         serverEntry: './server/build/src/index.js',
         clientBuild: './client/build'
     },
     server: {
         sourceLang: 'ts', //ts / js_next / js_es6 / js
         removeMapFiles: true,
-        minify: true,
+        minify: false,
         bundleNodeModules: true,
         run: false
+    },
+    postBuild: {
+        removeMapFiles: true
     }
 };
 

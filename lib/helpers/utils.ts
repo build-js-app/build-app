@@ -1,6 +1,6 @@
 import * as chalk from 'chalk';
 import * as fs from 'fs-extra';
-import * as config from './../config';
+import * as config from '../config/config';
 import * as moment from 'moment';
 import pathHelper from './pathHelper';
 
@@ -11,6 +11,7 @@ export default {
     log,
     logOperation,
     logOperationAsync,
+    clearConsole,
     copy,
     runCommand,
     ensureEmptyDir,
@@ -23,6 +24,10 @@ function log(message = '', color = null) {
     } else {
         console.log(message);
     }
+}
+
+function clearConsole() {
+    process.stdout.write(process.platform === 'win32' ? '\x1Bc' : '\x1B[2J\x1B[3J\x1B[H');
 }
 
 function copy(from, to) {
@@ -46,7 +51,12 @@ function ensureEmptyDir(path) {
 }
 
 function getFormattedTimeInterval(start, end) {
-    return moment.utc(moment(end).diff(moment(start))).format('HH:mm:ss');
+    let diff = moment.utc(moment(end).diff(moment(start)));
+    if (diff.minutes() > 0) {
+        return diff.format('HH:mm:ss');
+    } else {
+        return `${diff.format('ss.SS')} seconds`
+    }
 }
 
 function runCommand(cmd, args, options) {
