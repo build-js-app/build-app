@@ -1,6 +1,6 @@
+import * as fs from 'fs-extra';
 initEnvVars();
 
-import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as Promise from 'bluebird';
@@ -12,7 +12,7 @@ import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import config from '../config/config';
 import * as FriendlyErrorsWebpackPlugin from 'friendly-errors-webpack-plugin';
-const nodemon = require('nodemon')
+const nodemon = require('nodemon');
 
 function initEnvVars() {
     if (!process.env.APP_DIR) {
@@ -41,7 +41,7 @@ function dev() {
             let end = new Date();
             let timeStr = utils.getFormattedTimeInterval(start, end);
 
-            //utils.clearConsole();
+            utils.clearConsole();
             utils.log(`Compiled: ${timeStr}`, 'green');
 
             if (cb) cb()
@@ -63,6 +63,8 @@ function dev() {
 
     let compileRequested = false;
     let onWatch = () => {
+        if (compileRequested) return;
+
         compileRequested = true;
 
         _.delay(() => {

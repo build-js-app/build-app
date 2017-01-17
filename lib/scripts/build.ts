@@ -1,6 +1,6 @@
+import * as fs from 'fs-extra';
 initEnvVars();
 
-import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as Promise from 'bluebird';

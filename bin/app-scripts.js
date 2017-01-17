@@ -10,6 +10,7 @@ if (!script) {
 switch (script) {
     case 'build':
     case 'test':
+    case 'dev':
         var result = spawn.sync(
             'node',
             [require.resolve('../dist/scripts/' + script)].concat(args),
