@@ -12,7 +12,7 @@ export default {
     logOperation,
     logOperationAsync,
     clearConsole,
-    copy,
+    copyToPackage,
     runCommand,
     ensureEmptyDir,
     getFormattedTimeInterval
@@ -30,11 +30,7 @@ function clearConsole() {
     process.stdout.write(process.platform === 'win32' ? '\x1Bc' : '\x1B[2J\x1B[3J\x1B[H');
 }
 
-function copy(from, to) {
-    if (from.startsWith('.')) {
-        from = pathHelper.appRelative(from);
-    }
-
+function copyToPackage(from, to) {
     if (to.startsWith('.')) {
         to = pathHelper.packageRelative(to);
     }
@@ -43,10 +39,6 @@ function copy(from, to) {
 }
 
 function ensureEmptyDir(path) {
-    if (path.startsWith('.')) {
-        path = pathHelper.appRelative(path);
-    }
-
     fs.emptyDirSync(path);
 }
 

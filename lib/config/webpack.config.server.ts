@@ -20,7 +20,7 @@ let webpackConfig = {
     },
     resolve: {
         extensions: ["", ".js"],
-        fallback: pathHelper.rootRelative('node_modules')
+        fallback: pathHelper.moduleRelative('node_modules')
     },
     resolveLoader: {
         root: ''
@@ -46,7 +46,7 @@ let webpackConfig = {
 function loadPlugins() {
     let result = [];
 
-    if (config.server.minify) {
+    if (config.server.build.minify) {
         let minifyPlugin = new webpack.optimize.UglifyJsPlugin({
             compress: {
                 warnings: false
@@ -60,12 +60,12 @@ function loadPlugins() {
 }
 
 function loadConfig(isDev = false) {
-    webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
+    webpackConfig.entry.push(pathHelper.serverRelative(config.paths.server.entry));
 
-    webpackConfig.output.path = pathHelper.appRelative('./server/build');
+    webpackConfig.output.path = pathHelper.serverRelative(config.paths.server.build);
 
-    webpackConfig.resolveLoader.root = pathHelper.rootRelative('node_modules');
-    webpackConfig.resolve.fallback = pathHelper.rootRelative('node_modules');
+    webpackConfig.resolveLoader.root = pathHelper.moduleRelative('node_modules');
+    webpackConfig.resolve.fallback = pathHelper.moduleRelative('node_modules');
 
     if (transpileJs) {
         let babelLoader = {
@@ -83,9 +83,9 @@ function loadConfig(isDev = false) {
     }
 
     //TODO consider using 'webpack-node-externals' plugin
-    if (isDev || !config.server.bundleNodeModules) {
+    if (isDev || !config.server.build.bundleNodeModules) {
         let nodeModules = {};
-        let nodeModulesPath = pathHelper.appRelative('./server/node_modules');
+        let nodeModulesPath = pathHelper.serverRelative('./node_modules');
         fs.readdirSync(nodeModulesPath)
             .filter(function (x) {
                 return ['.bin'].indexOf(x) === -1;
