@@ -7,40 +7,41 @@ export default {
     load: loadConfig
 }
 
-let preset = 'babel-preset-stage-2'; //'babel-preset-es2015'
-let transpileJs = true;
+let preset = 'babel-preset-es2015';
 
 let webpackConfig = {
     entry: [
-        "babel-polyfill"
+        'babel-polyfill',
+        pathHelper.serverRelative(config.paths.server.entry)
     ],
     output: {
-        path: "",
-        filename: 'server.js'
+        path: '',
+        filename: 'server.js',
+        libraryTarget: 'commonjs2'
     },
     resolve: {
-        extensions: ["", ".js"],
-        fallback: pathHelper.moduleRelative('node_modules')
-    },
-    resolveLoader: {
-        root: ''
+        extensions: ['.js', '.json'],
+        modules: [
+            'node_modules',
+            pathHelper.moduleRelative('node_modules')
+        ]
     },
     target: 'node',
     node: {
         __filename: false,
         __dirname: false
     },
+    devtool: 'source-map',
     plugins: loadPlugins(),
     externals: {},
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.json$/,
                 loader: "json-loader"
             }
         ]
-    },
-    devtool: "source-map"
+    }
 };
 
 function loadPlugins() {
@@ -60,26 +61,21 @@ function loadPlugins() {
 }
 
 function loadConfig(isDev = false) {
-    webpackConfig.entry.push(pathHelper.serverRelative(config.paths.server.entry));
-
     webpackConfig.output.path = pathHelper.serverRelative(config.paths.server.build);
 
-    webpackConfig.resolveLoader.root = pathHelper.moduleRelative('node_modules');
-    webpackConfig.resolve.fallback = pathHelper.moduleRelative('node_modules');
-
-    if (transpileJs) {
+    if (config.server.build.transpileJs) {
         let babelLoader = {
             test: /\.js$/,
             exclude: /node_modules/,
-            loader: "babel-loader",
-            query: {
+            loader: 'babel-loader',
+            options: {
+                //TODO enable custom, like in backpack
                 babelrc: false,
-                presets: [require.resolve(preset)],
-                plugins: [require.resolve('babel-plugin-transform-es2015-modules-commonjs')]
+                presets: [require.resolve(preset)]
             }
         };
 
-        webpackConfig.module.loaders.push(babelLoader);
+        webpackConfig.module.rules.push(babelLoader);
     }
 
     //TODO consider using 'webpack-node-externals' plugin

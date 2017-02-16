@@ -23,8 +23,10 @@ let config = {
         build: {
             sourceLang: 'ts', //ts / js_next / js_es6 / js
             removeMapFiles: true,
+            transpileJs: false,
+            //make sure source is ES5, that should include external npm packages too
             minify: false,
-            bundleNodeModules: true,
+            bundleNodeModules: false,
             run: false
         },
         dev: {
