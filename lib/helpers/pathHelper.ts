@@ -9,7 +9,8 @@ let moduleRootDir = getModuleRoot();
 let packageDir = projectRelative(config.paths.buildPackage);
 
 export default {
-    init: init,
+    init,
+    path,
     moduleRelative,
     projectRelative,
     serverRelative,

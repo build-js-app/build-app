@@ -1,23 +1,22 @@
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 import pathHelper from '../helpers/pathHelper';
+import babelPresetLoader from './babelPreset';
 import config from './config';
 
 export default {
     load: loadConfig
 }
 
-let preset = 'babel-preset-es2015';
-
 let webpackConfig = {
     entry: [
-        'babel-polyfill',
         pathHelper.serverRelative(config.paths.server.entry)
     ],
     output: {
-        path: '',
+        path: pathHelper.serverRelative(config.paths.server.build),
         filename: 'server.js',
-        libraryTarget: 'commonjs2'
+        libraryTarget: 'commonjs2',
+        publicPath: pathHelper.serverRelative('./')
     },
     resolve: {
         extensions: ['.js', '.json'],
@@ -63,19 +62,10 @@ function loadPlugins() {
 function loadConfig(isDev = false) {
     webpackConfig.output.path = pathHelper.serverRelative(config.paths.server.build);
 
-    if (config.server.build.transpileJs) {
-        let babelLoader = {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            loader: 'babel-loader',
-            options: {
-                //TODO enable custom, like in backpack
-                babelrc: false,
-                presets: [require.resolve(preset)]
-            }
-        };
-
-        webpackConfig.module.rules.push(babelLoader);
+    if (isDev) {
+        initBabel();
+    } else {
+        initBabel(config.server.build.nodeVersion)
     }
 
     //TODO consider using 'webpack-node-externals' plugin
@@ -95,3 +85,19 @@ function loadConfig(isDev = false) {
 
     return webpackConfig;
 }
+
+function initBabel(nodeVersion?) {
+    let babelLoader = {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        options: {
+            //TODO enable custom, like in backpack
+            babelrc: false,
+            presets: [babelPresetLoader.loadPreset(nodeVersion)]
+        }
+    };
+
+    webpackConfig.module.rules.push(babelLoader);
+}
+

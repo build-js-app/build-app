@@ -60,7 +60,7 @@ function build() {
 function buildServer() {
     console.log('Server build:');
 
-    if (config.server.build.sourceLang === 'ts') {
+    if (config.server.sourceLang === 'ts') {
         utils.runCommand('tsc', [], {
             path: pathHelper.serverRelative('./'),
             title: 'Compiling TypeScript'
@@ -91,9 +91,17 @@ function buildServer() {
 }
 
 function buildServerJs(callback) {
-    let config = webpackConfig.load();
+    let webpackConfigValues = webpackConfig.load();
 
-    webpack(config).run((err, stats) => {
+    if (config.server.sourceLang === 'ts') {
+        let entry = pathHelper.serverRelative(config.paths.server.build);
+        entry = pathHelper.path.join(entry, config.paths.server.entry);
+        entry += '.js';
+
+        webpackConfigValues.entry = [entry];
+    }
+
+    webpack(webpackConfigValues).run((err, stats) => {
         webpackHelper.handleErrors(err, stats, true);
 
         if (callback) callback();

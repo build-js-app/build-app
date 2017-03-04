@@ -9,7 +9,7 @@ let config = {
             root: './server',
             src: './src',
             build: './build',
-            entry: './build/src/index.js',
+            entry: './src/index',
             bundle: './build/server.js',
             data: './data',
             local: './local'
@@ -20,16 +20,17 @@ let config = {
         },
     },
     server: {
+        sourceLang: 'ts', //ts or js
         build: {
-            sourceLang: 'ts', //ts / js_next / js_es6 / js
+            nodeVersion: '6', //0, 4, 5, 6, 7
             removeMapFiles: true,
-            transpileJs: false,
             //make sure source is ES5, that should include external npm packages too
             minify: false,
             bundleNodeModules: false,
             run: false
         },
         dev: {
+            nodeVersion: '6',
             debugPort: 9999
         }
     }

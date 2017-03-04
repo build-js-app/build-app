@@ -28,8 +28,6 @@ function dev() {
     let webpackConfig = webpackConfigLoader.load(true);
 
     webpackConfig.plugins.push[new FriendlyErrorsWebpackPlugin()];
-    webpackConfig.entry[1] = pathHelper.serverRelative(config.paths.server.entry);
-    webpackConfig.devtool = 'cheap-module-source-map';
 
     let compiler = webpack(webpackConfig);
 
@@ -51,8 +49,8 @@ function dev() {
     let nodemonInstance = null;
 
     compile(() => {
-        let entry = pathHelper.serverRelative(config.paths.server.bundle);
-        nodemonInstance = nodemon({script: entry, flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
+        let bundlePath = pathHelper.serverRelative(config.paths.server.bundle);
+        nodemonInstance = nodemon({script: bundlePath, flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
             .on('quit', process.exit);
 
         process.on('uncaughtException', function(err) {
