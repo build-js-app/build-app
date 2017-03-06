@@ -3,12 +3,14 @@ helper.initEnv();
 
 import * as fs from 'fs-extra';
 import * as Git from 'nodegit';
+import * as Promise from 'bluebird';
 
 import config from '../config/config';
 import pathHelper from '../helpers/pathHelper';
+import utils from '../helpers/utils';
 
 function init() {
-    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/templates.json'));
+    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/init/templates.json'));
 
     let args = process.argv.slice(2);
 
@@ -30,12 +32,35 @@ function init() {
         return console.log(`Incorrect project name '${project}'. Valid values are: [${projects.join(', ')}].`);
     }
 
-    //TODO validation
-    let serverTemplate = parts[1];
-    let clientTemplate = parts[2];
+    let projectInfo = templateRegistry.projects[project];
 
-    console.log('Downloading server template...');
-    downloadTemplate(serverTemplate, templateRegistry.projects[project].server[serverTemplate], pathHelper.serverRelative('./'));
+    let serverTemplate = parts[1];
+    let serverTemplateInfo = projectInfo.server[serverTemplate];
+    if (!serverTemplateInfo) {
+        let templates = Object.keys(projectInfo.server);
+        return console.log(`Incorrect server template '${serverTemplate}'. Valid values are: [${templates.join(', ')}].`);
+    }
+
+    let clientTemplate = parts[2];
+    let clientTemplateInfo = projectInfo.client[clientTemplate];
+    if (!clientTemplateInfo) {
+        let templates = Object.keys(projectInfo.client);
+        return console.log(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
+    }
+
+
+    Promise.resolve(null)
+        .then(() => {
+            return utils.logOperationAsync('Downloading server template',
+                downloadTemplate(serverTemplate, projectInfo.server[serverTemplate], pathHelper.serverRelative('./')));
+        })
+        .then(() => {
+            return utils.logOperationAsync('Downloading client template',
+                downloadTemplate(clientTemplate, projectInfo.client[clientTemplate], pathHelper.clientRelative('./')));
+        })
+        .then(() => {
+            copyAssets();
+        })
 }
 
 function downloadTemplate(templateName, templateInfo, directory) {
@@ -47,11 +72,14 @@ function downloadTemplate(templateName, templateInfo, directory) {
         })
         .then((repository) => {
             console.log('Done!');
-        })
-        .catch((err) => {
-            console.log(err);
-            console.log(`Cannot download ${templateName} into ${directory}.`)
         });
+}
+
+function copyAssets() {
+    fs.copySync(
+        pathHelper.moduleRelative('./assets/init/rootPackage.json'),
+        pathHelper.projectRelative('./package.json')
+    )
 }
 
 init();
