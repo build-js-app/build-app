@@ -5,23 +5,34 @@ import * as path from 'path';
 let config = {
     paths: {
         buildPackage: './build',
-        serverBundle: './server/build/server.js',
-        serverSrc: './server/src',
-        serverEntry: './server/build/src/index.js',
-        clientBuild: './client/build'
+        server: {
+            root: './server',
+            src: './src',
+            build: './build',
+            entry: './src/index',
+            bundle: './build/server.js',
+            data: './data',
+            local: './local'
+        },
+        client: {
+            root: './client',
+            build: './build'
+        },
     },
     server: {
-        sourceLang: 'ts', //ts / js_next / js_es6 / js
-        removeMapFiles: true,
-        minify: false,
-        bundleNodeModules: true,
-        run: false
-    },
-    dev: {
-        serverDebugPort: 9999
-    },
-    postBuild: {
-        removeMapFiles: true
+        sourceLang: 'ts', //ts or js
+        build: {
+            nodeVersion: '6', //0, 4, 5, 6, 7
+            removeMapFiles: true,
+            //make sure source is ES5, that should include external npm packages too
+            minify: false,
+            bundleNodeModules: false,
+            run: false
+        },
+        dev: {
+            nodeVersion: '6',
+            debugPort: 9999
+        }
     }
 };
 
@@ -31,6 +42,7 @@ try {
     _.merge(config, localConfig);
 
     console.log('Using config from app-build.json file.');
-} catch (err) {}
+} catch (err) {
+}
 
 export default config;

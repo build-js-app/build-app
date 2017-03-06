@@ -1,52 +1,52 @@
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
 import pathHelper from '../helpers/pathHelper';
+import babelPresetLoader from './babelPreset';
 import config from './config';
 
 export default {
     load: loadConfig
 }
 
-let preset = 'babel-preset-stage-2'; //'babel-preset-es2015'
-let transpileJs = true;
-
 let webpackConfig = {
     entry: [
-        "babel-polyfill"
+        pathHelper.serverRelative(config.paths.server.entry)
     ],
     output: {
-        path: "",
-        filename: 'server.js'
+        path: pathHelper.serverRelative(config.paths.server.build),
+        filename: 'server.js',
+        libraryTarget: 'commonjs2',
+        publicPath: pathHelper.serverRelative('./')
     },
     resolve: {
-        extensions: ["", ".js"],
-        fallback: pathHelper.rootRelative('node_modules')
-    },
-    resolveLoader: {
-        root: ''
+        extensions: ['.js', '.json'],
+        modules: [
+            'node_modules',
+            pathHelper.moduleRelative('node_modules')
+        ]
     },
     target: 'node',
     node: {
         __filename: false,
         __dirname: false
     },
+    devtool: 'source-map',
     plugins: loadPlugins(),
     externals: {},
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.json$/,
                 loader: "json-loader"
             }
         ]
-    },
-    devtool: "source-map"
+    }
 };
 
 function loadPlugins() {
     let result = [];
 
-    if (config.server.minify) {
+    if (config.server.build.minify) {
         let minifyPlugin = new webpack.optimize.UglifyJsPlugin({
             compress: {
                 warnings: false
@@ -60,32 +60,18 @@ function loadPlugins() {
 }
 
 function loadConfig(isDev = false) {
-    webpackConfig.entry.push(pathHelper.appRelative(config.paths.serverEntry));
+    webpackConfig.output.path = pathHelper.serverRelative(config.paths.server.build);
 
-    webpackConfig.output.path = pathHelper.appRelative('./server/build');
-
-    webpackConfig.resolveLoader.root = pathHelper.rootRelative('node_modules');
-    webpackConfig.resolve.fallback = pathHelper.rootRelative('node_modules');
-
-    if (transpileJs) {
-        let babelLoader = {
-            test: /\.js$/,
-            exclude: /node_modules/,
-            loader: "babel-loader",
-            query: {
-                babelrc: false,
-                presets: [require.resolve(preset)],
-                plugins: [require.resolve('babel-plugin-transform-es2015-modules-commonjs')]
-            }
-        };
-
-        webpackConfig.module.loaders.push(babelLoader);
+    if (isDev) {
+        initBabel();
+    } else {
+        initBabel(config.server.build.nodeVersion)
     }
 
     //TODO consider using 'webpack-node-externals' plugin
-    if (isDev || !config.server.bundleNodeModules) {
+    if (isDev || !config.server.build.bundleNodeModules) {
         let nodeModules = {};
-        let nodeModulesPath = pathHelper.appRelative('./server/node_modules');
+        let nodeModulesPath = pathHelper.serverRelative('./node_modules');
         fs.readdirSync(nodeModulesPath)
             .filter(function (x) {
                 return ['.bin'].indexOf(x) === -1;
@@ -99,3 +85,19 @@ function loadConfig(isDev = false) {
 
     return webpackConfig;
 }
+
+function initBabel(nodeVersion?) {
+    let babelLoader = {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        options: {
+            //TODO enable custom, like in backpack
+            babelrc: false,
+            presets: [babelPresetLoader.loadPreset(nodeVersion)]
+        }
+    };
+
+    webpackConfig.module.rules.push(babelLoader);
+}
+

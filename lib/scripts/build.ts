@@ -1,5 +1,5 @@
 import helper from './_scriptsHelper';
-helper.initEnvVars();
+helper.initEnv();
 
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
@@ -16,7 +16,7 @@ function build() {
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-    utils.ensureEmptyDir(config.paths.buildPackage);
+    utils.ensureEmptyDir(pathHelper.projectRelative(config.paths.buildPackage));
 
     buildServer()
         .then(() => {
@@ -29,7 +29,7 @@ function build() {
                 copyDataFolder();
 
                 //index file to run app with production env params
-                utils.copy(pathHelper.rootRelative('./assets/build/serverIndex.js'), './index.js');
+                utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
             });
 
             let endTime = new Date();
@@ -38,8 +38,8 @@ function build() {
             utils.log('Build package was crated!', 'green');
             utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
 
-            if (config.server.run) {
-                if (!config.server.bundleNodeModules) {
+            if (config.server.build.run) {
+                if (!config.server.build.bundleNodeModules) {
                     utils.log('Installing dependencies...');
 
                     utils.runCommand('npm', ['install'], {
@@ -62,7 +62,7 @@ function buildServer() {
 
     if (config.server.sourceLang === 'ts') {
         utils.runCommand('tsc', [], {
-            path: pathHelper.appRelative('./server'),
+            path: pathHelper.serverRelative('./'),
             title: 'Compiling TypeScript'
         });
     }
@@ -76,9 +76,9 @@ function buildServer() {
     return utils.logOperationAsync('Transpiling JavaScript', buildServerJsAction)
         .then(() => {
             utils.logOperation('Copying assets', () => {
-                utils.copy(config.paths.serverBundle, './server/server.js');
+                utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
 
-                let serverPackagePath = pathHelper.appRelative('./server/package.json');
+                let serverPackagePath = pathHelper.serverRelative('./package.json');
                 let serverPackageJson = fs.readJsonSync(serverPackagePath);
 
                 let buildPackageJson = {
@@ -91,9 +91,17 @@ function buildServer() {
 }
 
 function buildServerJs(callback) {
-    let config = webpackConfig.load();
+    let webpackConfigValues = webpackConfig.load();
 
-    webpack(config).run((err, stats) => {
+    if (config.server.sourceLang === 'ts') {
+        let entry = pathHelper.serverRelative(config.paths.server.build);
+        entry = pathHelper.path.join(entry, config.paths.server.entry);
+        entry += '.js';
+
+        webpackConfigValues.entry = [entry];
+    }
+
+    webpack(webpackConfigValues).run((err, stats) => {
         webpackHelper.handleErrors(err, stats, true);
 
         if (callback) callback();
@@ -106,9 +114,9 @@ function buildClient() {
     utils.log(`Build client... ${chalk.yellow('skipped')}.`);
 
     utils.logOperation('Copying assets', () => {
-        utils.copy(config.paths.clientBuild, './client');
+        utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
 
-        if (config.postBuild.removeMapFiles) {
+        if (config.server.build.removeMapFiles) {
             let files = fs.walkSync(pathHelper.packageRelative('./client'));
             for (let file of files) {
                 if (file.endsWith('.map')) {
@@ -122,14 +130,9 @@ function buildClient() {
 }
 
 function copyDataFolder() {
+    utils.copyToPackage(pathHelper.serverRelative(config.paths.server.data), './data/');
+
     utils.ensureEmptyDir(pathHelper.packageRelative('./data/config'));
-
-    utils.copy('./server/data/', './data/');
-
-    let localDataPath = pathHelper.packageRelative('./data/local');
-
-    //TODO do not copy
-    fs.removeSync(localDataPath);
 }
 
 build();

@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 
 export default {
-    initEnvVars
+    initEnv: initEnvVars
 }
 
 function initEnvVars() {

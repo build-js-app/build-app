@@ -1,12 +1,12 @@
 import helper from './_scriptsHelper';
-helper.initEnvVars();
+helper.initEnv();
 
 import * as fs from 'fs-extra';
 
 import pathHelper from '../helpers/pathHelper';
 
 function init() {
-    let templateRegistry = fs.readJsonSync(pathHelper.rootRelative('./assets/templates.json'));
+    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/templates.json'));
 
     let args = process.argv.slice(2);
     console.log(args);

@@ -1,8 +1,9 @@
 import helper from './_scriptsHelper';
-helper.initEnvVars();
+helper.initEnv();
 
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
+import * as chalk from 'chalk';
 import * as _ from 'lodash';
 import * as chokidar from 'chokidar';
 import webpackConfigLoader from '../config/webpack.config.server';
@@ -21,14 +22,12 @@ function initEnvVars() {
 }
 
 function dev() {
-    let watchPath = pathHelper.appRelative(config.paths.serverSrc);
+    let watchPath = pathHelper.serverRelative(config.paths.server.src);
     let watcher = chokidar.watch([watchPath]);
 
     let webpackConfig = webpackConfigLoader.load(true);
 
     webpackConfig.plugins.push[new FriendlyErrorsWebpackPlugin()];
-    webpackConfig.entry[1] = pathHelper.appRelative('./server/src/index.js');
-    webpackConfig.devtool = 'cheap-module-source-map';
 
     let compiler = webpack(webpackConfig);
 
@@ -50,8 +49,8 @@ function dev() {
     let nodemonInstance = null;
 
     compile(() => {
-        let entry = pathHelper.appRelative(config.paths.serverBundle);
-        nodemonInstance = nodemon({script: entry, flags: [], nodeArgs: [`--debug=${config.dev.serverDebugPort}`]})
+        let bundlePath = pathHelper.serverRelative(config.paths.server.bundle);
+        nodemonInstance = nodemon({script: bundlePath, flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
             .on('quit', process.exit);
 
         process.on('uncaughtException', function(err) {
