@@ -2,14 +2,15 @@ import helper from './_scriptsHelper';
 helper.initEnv();
 
 import * as fs from 'fs-extra';
+import * as Git from 'nodegit';
 
+import config from '../config/config';
 import pathHelper from '../helpers/pathHelper';
 
 function init() {
     let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/templates.json'));
 
     let args = process.argv.slice(2);
-    console.log(args);
 
     let message = 'Please, specify project templates as a first argument in a format {project_name}:{server_template}:{client_template}';
 
@@ -32,8 +33,25 @@ function init() {
     //TODO validation
     let serverTemplate = parts[1];
     let clientTemplate = parts[2];
+
+    console.log('Downloading server template...');
+    downloadTemplate(serverTemplate, templateRegistry.projects[project].server[serverTemplate], pathHelper.serverRelative('./'));
 }
 
+function downloadTemplate(templateName, templateInfo, directory) {
+    //TODO check not empty
+    fs.emptyDirSync(directory);
 
+    return Git.Clone(templateInfo.repo, directory, {
+            checkoutBranch: templateInfo.branch
+        })
+        .then((repository) => {
+            console.log('Done!');
+        })
+        .catch((err) => {
+            console.log(err);
+            console.log(`Cannot download ${templateName} into ${directory}.`)
+        });
+}
 
 init();
