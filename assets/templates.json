@@ -1,0 +1,26 @@
+{
+  "projects": {
+    "simple": {
+      "server": {
+        "server_ts": {
+          "repo": "https://github.com/build-js-app/template-simple-server",
+          "branch": "ts"
+        },
+        "server_js": {
+          "repo": "https://github.com/build-js-app/template-simple-server",
+          "branch": "js"
+        }
+      },
+      "client": {
+        "client_react": {
+          "repo": "https://github.com/build-js-app/template-simple-client",
+          "branch": "react"
+        },
+        "client_vue": {
+          "repo": "https://github.com/build-js-app/template-simple-client",
+          "branch": "vue"
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,8 @@
-import * as fs from 'fs-extra';
-initEnvVars();
+import helper from './_scriptsHelper';
+helper.initEnvVars();
 
+import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
-import * as chalk from 'chalk';
-import * as Promise from 'bluebird';
 import * as _ from 'lodash';
 import * as chokidar from 'chokidar';
 import webpackConfigLoader from '../config/webpack.config.server';

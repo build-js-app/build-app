@@ -1,6 +1,7 @@
-import * as fs from 'fs-extra';
-initEnvVars();
+import helper from './_scriptsHelper';
+helper.initEnvVars();
 
+import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as Promise from 'bluebird';
@@ -9,13 +10,6 @@ import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import config from '../config/config';
-
-function initEnvVars() {
-    if (!process.env.APP_DIR) {
-        process.env.APP_DIR = fs.realpathSync(process.cwd());
-    }
-    process.env.NODE_ENV = 'production';
-}
 
 function build() {
     let startTime = new Date();
@@ -35,7 +29,7 @@ function build() {
                 copyDataFolder();
 
                 //index file to run app with production env params
-                utils.copy(pathHelper.rootRelative('./templates/general/serverIndex.js'), './index.js');
+                utils.copy(pathHelper.rootRelative('./assets/build/serverIndex.js'), './index.js');
             });
 
             let endTime = new Date();
