@@ -1,6 +1,7 @@
 import * as chalk from 'chalk';
 import * as fs from 'fs-extra';
 import * as config from '../config/config';
+import * as klawSync from 'klaw-sync';
 import * as moment from 'moment';
 import pathHelper from './pathHelper';
 
@@ -15,6 +16,7 @@ export default {
     copyToPackage,
     runCommand,
     ensureEmptyDir,
+    isEmptyDir,
     getFormattedTimeInterval
 };
 
@@ -40,6 +42,11 @@ function copyToPackage(from, to) {
 
 function ensureEmptyDir(path) {
     fs.emptyDirSync(path);
+}
+
+function isEmptyDir(path) {
+    let paths = klawSync(path)
+    return paths.length === 0;
 }
 
 function getFormattedTimeInterval(start, end) {

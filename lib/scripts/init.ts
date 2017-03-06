@@ -48,6 +48,10 @@ function init() {
         return console.log(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
 
+    if (!utils.isEmptyDir(pathHelper.projectRelative('./'))) {
+        return console.log('Project folder is not empty. Please empty the folder and try again.')
+    }
+
 
     Promise.resolve(null)
         .then(() => {
