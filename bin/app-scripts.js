@@ -3,7 +3,7 @@ var spawn = require('cross-spawn');
 var script = process.argv[2];
 var args = process.argv.slice(3);
 
-let scripts = ['build', 'dev', 'init'];
+let scripts = ['build', 'dev', 'init', 'install'];
 
 if (!script) {
     console.log('Please, specify valid script name. Available options are: ' + scripts.join(', ') + '.');

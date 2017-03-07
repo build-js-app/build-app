@@ -89,7 +89,13 @@ function getFormattedTimeInterval(start, end) {
     }
 }
 
-function runCommand(cmd, args, options) {
+interface Utils_RunCommandOptions {
+    title?: string,
+    path: string,
+    ignoreError?: boolean
+}
+
+function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let displayProgress = !!options.title;
     if (displayProgress) {
         process.stdout.write(`${options.title}... `);
