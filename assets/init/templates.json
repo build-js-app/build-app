@@ -1,4 +1,5 @@
 {
+  "defaults": ["simple", "server_ts", "client_react"],
   "projects": {
     "simple": {
       "server": {
