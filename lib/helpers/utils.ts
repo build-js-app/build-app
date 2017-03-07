@@ -3,6 +3,9 @@ import * as fs from 'fs-extra';
 import * as config from '../config/config';
 import * as klawSync from 'klaw-sync';
 import * as moment from 'moment';
+import * as rl from 'readline';
+import * as Promise from 'bluebird';
+
 import pathHelper from './pathHelper';
 
 import * as crossSpawn from 'cross-spawn';
@@ -13,6 +16,7 @@ export default {
     logOperation,
     logOperationAsync,
     clearConsole,
+    prompt,
     copyToPackage,
     runCommand,
     ensureEmptyDir,
@@ -30,6 +34,33 @@ function log(message = '', color = null) {
 
 function clearConsole() {
     process.stdout.write(process.platform === 'win32' ? '\x1Bc' : '\x1B[2J\x1B[3J\x1B[H');
+}
+
+function prompt(question, isYesDefault) {
+    if (typeof isYesDefault !== 'boolean') {
+        throw new Error('Provide explicit boolean isYesDefault as second argument.');
+    }
+    return new Promise(resolve => {
+        let rlInterface = rl.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+
+        let hint = isYesDefault === true ? '[Y/n]' : '[y/N]';
+        let message = question + ' ' + hint + '\n';
+
+        rlInterface.question(message, function(answer) {
+            rlInterface.close();
+
+            let useDefault = answer.trim().length === 0;
+            if (useDefault) {
+                return resolve(isYesDefault);
+            }
+
+            let isYes = answer.match(/^(yes|y)$/i);
+            return resolve(isYes);
+        });
+    });
 }
 
 function copyToPackage(from, to) {

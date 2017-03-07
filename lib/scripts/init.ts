@@ -48,12 +48,22 @@ function init() {
         return console.log(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
 
-    if (!utils.isEmptyDir(pathHelper.projectRelative('./'))) {
-        return console.log('Project folder is not empty. Please empty the folder and try again.')
+    let checkFolder = Promise.resolve(null);
+    let root = pathHelper.projectRelative('./');
+    if (!utils.isEmptyDir(root)) {
+        utils.log('Project folder is not empty.', 'red');
+        checkFolder = utils.prompt('Do you want to empty the folder?', true)
+            .then((answer) => {
+                if (!answer) {
+                    process.exit(0);
+                } else {
+                    utils.ensureEmptyDir(root);
+                }
+            });
     }
 
 
-    Promise.resolve(null)
+    checkFolder
         .then(() => {
             return utils.logOperationAsync('Downloading server template',
                 downloadTemplate(serverTemplate, projectInfo.server[serverTemplate], pathHelper.serverRelative('./')));
@@ -73,9 +83,6 @@ function downloadTemplate(templateName, templateInfo, directory) {
 
     return Git.Clone(templateInfo.repo, directory, {
             checkoutBranch: templateInfo.branch
-        })
-        .then((repository) => {
-            console.log('Done!');
         });
 }
 
