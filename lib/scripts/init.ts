@@ -23,7 +23,9 @@ function init() {
                 if (!answer) {
                     process.exit(0);
                 } else {
-                    utils.ensureEmptyDir(root);
+                    utils.logOperation('Empty project folder', () => {
+                        utils.ensureEmptyDir(root);
+                    })
                 }
             });
     }

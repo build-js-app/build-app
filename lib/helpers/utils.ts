@@ -5,6 +5,7 @@ import * as klawSync from 'klaw-sync';
 import * as moment from 'moment';
 import * as rl from 'readline';
 import * as Promise from 'bluebird';
+import * as del from 'del';
 
 import pathHelper from './pathHelper';
 
@@ -72,6 +73,8 @@ function copyToPackage(from, to) {
 }
 
 function ensureEmptyDir(path) {
+    del.sync(path + '/*.*');
+
     fs.emptyDirSync(path);
 }
 
