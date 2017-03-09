@@ -1,6 +1,8 @@
 import helper from './_scriptsHelper';
 helper.initEnv();
 
+(process as any).noDeprecation = true;
+
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
@@ -58,7 +60,7 @@ function build() {
 }
 
 function buildServer() {
-    console.log('Server build:');
+    utils.log('Server build:', 'green');
 
     if (config.server.sourceLang === 'ts') {
         utils.runCommand('tsc', [], {
@@ -109,9 +111,15 @@ function buildServerJs(callback) {
 }
 
 function buildClient() {
-    utils.log('Build client:');
+    utils.log('Build client:', 'green');
 
-    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+    //utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+
+    utils.runCommand('npm', ['run', 'build'], {
+        title: 'Build client',
+        path: pathHelper.clientRelative('./'),
+        hideOutput: true
+    });
 
     utils.logOperation('Copying assets', () => {
         utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');

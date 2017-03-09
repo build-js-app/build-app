@@ -73,7 +73,9 @@ function copyToPackage(from, to) {
 }
 
 function ensureEmptyDir(path) {
-    del.sync(path + '/*.*');
+    del.sync(path + '/*.*', {
+        force: true
+    });
 
     fs.emptyDirSync(path);
 }
@@ -95,7 +97,8 @@ function getFormattedTimeInterval(start, end) {
 interface Utils_RunCommandOptions {
     title?: string,
     path: string,
-    ignoreError?: boolean
+    ignoreError?: boolean,
+    hideOutput?: boolean
 }
 
 function runCommand(cmd, args, options: Utils_RunCommandOptions) {
@@ -107,7 +110,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let start = new Date();
 
     let result = spawn(cmd, args, {
-        stdio: 'inherit',
+        stdio: options.hideOutput ? ['ignore', 'ignore', process.stderr]: 'inherit',
         cwd: options.path
     });
 
