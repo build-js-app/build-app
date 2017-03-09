@@ -100,7 +100,7 @@ function buildServerJs(callback) {
         entry = pathHelper.path.join(entry, config.paths.server.entry);
         entry += '.js';
 
-        webpackConfigValues.entry = [entry];
+        webpackConfigValues.entry = ['babel-polyfill', entry];
     }
 
     webpack(webpackConfigValues).run((err, stats) => {

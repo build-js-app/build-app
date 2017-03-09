@@ -21,8 +21,12 @@ let webpackConfig = {
     resolve: {
         extensions: ['.js', '.json'],
         modules: [
-            'node_modules',
-            pathHelper.moduleRelative('node_modules')
+            pathHelper.moduleRelative('./node_modules')
+        ]
+    },
+    resolveLoader: {
+        modules: [
+            pathHelper.moduleRelative('./node_modules')
         ]
     },
     target: 'node',
@@ -87,6 +91,14 @@ function loadConfig(isDev = false) {
 }
 
 function initBabel(nodeVersion?) {
+    let preset = null;
+
+    if (config.server.sourceLang === 'ts') {
+        preset = require.resolve('babel-preset-es2015');
+    } else {
+        preset = babelPresetLoader.loadPreset(nodeVersion);
+    }
+
     let babelLoader = {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -94,7 +106,7 @@ function initBabel(nodeVersion?) {
         options: {
             //TODO enable custom, like in backpack
             babelrc: false,
-            presets: [babelPresetLoader.loadPreset(nodeVersion)]
+            presets: [preset]
         }
     };
 
