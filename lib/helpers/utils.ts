@@ -24,6 +24,7 @@ export default {
     runCommand,
     ensureEmptyDir,
     isEmptyDir,
+    removeDir,
     getFormattedTimeInterval
 };
 
@@ -85,6 +86,10 @@ function ensureEmptyDir(path) {
 function isEmptyDir(path) {
     let paths = klawSync(path)
     return paths.length === 0;
+}
+
+function removeDir(path) {
+    return del.sync(path);
 }
 
 function getFormattedTimeInterval(start, end) {

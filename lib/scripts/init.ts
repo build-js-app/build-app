@@ -97,11 +97,13 @@ function getTemplatesInfo(args) {
 }
 
 function downloadTemplate(templateInfo, directory) {
-    //TODO check not empty
     fs.emptyDirSync(directory);
 
     return Git.Clone(templateInfo.repo, directory, {
             checkoutBranch: templateInfo.branch
+        })
+        .then(() => {
+            utils.removeDir(pathHelper.path.join(directory, '.git'));
         });
 }
 
