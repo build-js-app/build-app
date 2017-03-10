@@ -24,12 +24,20 @@ function install() {
 }
 
 function installAll() {
-    utils.runCommand('npm', ['install', '--save'], {
+    let command = 'npm';
+    let params = ['install'];
+
+    if (utils.commandExists('yarn')) {
+        command = 'yarn';
+        params = ['--no-lockfile'];
+    }
+
+    utils.runCommand(command, params, {
         title: 'Install server dependencies',
         path: pathHelper.projectRelative(config.paths.server.root)
     });
 
-    utils.runCommand('npm', ['install', '--save'], {
+    utils.runCommand('npm', ['install'], {
         title: 'Install client dependencies',
         path: pathHelper.projectRelative(config.paths.client.root)
     });

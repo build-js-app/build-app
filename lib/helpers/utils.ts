@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import * as rl from 'readline';
 import * as Promise from 'bluebird';
 import * as del from 'del';
+import {sync as commandExists} from 'command-exists';
 
 import pathHelper from './pathHelper';
 
@@ -19,6 +20,7 @@ export default {
     clearConsole,
     prompt,
     copyToPackage,
+    commandExists,
     runCommand,
     ensureEmptyDir,
     isEmptyDir,
@@ -99,6 +101,10 @@ interface Utils_RunCommandOptions {
     path: string,
     ignoreError?: boolean,
     hideOutput?: boolean
+}
+
+function commandExists(command) {
+    return commandExists(command);
 }
 
 function runCommand(cmd, args, options: Utils_RunCommandOptions) {
