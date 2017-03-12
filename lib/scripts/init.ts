@@ -12,6 +12,10 @@ import utils from '../helpers/utils';
 function init() {
     let args = process.argv.slice(2);
 
+    if (args[0] === 'list') {
+        return showTemplatesList();
+    }
+
     let templatesInfo = getTemplatesInfo(args);
 
     let checkFolder = Promise.resolve(null);
@@ -42,6 +46,33 @@ function init() {
         .then(() => {
             copyAssets();
         })
+}
+
+function showTemplatesList() {
+    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/init/templates.json'));
+
+    let logWithTabs = (message, tabs) => {
+        let tabStr = '';
+        for (let i = 0; i <= tabs - 1; i++) tabStr += ' ';
+        utils.log(tabStr + message);
+    };
+
+    logWithTabs(`Projects:`, 0);
+
+    for (let project of Object.keys(templateRegistry.projects)) {
+        logWithTabs(project, 2);
+
+        logWithTabs('server:', 4);
+        for(let serverTemplate of Object.keys(templateRegistry.projects[project].server)) {
+            logWithTabs(serverTemplate, 6);
+        }
+
+        logWithTabs('client:', 4);
+        for(let clientTemplate of Object.keys(templateRegistry.projects[project].client)) {
+            logWithTabs(clientTemplate, 6);
+        }
+    }
+
 }
 
 function getTemplatesInfo(args) {
