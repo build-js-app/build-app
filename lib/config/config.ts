@@ -26,13 +26,16 @@ let config = {
             removeMapFiles: true,
             //make sure source is ES5, that should include external npm packages too
             minify: false,
-            bundleNodeModules: false,
-            run: false
+            bundleNodeModules: false
         },
         dev: {
             nodeVersion: '6',
             debugPort: 9999
         }
+    },
+    postBuild: {
+        run: false,
+        archive: false
     }
 };
 

@@ -40,8 +40,16 @@ function build() {
 
             utils.log('Build package was crated!', 'green');
             utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+        })
+        .then(() => {
+            if (config.postBuild.archive) {
+                let archive = utils.archiveFolder(pathHelper.packageRelative('./'), pathHelper.packageRelative('./build.zip'));
 
-            if (config.server.build.run) {
+                return utils.logOperationAsync('Archive build package', archive);
+            }
+        })
+        .then(() => {
+            if (config.postBuild.run) {
                 if (!config.server.build.bundleNodeModules) {
                     utils.log('Installing dependencies...');
 

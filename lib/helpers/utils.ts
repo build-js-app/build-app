@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import * as rl from 'readline';
 import * as Promise from 'bluebird';
 import * as del from 'del';
+import * as archiver from 'archiver';
 import {sync as commandExists} from 'command-exists';
 
 import pathHelper from './pathHelper';
@@ -25,7 +26,8 @@ export default {
     ensureEmptyDir,
     isEmptyDir,
     removeDir,
-    getFormattedTimeInterval
+    getFormattedTimeInterval,
+    archiveFolder
 };
 
 type Utils_CL_Color = 'red' | 'green';
@@ -189,4 +191,25 @@ function logDone(start, end) {
     } else {
         log(`${chalk.green('done')} in ${chalk.cyan(runTime)}.`);
     }
+}
+
+function archiveFolder(source, destination) {
+    return new Promise((resolve, reject) => {
+        let output = fs.createWriteStream(destination);
+        let archive = archiver('zip');
+
+        output.on('close', function() {
+            return resolve(archive);
+        });
+
+        archive.on('error', function(err) {
+            return reject(err);
+        });
+
+        archive.pipe(output);
+
+        archive.directory(source, '');
+
+        archive.finalize();
+    });
 }
