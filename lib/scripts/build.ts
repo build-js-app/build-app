@@ -11,6 +11,7 @@ import webpackConfig from '../config/webpack.config.server';
 import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
+import envHelper from '../helpers/evnHelper';
 import config from '../config/config';
 
 function build() {
@@ -63,6 +64,8 @@ function buildServer() {
     utils.log('Server build:', 'green');
 
     if (config.server.sourceLang === 'ts') {
+        envHelper.checkTypeScript();
+
         utils.runCommand('tsc', [], {
             path: pathHelper.serverRelative('./'),
             title: 'Compiling TypeScript'

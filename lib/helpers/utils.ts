@@ -28,7 +28,9 @@ export default {
     getFormattedTimeInterval
 };
 
-function log(message = '', color = null) {
+type Utils_CL_Color = 'red' | 'green';
+
+function log(message = '', color: Utils_CL_Color = null) {
     if (color) {
         console.log(chalk[color](message));
     } else {
