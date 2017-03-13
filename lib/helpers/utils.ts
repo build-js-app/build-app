@@ -124,9 +124,13 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
 
     let start = new Date();
 
+    let env = process.env;
+    env.NODE_ENV = '';
+
     let result = spawn(cmd, args, {
         stdio: options.hideOutput ? ['ignore', 'ignore', process.stderr]: 'inherit',
-        cwd: options.path
+        cwd: options.path,
+        env: env
     });
 
     if (result.status !== 0) {
