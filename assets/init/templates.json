@@ -20,6 +20,10 @@
         "client_vue": {
           "repo": "https://github.com/build-js-app/template-simple-client",
           "branch": "vue"
+        },
+        "client_angular": {
+          "repo": "https://github.com/build-js-app/template-simple-client",
+          "branch": "angular"
         }
       }
     }
