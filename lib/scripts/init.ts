@@ -107,19 +107,20 @@ function getTemplatesInfo(args) {
 
     let serverTemplate = params[1];
     let serverTemplateInfo = projectInfo.server[serverTemplate];
-    serverTemplateInfo.name = serverTemplate;
     if (!serverTemplateInfo) {
         let templates = Object.keys(projectInfo.server);
         logAndExit(`Incorrect server template '${serverTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
+    serverTemplateInfo.name = serverTemplate;
 
     let clientTemplate = params[2];
     let clientTemplateInfo = projectInfo.client[clientTemplate];
-    clientTemplateInfo.name = clientTemplate;
+
     if (!clientTemplateInfo) {
         let templates = Object.keys(projectInfo.client);
         logAndExit(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
+    clientTemplateInfo.name = clientTemplate;
 
     return {
         serverTemplate: serverTemplateInfo,
