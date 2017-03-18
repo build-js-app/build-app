@@ -107,11 +107,9 @@ function buildServerJs(callback) {
     let webpackConfigValues = webpackConfig.load();
 
     if (config.server.sourceLang === 'ts') {
-        let entry = pathHelper.serverRelative(config.paths.server.build);
-        entry = pathHelper.path.join(entry, config.paths.server.entry);
-        entry += '.js';
+        let tsEntry = pathHelper.getTsEntry();
 
-        webpackConfigValues.entry = ['babel-polyfill', entry];
+        webpackConfigValues.entry = ['babel-polyfill', tsEntry];
     }
 
     webpack(webpackConfigValues).run((err, stats) => {

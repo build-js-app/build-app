@@ -12,6 +12,8 @@ import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import config from '../config/config';
 import * as FriendlyErrorsWebpackPlugin from 'friendly-errors-webpack-plugin';
+import * as spawn from 'cross-spawn';
+import * as os from 'os';
 const nodemon = require('nodemon');
 
 function initEnvVars() {
@@ -22,6 +24,107 @@ function initEnvVars() {
 }
 
 function dev() {
+    if (config.server.sourceLang === 'ts') {
+        devTs();
+    } else {
+        devJs();
+    }
+}
+
+let nodemonInstance = null;
+let output = [];
+
+function devTs() {
+    //TODO duplication
+    utils.clearConsole();
+    utils.log('Starting new compilation...');
+
+    let ts = spawn('tsc', ['--watch'], {
+        cwd: pathHelper.serverRelative('./')
+    });
+
+    let compile = _.debounce(() => {
+        tsCompileRequest()
+    }, 200, {});
+
+    ts.stdout.on('data', (data) => {
+        let entry = _.trim(data.toString());
+        let parts = entry.split(os.EOL);
+        for (let part of parts) {
+            output.push(_.trim(part));
+        }
+        compile();
+    });
+
+    ts.stderr.on('data', (data) => {
+        console.log(`stderr: ${data}`);
+    });
+
+    ts.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+    });
+}
+
+function tsCompileRequest() {
+    let lastMessage = output[output.length - 1];
+
+    if (_.endsWith(lastMessage, 'File change detected. Starting incremental compilation...')) {
+        utils.clearConsole();
+        utils.log('Starting new compilation...');
+        return;
+    }
+
+
+    if (_.endsWith(lastMessage, 'Compilation complete. Watching for file changes.')) {
+        let errors = [];
+
+        for (let i = output.length - 2; i >= 0; i--) {
+            if (!_.endsWith(output[i], 'File change detected. Starting incremental compilation...')) {
+                errors.push(output[i]);
+            } else {
+                break;
+            }
+        }
+
+        return onTsCompileComplete(errors);
+    }
+}
+
+function onTsCompileComplete(errors) {
+    _.delay(() => {
+        let restart = () => {
+            restartNodemon()
+        };
+
+        if (errors.length === 0) {
+            utils.log('Compiled successfully!', 'green');
+            restart();
+        } else {
+            utils.log('Failed to compile.', 'red');
+            for (let error of errors) {
+                utils.log(error);
+            }
+        }
+    }, 0)
+}
+
+function restartNodemon() {
+    if (!nodemonInstance) {
+        let entry = pathHelper.getTsEntry();
+
+        nodemonInstance = nodemon({script: entry, ignore: [entry], watch: [], flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
+            .on('quit', process.exit);
+
+        process.on('uncaughtException', function (err) {
+            console.log(err);
+            nodemonInstance.emit('quit');
+        });
+    } else {
+        nodemonInstance.emit('restart');
+    }
+}
+
+function devJs() {
     let watchPath = pathHelper.serverRelative(config.paths.server.src);
     let watcher = chokidar.watch([watchPath]);
 
@@ -53,7 +156,7 @@ function dev() {
         nodemonInstance = nodemon({script: bundlePath, flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
             .on('quit', process.exit);
 
-        process.on('uncaughtException', function(err) {
+        process.on('uncaughtException', function (err) {
             console.log(err);
             nodemonInstance.emit('quit');
         });
