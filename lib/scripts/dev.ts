@@ -14,6 +14,8 @@ import config from '../config/config';
 import * as FriendlyErrorsWebpackPlugin from 'friendly-errors-webpack-plugin';
 import * as spawn from 'cross-spawn';
 import * as os from 'os';
+import nodeRunner from '../helpers/nodeRunner';
+
 const nodemon = require('nodemon');
 
 function initEnvVars() {
@@ -31,8 +33,8 @@ function dev() {
     }
 }
 
-let nodemonInstance = null;
 let output = [];
+let scriptRunner = null;
 
 function devTs() {
     //TODO duplication
@@ -63,14 +65,20 @@ function devTs() {
     ts.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
     });
+
+    let entry = pathHelper.getTsEntry();
+    scriptRunner = nodeRunner.init(entry);
 }
 
 function tsCompileRequest() {
     let lastMessage = output[output.length - 1];
 
     if (_.endsWith(lastMessage, 'File change detected. Starting incremental compilation...')) {
+        scriptRunner.stop();
+
         utils.clearConsole();
         utils.log('Starting new compilation...');
+
         return;
     }
 
@@ -92,36 +100,16 @@ function tsCompileRequest() {
 
 function onTsCompileComplete(errors) {
     _.delay(() => {
-        let restart = () => {
-            restartNodemon()
-        };
-
         if (errors.length === 0) {
             utils.log('Compiled successfully!', 'green');
-            restart();
+            scriptRunner.start();
         } else {
             utils.log('Failed to compile.', 'red');
             for (let error of errors) {
                 utils.log(error);
             }
         }
-    }, 0)
-}
-
-function restartNodemon() {
-    if (!nodemonInstance) {
-        let entry = pathHelper.getTsEntry();
-
-        nodemonInstance = nodemon({script: entry, ignore: [entry], watch: [], flags: [], nodeArgs: [`--debug=${config.server.dev.debugPort}`]})
-            .on('quit', process.exit);
-
-        process.on('uncaughtException', function (err) {
-            console.log(err);
-            nodemonInstance.emit('quit');
-        });
-    } else {
-        nodemonInstance.emit('restart');
-    }
+    }, 0);
 }
 
 function devJs() {
