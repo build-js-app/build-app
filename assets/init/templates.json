@@ -28,9 +28,11 @@
       }
     },
     "full": {
-      "server_mongo": {
-        "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
-        "branch": "mongo"
+      "server": {
+        "server_mongo": {
+          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
+          "branch": "mongo"
+        }
       },
       "client": {
         "client_react": {
