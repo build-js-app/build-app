@@ -16,6 +16,7 @@ let spawn = crossSpawn.sync;
 
 export default {
     log,
+    logAndExit,
     logOperation,
     logOperationAsync,
     clearConsole,
@@ -27,10 +28,11 @@ export default {
     isEmptyDir,
     removeDir,
     getFormattedTimeInterval,
-    archiveFolder
+    archiveFolder,
+    readJsonFile
 };
 
-type Utils_CL_Color = 'red' | 'green';
+type Utils_CL_Color = 'red' | 'green' | 'cyan';
 
 function log(message = '', color: Utils_CL_Color = null) {
     if (color) {
@@ -38,6 +40,11 @@ function log(message = '', color: Utils_CL_Color = null) {
     } else {
         console.log(message);
     }
+}
+
+function logAndExit(message = '', color: Utils_CL_Color = null) {
+    log(message, color);
+    process.exit(0);
 }
 
 function clearConsole() {
@@ -88,7 +95,7 @@ function ensureEmptyDir(path) {
 }
 
 function isEmptyDir(path) {
-    let paths = klawSync(path)
+    let paths = klawSync(path);
     return paths.length === 0;
 }
 
@@ -216,4 +223,8 @@ function archiveFolder(source, destination) {
 
         archive.finalize();
     });
+}
+
+function readJsonFile(path) {
+    return fs.readJsonSync(path);
 }

@@ -49,7 +49,7 @@ function init() {
 }
 
 function showTemplatesList() {
-    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/init/templates.json'));
+    let templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
 
     let logWithTabs = (message, tabs) => {
         let tabStr = '';
@@ -76,12 +76,7 @@ function showTemplatesList() {
 }
 
 function getTemplatesInfo(args) {
-    let logAndExit = (message) => {
-        utils.log(message);
-        process.exit(0);
-    };
-
-    let templateRegistry = fs.readJsonSync(pathHelper.moduleRelative('./assets/init/templates.json'));
+    let templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
 
     let message = 'Please, specify project templates as a first argument in a format {project_name}:{server_template}:{client_template}';
 
@@ -94,13 +89,13 @@ function getTemplatesInfo(args) {
     }
 
     if (params.length !== 3) {
-        logAndExit(message);
+        utils.logAndExit(message);
     }
 
     let project = params[0];
     if (!templateRegistry.projects[project]) {
         let projects = Object.keys(templateRegistry.projects);
-        logAndExit(`Incorrect project name '${project}'. Valid values are: [${projects.join(', ')}].`);
+        utils.logAndExit(`Incorrect project name '${project}'. Valid values are: [${projects.join(', ')}].`);
     }
 
     let projectInfo = templateRegistry.projects[project];
@@ -109,7 +104,7 @@ function getTemplatesInfo(args) {
     let serverTemplateInfo = projectInfo.server[serverTemplate];
     if (!serverTemplateInfo) {
         let templates = Object.keys(projectInfo.server);
-        logAndExit(`Incorrect server template '${serverTemplate}'. Valid values are: [${templates.join(', ')}].`);
+        utils.logAndExit(`Incorrect server template '${serverTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
     serverTemplateInfo.name = serverTemplate;
 
@@ -118,7 +113,7 @@ function getTemplatesInfo(args) {
 
     if (!clientTemplateInfo) {
         let templates = Object.keys(projectInfo.client);
-        logAndExit(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
+        utils.logAndExit(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
     }
     clientTemplateInfo.name = clientTemplate;
 

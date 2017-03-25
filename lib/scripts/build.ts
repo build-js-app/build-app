@@ -92,7 +92,7 @@ function buildServer() {
                 utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
 
                 let serverPackagePath = pathHelper.serverRelative('./package.json');
-                let serverPackageJson = fs.readJsonSync(serverPackagePath);
+                let serverPackageJson = utils.readJsonFile(serverPackagePath);
 
                 let buildPackageJson = {
                     dependencies: serverPackageJson.dependencies
