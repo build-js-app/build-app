@@ -28,7 +28,7 @@
       }
     },
     "full": {
-      "server": {
+      "server_mongo": {
         "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
         "branch": "mongo"
       },
