@@ -26,6 +26,22 @@
           "branch": "angular"
         }
       }
+    },
+    "full": {
+      "server": {
+        "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
+        "branch": "mongo"
+      },
+      "client": {
+        "client_react": {
+          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
+          "branch": "react"
+        },
+        "client_vue": {
+          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
+          "branch": "vue"
+        }
+      }
     }
   }
 }
