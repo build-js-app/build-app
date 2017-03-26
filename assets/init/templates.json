@@ -3,25 +3,25 @@
   "projects": {
     "simple": {
       "server": {
-        "server_ts": {
+        "ts": {
           "repo": "https://github.com/build-js-app/template-simple-server",
           "branch": "ts"
         },
-        "server_js": {
+        "js": {
           "repo": "https://github.com/build-js-app/template-simple-server",
           "branch": "js"
         }
       },
       "client": {
-        "client_react": {
+        "react": {
           "repo": "https://github.com/build-js-app/template-simple-client",
           "branch": "react"
         },
-        "client_vue": {
+        "vue": {
           "repo": "https://github.com/build-js-app/template-simple-client",
           "branch": "vue"
         },
-        "client_angular": {
+        "angular": {
           "repo": "https://github.com/build-js-app/template-simple-client",
           "branch": "angular"
         }
@@ -29,17 +29,17 @@
     },
     "full": {
       "server": {
-        "server_mongo": {
+        "mongo": {
           "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
           "branch": "mongo"
         }
       },
       "client": {
-        "client_react": {
+        "react": {
           "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
           "branch": "react"
         },
-        "client_vue": {
+        "vue": {
           "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
           "branch": "vue"
         }

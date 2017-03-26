@@ -1,22 +1,71 @@
-import helper from './_scriptsHelper';
-helper.initEnv();
-
 import * as fs from 'fs-extra';
 import * as Git from 'nodegit';
 import * as Promise from 'bluebird';
 
-import config from '../config/config';
 import pathHelper from '../helpers/pathHelper';
 import utils from '../helpers/utils';
 
-function init() {
-    let args = process.argv.slice(2);
+export default {
+    command: 'init',
+    describe: 'Init new project',
+    handler: commandHandler,
+    builder: commandBuilder
+};
 
-    if (args[0] === 'list') {
+function commandBuilder(yargs) {
+    return yargs
+        .option('project', {
+            alias: 'p',
+            description: 'Templates project'
+        })
+        .option('server', {
+            alias: 's',
+            description: 'Server template'
+        })
+        .option('client', {
+            alias: 'c',
+            description: 'Client template'
+        })
+        .option('default', {
+            alias: 'df',
+            description: 'Init with default templates'
+
+        })
+        .option('list', {
+            alias: 'ls',
+            description: 'Show list of templates'
+
+        })
+        .example('init -p simple -s ts -c react', 'inits project for templates "ts", "react" in project "simple"')
+        .example('init --default', 'inits project with default templates')
+        .example('init --list', 'show list of all available templates grouped by project');
+}
+
+function commandHandler(argv) {
+    if (argv.list) {
         return showTemplatesList();
     }
 
-    let templatesInfo = getTemplatesInfo(args);
+    if (argv.default) {
+        return initCommand('simple', 'ts', 'react');
+    }
+
+    let params = [argv.project, argv.server, argv.client];
+
+    for (let param of params) {
+        if (!param) {
+            console.log(`Please specify project, server and client options or use defaults with --default option.`);
+            return console.log(`Run init -h to get more information`);
+        }
+    }
+
+    initCommand(argv.project, argv.server, argv.client);
+}
+
+function initCommand(project, serverTemplate, clientTemplate) {
+    utils.log(`Init new project. Server template: ${serverTemplate}; client template: ${clientTemplate}; project: ${project}.`);
+
+    let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
 
     let checkFolder = Promise.resolve(null);
     let root = pathHelper.projectRelative('./');
@@ -45,6 +94,8 @@ function init() {
         })
         .then(() => {
             copyAssets();
+
+            utils.log('Project was initialized!', 'green');
         })
 }
 
@@ -63,36 +114,23 @@ function showTemplatesList() {
         logWithTabs(project, 2);
 
         logWithTabs('server:', 4);
-        for(let serverTemplate of Object.keys(templateRegistry.projects[project].server)) {
+        for (let serverTemplate of Object.keys(templateRegistry.projects[project].server)) {
             logWithTabs(serverTemplate, 6);
         }
 
         logWithTabs('client:', 4);
-        for(let clientTemplate of Object.keys(templateRegistry.projects[project].client)) {
+        for (let clientTemplate of Object.keys(templateRegistry.projects[project].client)) {
             logWithTabs(clientTemplate, 6);
         }
     }
 
 }
 
-function getTemplatesInfo(args) {
+function getTemplatesInfo(project, serverTemplate, clientTemplate) {
     let templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
-
-    let message = 'Please, specify project templates as a first argument in a format {project_name}:{server_template}:{client_template}';
 
     let params = [];
 
-    if (!args.length) {
-        params = templateRegistry.defaults;
-    } else {
-        params = args[0].split(':');
-    }
-
-    if (params.length !== 3) {
-        utils.logAndExit(message);
-    }
-
-    let project = params[0];
     if (!templateRegistry.projects[project]) {
         let projects = Object.keys(templateRegistry.projects);
         utils.logAndExit(`Incorrect project name '${project}'. Valid values are: [${projects.join(', ')}].`);
@@ -100,7 +138,6 @@ function getTemplatesInfo(args) {
 
     let projectInfo = templateRegistry.projects[project];
 
-    let serverTemplate = params[1];
     let serverTemplateInfo = projectInfo.server[serverTemplate];
     if (!serverTemplateInfo) {
         let templates = Object.keys(projectInfo.server);
@@ -108,7 +145,6 @@ function getTemplatesInfo(args) {
     }
     serverTemplateInfo.name = serverTemplate;
 
-    let clientTemplate = params[2];
     let clientTemplateInfo = projectInfo.client[clientTemplate];
 
     if (!clientTemplateInfo) {
@@ -140,5 +176,3 @@ function copyAssets() {
         pathHelper.projectRelative('./package.json')
     )
 }
-
-init();
