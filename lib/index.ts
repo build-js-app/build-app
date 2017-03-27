@@ -32,6 +32,7 @@ yargs
         })
     .help()
     .alias('h', 'help')
+    .epilog(`You can see specific help for each command. Run app-scripts <command> --help.`)
     .argv;
 
 function logAvailableCommands() {

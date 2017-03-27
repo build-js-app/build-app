@@ -1,6 +1,6 @@
 import * as chalk from 'chalk';
 import * as fs from 'fs-extra';
-import * as config from '../config/config';
+import * as _ from 'lodash';
 import * as klawSync from 'klaw-sync';
 import * as moment from 'moment';
 import * as rl from 'readline';
@@ -131,7 +131,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
 
     let start = new Date();
 
-    let env = process.env;
+    let env = _.assign({}, process.env);
     env.NODE_ENV = '';
 
     let result = spawn(cmd, args, {
