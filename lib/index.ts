@@ -1,5 +1,6 @@
 import * as yargs from 'yargs';
 import * as fs from 'fs-extra';
+import * as os from 'os';
 
 initEnvVars();
 
@@ -9,6 +10,11 @@ import buildModule from './scripts/build';
 import serveModule from './scripts/serve';
 
 let commands = ['init', 'install', 'build', 'serve'];
+
+let epilog = [
+    'You can see specific help for each command. Run app-scripts <command> --help.',
+    'You can use napp as shorter alias for app-scripts.'
+].join(os.EOL);
 
 yargs
     .usage('Usage: app-scripts <command> [options]')
@@ -32,7 +38,7 @@ yargs
         })
     .help()
     .alias('h', 'help')
-    .epilog(`You can see specific help for each command. Run app-scripts <command> --help.`)
+    .epilog(epilog)
     .argv;
 
 function logAvailableCommands() {

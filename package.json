@@ -11,7 +11,8 @@
     "node": ">=4"
   },
   "bin": {
-    "app-scripts": "./bin/app-scripts.js"
+    "app-scripts": "./bin/app-scripts.js",
+    "napp": "./bin/app-scripts.js"
   },
   "dependencies": {
     "@types/node": "^6.0.53",
