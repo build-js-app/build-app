@@ -1,6 +1,3 @@
-import helper from './_scriptsHelper';
-helper.initEnv();
-
 (process as any).noDeprecation = true;
 
 import * as fs from 'fs-extra';
@@ -13,6 +10,21 @@ import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import envHelper from '../helpers/evnHelper';
 import config from '../config/config';
+
+export default {
+    command: 'build',
+    describe: 'Build project for production',
+    handler: commandHandler,
+    builder: commandBuilder
+};
+
+function commandBuilder(yargs) {
+    return yargs;
+}
+
+function commandHandler(argv) {
+    build();
+}
 
 function build() {
     let startTime = new Date();
@@ -151,5 +163,3 @@ function copyDataFolder() {
 
     utils.ensureEmptyDir(pathHelper.packageRelative('./data/config'));
 }
-
-build();

@@ -1,6 +1,3 @@
-import helper from './_scriptsHelper';
-helper.initEnv();
-
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';

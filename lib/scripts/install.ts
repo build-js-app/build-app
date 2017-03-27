@@ -1,6 +1,3 @@
-import helper from './_scriptsHelper';
-helper.initEnv();
-
 import * as _ from 'lodash';
 import * as globby from 'globby';
 import * as semver from 'semver';
@@ -9,31 +6,44 @@ import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
 import config from '../config/config';
 
-function install() {
-    let args = process.argv.slice(2);
+export default {
+    command: 'install [package]',
+    describe: 'Install project dependencies',
+    aliases: ['i'],
+    handler: commandHandler,
+    builder: commandBuilder
+};
 
-    if (!args.length) {
+function commandBuilder(yargs) {
+    return yargs
+        .option('server', {
+            alias: 's',
+            boolean: true,
+            description: 'install to server'
+        })
+        .option('client', {
+            alias: 'c',
+            boolean: true,
+            description: 'install to client'
+        })
+        .example('install', 'install all dependencies for server/client, check global dependencies')
+        .example('install lodash -s', 'install lodash to server')
+        .example('install jquery -c', 'install jquery to client');
+}
+
+function commandHandler(argv) {
+    if (!argv.package) {
         return installAll();
     }
 
-    let message = `Not valid 'install' script arguments.`;
+    //TODO demand -s or -c
+    let target = 'server';
 
-    let target = args[0];
-    let packageName = args[1];
-
-    if (!packageName) {
-        utils.logAndExit(message);
+    if (argv.client) {
+        target = 'client';
     }
 
-    if (target === 'server') {
-        return installPackage(packageName, target);
-    }
-
-    if (target === 'client') {
-        return installPackage(packageName, target);
-    }
-
-    utils.logAndExit(message);
+    return installPackage(argv.package, target);
 }
 
 function installAll() {
@@ -158,6 +168,4 @@ function installPackage(packageName, target) {
         path: folder
     });
 }
-
-install();
 

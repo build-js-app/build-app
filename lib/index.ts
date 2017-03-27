@@ -4,15 +4,18 @@ import * as fs from 'fs-extra';
 initEnvVars();
 
 import initModule from './scripts/init';
+import installModule from './scripts/install';
+import buildModule from './scripts/build';
+import serveModule from './scripts/serve';
 
 let commands = ['init', 'install', 'build', 'serve'];
 
 yargs
     .usage('Usage: app-scripts <command> [options]')
     .command(initModule)
-    .command('install', '')
-    .command('build', '')
-    .command('serve', '')
+    .command(installModule)
+    .command(buildModule)
+    .command(serveModule)
     .command('*', '', () => {
         },
         (argv) => {
