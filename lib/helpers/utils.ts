@@ -61,10 +61,10 @@ function prompt(question, isYesDefault) {
             output: process.stdout,
         });
 
-        let hint = isYesDefault === true ? '[Y/n]' : '[y/N]';
-        let message = question + ' ' + hint + '\n';
+        let hint = isYesDefault === true ? '[Y/n]:' : '[y/N]:';
+        let message = question + ' ' + hint;
 
-        rlInterface.question(message, function(answer) {
+        rlInterface.question(message, function (answer) {
             rlInterface.close();
 
             let useDefault = answer.trim().length === 0;
@@ -116,7 +116,7 @@ interface Utils_RunCommandOptions {
     title?: string,
     path: string,
     ignoreError?: boolean,
-    hideOutput?: boolean
+    showOutput?: boolean
 }
 
 function commandExists(command) {
@@ -125,8 +125,15 @@ function commandExists(command) {
 
 function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let displayProgress = !!options.title;
+    let multiLine = options.showOutput;
+
     if (displayProgress) {
-        process.stdout.write(`${options.title}... `);
+        let message = `${options.title}... `
+        if (multiLine) {
+            console.log(message);
+        } else {
+            process.stdout.write(message);
+        }
     }
 
     let start = new Date();
@@ -134,16 +141,29 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let env = _.assign({}, process.env);
     env.NODE_ENV = '';
 
+    let stdio: any = ['ignore', 'ignore', 'pipe'];
+    if (multiLine) {
+        stdio[1] = 'inherit';
+        stdio[2] = 'inherit';
+    }
+
     let result = spawn(cmd, args, {
-        stdio: options.hideOutput ? ['ignore', 'ignore', process.stderr]: 'inherit',
+        stdio,
         cwd: options.path,
         env: env
     });
 
     if (result.status !== 0) {
         if (displayProgress) {
-            let message = 'operation failed.';
+            let message = multiLine ? 'Operation failed.' : 'operation failed.';
             log(message, 'red');
+
+            if (!multiLine) {
+                let error = result.stderr.toString('utf8');
+                if (error) {
+                    console.log(error);
+                }
+            }
         }
 
         if (!options.ignoreError) {
@@ -152,7 +172,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     } else {
         if (displayProgress) {
             let end = new Date();
-            logDone(start, end);
+            logDone(start, end, multiLine);
         }
     }
 
@@ -195,12 +215,22 @@ function logOperationAsync(title: string, operation): any {
         });
 }
 
-function logDone(start, end) {
+function logDone(start, end, multiLine = false) {
     let runTime = getFormattedTimeInterval(start, end);
-    if (runTime === '00:00:00') {
-        log('done.', 'green');
+    let instant = runTime === '00:00:00';
+
+    let logWithMessage = (msg) => {
+        if (instant) {
+            log(`${msg}`, 'green');
+        } else {
+            log(`${chalk.green(msg)} in ${chalk.cyan(runTime)}.`);
+        }
+    };
+
+    if (multiLine) {
+        logWithMessage('Operation completed');
     } else {
-        log(`${chalk.green('done')} in ${chalk.cyan(runTime)}.`);
+        logWithMessage('done');
     }
 }
 
@@ -209,11 +239,11 @@ function archiveFolder(source, destination) {
         let output = fs.createWriteStream(destination);
         let archive = archiver('zip');
 
-        output.on('close', function() {
+        output.on('close', function () {
             return resolve(archive);
         });
 
-        archive.on('error', function(err) {
+        archive.on('error', function (err) {
             return reject(err);
         });
 

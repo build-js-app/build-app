@@ -45,12 +45,16 @@ function handler(argv) {
 
 function serveServer() {
     utils.runCommand('npm', ['run', 'start'], {
-        path: pathHelper.serverRelative('./')
+        title: 'Serve server',
+        path: pathHelper.serverRelative('./'),
+        showOutput: true
     });
 }
 
 function serveClient() {
     utils.runCommand('npm', ['run', 'start'], {
-        path: pathHelper.clientRelative('./')
+        title: 'Serve client',
+        path: pathHelper.clientRelative('./'),
+        showOutput: true
     });
 }

@@ -63,7 +63,9 @@ function commandHandler(argv) {
 }
 
 function initCommand(project, serverTemplate, clientTemplate) {
-    utils.log(`Init new project. Server template: ${serverTemplate}; client template: ${clientTemplate}; project: ${project}.`);
+    utils.log(`Init new project based on project "${project}".`);
+    utils.log(`Server template: "${serverTemplate}".`);
+    utils.log(`Client template: "${clientTemplate}".`);
 
     let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
 

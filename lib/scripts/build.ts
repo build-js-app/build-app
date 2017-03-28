@@ -138,8 +138,7 @@ function buildClient() {
 
     utils.runCommand('npm', ['run', 'build'], {
         title: 'Build client',
-        path: pathHelper.clientRelative('./'),
-        hideOutput: true
+        path: pathHelper.clientRelative('./')
     });
 
     utils.logOperation('Copying assets', () => {

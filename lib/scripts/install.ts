@@ -64,12 +64,14 @@ function installAll() {
 
     utils.runCommand(command, params, {
         title: 'Install server dependencies',
-        path: pathHelper.projectRelative(config.paths.server.root)
+        path: pathHelper.projectRelative(config.paths.server.root),
+        showOutput: true
     });
 
     utils.runCommand('npm', ['install'], {
         title: 'Install client dependencies',
-        path: pathHelper.projectRelative(config.paths.client.root)
+        path: pathHelper.projectRelative(config.paths.client.root),
+        showOutput: true
     });
 }
 
