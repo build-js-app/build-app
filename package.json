@@ -1,6 +1,6 @@
 {
   "name": "build-app",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Build full-stack JS app",
   "scripts": {
     "build": "node scripts/build.js"
