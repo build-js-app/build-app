@@ -50,7 +50,7 @@ function build() {
             let endTime = new Date();
             let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
 
-            utils.log('Build package was crated!', 'green');
+            utils.log('Build package was created!', 'green');
             utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
         })
         .then(() => {

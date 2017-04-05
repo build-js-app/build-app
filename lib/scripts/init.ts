@@ -1,12 +1,14 @@
 import * as fs from 'fs-extra';
 import * as Git from 'nodegit';
 import * as Promise from 'bluebird';
+import * as chalk from 'chalk';
+import * as validateProjectName from 'validate-npm-package-name';
 
 import pathHelper from '../helpers/pathHelper';
 import utils from '../helpers/utils';
 
 export default {
-    command: 'init',
+    command: 'init <app-name>',
     describe: 'Init new project',
     handler: commandHandler,
     builder: commandBuilder
@@ -36,9 +38,9 @@ function commandBuilder(yargs) {
             description: 'Show list of templates'
 
         })
-        .example('init -p simple -s ts -c react', 'inits project for templates "ts", "react" in project "simple"')
-        .example('init --default', 'inits project with default templates')
-        .example('init --list', 'show list of all available templates grouped by project');
+        .example('init my-app -p simple -s ts -c react', 'inits new app in "my-app" folder with templates "ts", "react" in project "simple"')
+        .example('init my-app --default', 'inits project with default templates')
+        .example('init my-app --list', 'show list of all available templates grouped by project');
 }
 
 function commandHandler(argv) {
@@ -47,7 +49,7 @@ function commandHandler(argv) {
     }
 
     if (argv.default) {
-        return initCommand('simple', 'ts', 'react');
+        return initCommand(argv.appName, 'simple', 'ts', 'react');
     }
 
     let params = [argv.project, argv.server, argv.client];
@@ -59,21 +61,27 @@ function commandHandler(argv) {
         }
     }
 
-    initCommand(argv.project, argv.server, argv.client);
+    initCommand(argv.appName, argv.project, argv.server, argv.client);
 }
 
-function initCommand(project, serverTemplate, clientTemplate) {
-    utils.log(`Init new project based on project "${project}".`);
-    utils.log(`Server template: "${serverTemplate}".`);
-    utils.log(`Client template: "${clientTemplate}".`);
+function initCommand(appName, project, serverTemplate, clientTemplate) {
+    checkAppName(appName);
 
     let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
 
     let checkFolder = Promise.resolve(null);
-    let root = pathHelper.projectRelative('./');
+    let root = pathHelper.projectRelative(`./${appName}`);
+
+    pathHelper.setAppPath(root);
+
+    utils.log(`Init new project based on project "${project}".`);
+    utils.log(`Server template: "${serverTemplate}".`);
+    utils.log(`Client template: "${clientTemplate}".`);
+    utils.log(`App folder: "${pathHelper.getAppPath()}".`);
+
     if (!utils.isEmptyDir(root)) {
         utils.log('Project folder is not empty.', 'red');
-        checkFolder = utils.prompt('Do you want to empty the folder?', true)
+        checkFolder = utils.prompt('Do you want to empty the folder?', false)
             .then((answer) => {
                 if (!answer) {
                     process.exit(0);
@@ -83,6 +91,8 @@ function initCommand(project, serverTemplate, clientTemplate) {
                     })
                 }
             });
+    } else {
+        fs.ensureDirSync(root);
     }
 
     checkFolder
@@ -99,6 +109,26 @@ function initCommand(project, serverTemplate, clientTemplate) {
 
             utils.log('Project was initialized!', 'green');
         })
+}
+
+function checkAppName(appName) {
+    const validationResult = validateProjectName(appName);
+    if (!validationResult.validForNewPackages) {
+        console.error(
+            `Could not create a project called ${chalk.red(`"${appName}"`)} because of npm naming restrictions:`
+        );
+        printValidationResults(validationResult.errors);
+        printValidationResults(validationResult.warnings);
+        process.exit(1);
+    }
+}
+
+function printValidationResults(results) {
+    if (typeof results !== 'undefined') {
+        results.forEach(error => {
+            console.error(chalk.red(`  *  ${error}`));
+        });
+    }
 }
 
 function showTemplatesList() {
@@ -168,7 +198,8 @@ function downloadTemplate(templateInfo, directory) {
             checkoutBranch: templateInfo.branch
         })
         .then(() => {
-            utils.removeDir(pathHelper.path.join(directory, '.git'));
+            let gitFolderPath = pathHelper.path.join(directory, '.git');
+            utils.removeDir(gitFolderPath);
         });
 }
 

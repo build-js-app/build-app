@@ -95,8 +95,13 @@ function ensureEmptyDir(path) {
 }
 
 function isEmptyDir(path) {
-    let paths = klawSync(path);
-    return paths.length === 0;
+    try {
+        let paths = klawSync(path);
+        return paths.length === 0;
+    } catch (err) {
+        if (err.code === 'ENOENT') return true;
+        throw err;
+    }
 }
 
 function removeDir(path) {

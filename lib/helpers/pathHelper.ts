@@ -6,7 +6,6 @@ let projectDir = process.env.APP_DIR;
 if (!projectDir) throw new Error('ENV param APP_DIR is not initialized');
 
 let moduleRootDir = getModuleRoot();
-let packageDir = projectRelative(config.paths.buildPackage);
 
 export default {
     init,
@@ -17,6 +16,10 @@ export default {
     clientRelative,
     packageRelative,
     getAppPath: () => projectDir,
+    //used in init command
+    setAppPath: (newPath) => {
+      projectDir = newPath;
+    },
     getTsEntry
 };
 
@@ -41,6 +44,7 @@ function clientRelative(relativePath) {
 }
 
 function packageRelative(relativePath) {
+    let packageDir = projectRelative(config.paths.buildPackage);
     return path.resolve(packageDir, relativePath);
 }
 

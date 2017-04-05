@@ -20,10 +20,10 @@ npm install -g build-app
 app-scripts --help
 
 # init empty project with default templates
-app-scripts init --default
+app-scripts init my-app --default
 
 # install project dependencies
-app-script install
+app-scripts install
 
 # build project for production (and before running in dev mode)
 app-scripts build
@@ -85,7 +85,7 @@ app-scripts init --list
 To seed project with particular templates use --project --server --client options:
 
 ```sh
-app-scripts init --project simple --server express_ts --client react
+app-scripts init my-app --project simple --server express_ts --client react
 ```
 
 ### Install
@@ -120,4 +120,4 @@ Project is in active development. The next planned features are:
 
 * Unit tests
 
-You are wellcome to submit a new feature request.
+You are welcome to submit a new feature request.
