@@ -88,7 +88,8 @@ function buildServer() {
 
         utils.runCommand('tsc', [], {
             path: pathHelper.serverRelative('./'),
-            title: 'Compiling TypeScript'
+            title: 'Compiling TypeScript',
+            showOutput: true
         });
     }
 

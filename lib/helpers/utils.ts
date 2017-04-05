@@ -128,7 +128,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let multiLine = options.showOutput;
 
     if (displayProgress) {
-        let message = `${options.title}... `
+        let message = `${options.title}... `;
         if (multiLine) {
             console.log(message);
         } else {
