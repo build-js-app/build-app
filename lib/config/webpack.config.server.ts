@@ -3,6 +3,7 @@ import * as fs from 'fs-extra';
 import pathHelper from '../helpers/pathHelper';
 import babelPresetLoader from './babelPreset';
 import config from './config';
+import envHelper from '../helpers/envHelper';
 
 export default {
     load: loadConfig
@@ -10,7 +11,7 @@ export default {
 
 let webpackConfig = {
     entry: [
-        pathHelper.serverRelative(config.paths.server.entry)
+        pathHelper.serverRelative(envHelper.getServerEntry())
     ],
     output: {
         path: pathHelper.serverRelative(config.paths.server.build),
@@ -93,7 +94,7 @@ function loadConfig(isDev = false) {
 function initBabel(nodeVersion?) {
     let preset = null;
 
-    if (config.server.sourceLang === 'ts') {
+    if (envHelper.isTsServerLang()) {
         preset = require.resolve('babel-preset-es2015');
     } else {
         preset = babelPresetLoader.loadPreset(nodeVersion);

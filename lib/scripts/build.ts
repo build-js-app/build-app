@@ -87,7 +87,7 @@ function build() {
 function buildServer() {
     utils.log('Server build:', 'green');
 
-    if (config.server.sourceLang === 'ts') {
+    if (envHelper.isTsServerLang()) {
         envHelper.checkTypeScript();
 
         utils.runCommand('tsc', [], {
@@ -123,8 +123,8 @@ function buildServer() {
 function buildServerJs(callback) {
     let webpackConfigValues = webpackConfig.load();
 
-    if (config.server.sourceLang === 'ts') {
-        let tsEntry = pathHelper.getTsEntry();
+    if (envHelper.isTsServerLang()) {
+        let tsEntry = envHelper.getTsBuildEntry();
 
         webpackConfigValues.entry = ['babel-polyfill', tsEntry];
     }

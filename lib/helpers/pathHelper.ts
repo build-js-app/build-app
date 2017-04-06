@@ -19,8 +19,7 @@ export default {
     //used in init command
     setAppPath: (newPath) => {
       projectDir = newPath;
-    },
-    getTsEntry
+    }
 };
 
 function init(appDirPath) {
@@ -50,12 +49,5 @@ function packageRelative(relativePath) {
 
 function getModuleRoot() {
     return fs.realpathSync(path.resolve(__dirname, '../..'));
-}
-
-function getTsEntry() {
-    let entry = serverRelative(config.paths.server.build);
-    entry = path.join(entry, config.paths.server.entry);
-    entry += '.js';
-    return entry;
 }
 

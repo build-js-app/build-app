@@ -3,15 +3,17 @@ import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as _ from 'lodash';
 import * as chokidar from 'chokidar';
+import * as FriendlyErrorsWebpackPlugin from 'friendly-errors-webpack-plugin';
+import * as spawn from 'cross-spawn';
+import * as os from 'os';
+import nodeRunner from '../helpers/nodeRunner';
+
 import webpackConfigLoader from '../config/webpack.config.server';
 import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import config from '../config/config';
-import * as FriendlyErrorsWebpackPlugin from 'friendly-errors-webpack-plugin';
-import * as spawn from 'cross-spawn';
-import * as os from 'os';
-import nodeRunner from '../helpers/nodeRunner';
+import envHelper from '../helpers/envHelper';
 
 const nodemon = require('nodemon');
 
@@ -23,7 +25,7 @@ function initEnvVars() {
 }
 
 function dev() {
-    if (config.server.sourceLang === 'ts') {
+    if (envHelper.isTsServerLang()) {
         devTs();
     } else {
         devJs();
@@ -63,7 +65,7 @@ function devTs() {
         console.log(`child process exited with code ${code}`);
     });
 
-    let entry = pathHelper.getTsEntry();
+    let entry = envHelper.getTsBuildEntry();
     scriptRunner = nodeRunner.init(entry);
 }
 

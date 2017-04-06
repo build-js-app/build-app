@@ -9,7 +9,8 @@ let config = {
             root: './server',
             src: './src',
             build: './build',
-            entry: './src/index',
+            //by default expects index.ts or index.js in src folder
+            entry: '',
             bundle: './build/server.js',
             data: './data',
             local: './local'
@@ -20,7 +21,7 @@ let config = {
         },
     },
     server: {
-        sourceLang: 'ts', //ts or js
+        //sourceLang: 'ts', //ts or js
         build: {
             nodeVersion: '6', //0, 4, 5, 6, 7
             removeMapFiles: true,

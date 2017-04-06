@@ -47,6 +47,7 @@ function handler(argv) {
 }
 
 function serveServer() {
+    utils.clearConsole();
     utils.runCommand('npm', ['run', 'start'], {
         title: 'Serve server',
         path: pathHelper.serverRelative('./'),
@@ -55,6 +56,7 @@ function serveServer() {
 }
 
 function serveClient() {
+    utils.clearConsole();
     utils.runCommand('npm', ['run', 'start'], {
         title: 'Serve client',
         path: pathHelper.clientRelative('./'),
