@@ -22,6 +22,9 @@ app-scripts --help
 # init empty project with default templates
 app-scripts init my-app --default
 
+# change directory to new project folder
+cd my-app
+
 # install project dependencies
 app-scripts install
 
