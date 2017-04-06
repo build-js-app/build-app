@@ -5,6 +5,7 @@ import * as semver from 'semver';
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
 import config from '../config/config';
+import envHelper from '../helpers/envHelper';
 
 export default {
     command: 'install [package]',
@@ -32,6 +33,8 @@ function commandBuilder(yargs) {
 }
 
 function commandHandler(argv) {
+    envHelper.checkFolderStructure();
+
     if (!argv.package) {
         return installAll();
     }

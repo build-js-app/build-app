@@ -1,5 +1,6 @@
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
+import envHelper from '../helpers/envHelper';
 
 export default {
     command: 'serve',
@@ -26,6 +27,8 @@ function builder(yargs) {
 }
 
 function handler(argv) {
+    envHelper.checkFolderStructure();
+
     let target = 'server';
     if (argv.client) {
         target = 'client';

@@ -197,6 +197,8 @@ function logOperation(title: string, operation: Function) {
     } catch (err) {
         let message = 'operation failed.';
         log(message, 'red');
+        //TODO log error (log file or console)
+        //console.log(err);
         process.exit(1);
     }
 }

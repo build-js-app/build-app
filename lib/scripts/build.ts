@@ -4,11 +4,13 @@ import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as Promise from 'bluebird';
+import * as klawSync from 'klaw-sync';
+
 import webpackConfig from '../config/webpack.config.server';
 import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
-import envHelper from '../helpers/evnHelper';
+import envHelper from '../helpers/envHelper';
 import config from '../config/config';
 
 export default {
@@ -23,6 +25,8 @@ function commandBuilder(yargs) {
 }
 
 function commandHandler(argv) {
+    envHelper.checkFolderStructure();
+
     build();
 }
 
@@ -135,21 +139,26 @@ function buildServerJs(callback) {
 function buildClient() {
     utils.log('Build client:', 'green');
 
-    //utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+    let buildClient = true;
 
-    utils.runCommand('npm', ['run', 'build'], {
-        title: 'Build client',
-        path: pathHelper.clientRelative('./')
-    });
+    if (buildClient) {
+        utils.runCommand('npm', ['run', 'build'], {
+            title: 'Build client',
+            path: pathHelper.clientRelative('./')
+        });
+    } else {
+        utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+    }
 
     utils.logOperation('Copying assets', () => {
         utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
 
         if (config.server.build.removeMapFiles) {
-            let files = fs.walkSync(pathHelper.packageRelative('./client'));
+            let clientPath = pathHelper.packageRelative(config.paths.client.root);
+            let files = klawSync(clientPath);
             for (let file of files) {
-                if (file.endsWith('.map')) {
-                    fs.removeSync(file);
+                if (file.path.endsWith('.map')) {
+                    fs.removeSync(file.path);
                 }
             }
         }

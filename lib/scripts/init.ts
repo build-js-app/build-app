@@ -81,7 +81,7 @@ function initCommand(appName, project, serverTemplate, clientTemplate) {
 
     if (!utils.isEmptyDir(root)) {
         utils.log('Project folder is not empty.', 'red');
-        checkFolder = utils.prompt('Do you want to empty the folder?', false)
+        checkFolder = utils.prompt('Do you want to empty the folder? All files will be deleted.', false)
             .then((answer) => {
                 if (!answer) {
                     process.exit(0);
