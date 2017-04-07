@@ -67,7 +67,7 @@ function detectEntry() {
     //look for TS entry first
     if (fs.existsSync(entryTs)) return entryTs;
 
-    let entryJs = pathHelper.path.join(entryDir, 'index.ts');
+    let entryJs = pathHelper.path.join(entryDir, 'index.js');
     if (fs.existsSync(entryJs)) return entryJs;
 
     return '';
