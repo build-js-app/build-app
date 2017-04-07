@@ -105,7 +105,7 @@ function initCommand(appName, project, serverTemplate, clientTemplate) {
                 downloadTemplate(templatesInfo.clientTemplate, pathHelper.clientRelative('./')));
         })
         .then(() => {
-            copyAssets();
+            copyAssets(appName);
 
             utils.log('Project was initialized!', 'green');
         })
@@ -203,9 +203,9 @@ function downloadTemplate(templateInfo, directory) {
         });
 }
 
-function copyAssets() {
-    fs.copySync(
-        pathHelper.moduleRelative('./assets/init/rootPackage.json'),
-        pathHelper.projectRelative('./package.json')
-    )
+function copyAssets(appName) {
+    let packagePath = pathHelper.moduleRelative('./assets/init/rootPackage.json');
+    let appPackage = fs.readJsonSync(packagePath);
+    appPackage.name = appName;
+    fs.writeJSONSync(pathHelper.projectRelative('./package.json'), appPackage);
 }
