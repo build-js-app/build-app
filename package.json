@@ -25,6 +25,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.16.0",
+    "babel-preset-backpack": "0.0.9",
     "babel-preset-env": "^1.2.0",
     "babel-preset-es2015": "^6.22.0",
     "bluebird": "^3.4.7",

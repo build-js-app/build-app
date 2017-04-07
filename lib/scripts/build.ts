@@ -6,7 +6,7 @@ import * as chalk from 'chalk';
 import * as Promise from 'bluebird';
 import * as klawSync from 'klaw-sync';
 
-import webpackConfig from '../config/webpack.config.server';
+import webpackConfigLoader from '../config/webpackConfigLoader';
 import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
@@ -121,15 +121,15 @@ function buildServer() {
 }
 
 function buildServerJs(callback) {
-    let webpackConfigValues = webpackConfig.load();
+    let webpackConfig = null;
 
     if (envHelper.isTsServerLang()) {
-        let tsEntry = envHelper.getTsBuildEntry();
-
-        webpackConfigValues.entry = ['babel-polyfill', tsEntry];
+        webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
+    } else {
+        webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
     }
 
-    webpack(webpackConfigValues).run((err, stats) => {
+    webpack(webpackConfig).run((err, stats) => {
         webpackHelper.handleErrors(err, stats, true);
 
         if (callback) callback();

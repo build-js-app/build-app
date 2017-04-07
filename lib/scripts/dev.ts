@@ -8,7 +8,7 @@ import * as spawn from 'cross-spawn';
 import * as os from 'os';
 import nodeRunner from '../helpers/nodeRunner';
 
-import webpackConfigLoader from '../config/webpack.config.server';
+import webpackConfigLoader from '../config/webpackConfigLoader';
 import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
@@ -115,7 +115,7 @@ function devJs() {
     let watchPath = pathHelper.serverRelative(config.paths.server.src);
     let watcher = chokidar.watch([watchPath]);
 
-    let webpackConfig = webpackConfigLoader.load(true);
+    let webpackConfig = webpackConfigLoader.loadWebpackConfig('js_dev');
 
     webpackConfig.plugins.push[new FriendlyErrorsWebpackPlugin()];
 
