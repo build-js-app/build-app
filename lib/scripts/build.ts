@@ -26,6 +26,7 @@ function commandBuilder(yargs) {
 
 function commandHandler(argv) {
     envHelper.checkFolderStructure();
+    envHelper.checkDependenciesInstalled();
 
     build();
 }

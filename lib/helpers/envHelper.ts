@@ -8,6 +8,8 @@ import pathHelper from  '../helpers/pathHelper';
 export default {
     checkTypeScript,
     checkFolderStructure,
+    checkDependenciesInstalled,
+    checkClientBuildWasGenerated,
     getServerEntry,
     getTsBuildEntry,
     isTsServerLang,
@@ -86,4 +88,33 @@ function getTsBuildEntry() {
     //replace .ts extension with .js extension
     entry = entry.substr(0, entry.length - 3) + '.js';
     return entry;
+}
+
+function checkDependenciesInstalled() {
+    let logError = (message) => {
+        utils.log(message, 'red');
+        utils.logAndExit('Please make sure that you have installed server/client dependencies. Run app-scripts install.')
+    };
+
+    let serverDependencies = pathHelper.serverRelative('./node_modules');
+    if (!utils.dirHasContent(serverDependencies)) {
+        logError('Server dependencies are not installed.');
+    }
+
+    let clientDependencies = pathHelper.clientRelative('./node_modules');
+    if (!utils.dirHasContent(serverDependencies)) {
+        logError('Client dependencies are not installed.');
+    }
+}
+
+function checkClientBuildWasGenerated() {
+    let logError = (message) => {
+        utils.log(message, 'red');
+        utils.logAndExit('Please make sure that you have built the client. Run app-scripts build.')
+    };
+
+    let clientBuild = pathHelper.clientRelative(config.paths.client.build);
+    if (!utils.dirHasContent(clientBuild)) {
+        logError('Client build folder has not been generated.');
+    }
 }

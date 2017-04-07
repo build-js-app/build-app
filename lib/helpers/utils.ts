@@ -26,6 +26,7 @@ export default {
     runCommand,
     ensureEmptyDir,
     isEmptyDir,
+    dirHasContent,
     removeDir,
     getFormattedTimeInterval,
     archiveFolder,
@@ -94,12 +95,23 @@ function ensureEmptyDir(path) {
     fs.emptyDirSync(path);
 }
 
+//TODO combine isEmptyDir and dirHasContent
 function isEmptyDir(path) {
     try {
         let paths = klawSync(path);
         return paths.length === 0;
     } catch (err) {
         if (err.code === 'ENOENT') return true;
+        throw err;
+    }
+}
+
+function dirHasContent(path) {
+    try {
+        let paths = klawSync(path);
+        return paths.length !== 0;
+    } catch (err) {
+        if (err.code === 'ENOENT') return false;
         throw err;
     }
 }

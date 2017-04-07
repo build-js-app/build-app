@@ -28,6 +28,8 @@ function builder(yargs) {
 
 function handler(argv) {
     envHelper.checkFolderStructure();
+    envHelper.checkDependenciesInstalled();
+    envHelper.checkClientBuildWasGenerated();
 
     let target = 'server';
     if (argv.client) {
