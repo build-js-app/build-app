@@ -88,7 +88,7 @@ app-scripts init --list
 To seed project with particular templates use --project --server --client options:
 
 ```sh
-app-scripts init my-app --project simple --server express_ts --client react
+app-scripts init my-app --project simple --server ts --client react
 ```
 
 ### Install
