@@ -16,6 +16,8 @@ let epilog = [
     'You can use napp as shorter alias for app-scripts.'
 ].join(os.EOL);
 
+let pkg = require('../package.json');
+
 yargs
     .usage('Usage: app-scripts <command> [options]')
     .command(initModule)
@@ -39,6 +41,7 @@ yargs
     .help()
     .alias('h', 'help')
     .epilog(epilog)
+    .version(pkg.version)
     .argv;
 
 function logAvailableCommands() {
