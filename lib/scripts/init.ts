@@ -14,6 +14,11 @@ export default {
     builder: commandBuilder
 };
 
+const supportedIdes = {
+    'code': 'Visual Studio Code',
+    'ws': 'WebStorm'
+};
+
 function commandBuilder(yargs) {
     return yargs
         .option('project', {
@@ -38,6 +43,9 @@ function commandBuilder(yargs) {
             description: 'Show list of templates'
 
         })
+        .option('ide', {
+            description: 'Init with specified IDE settings'
+        })
         .example('init my-app -p simple -s ts -c react', 'inits new app in "my-app" folder with templates "ts", "react" in project "simple"')
         .example('init my-app --default', 'inits project with default templates')
         .example('init my-app --list', 'show list of all available templates grouped by project');
@@ -48,8 +56,12 @@ function commandHandler(argv) {
         return showTemplatesList();
     }
 
+    if (argv.ide) {
+        checkIdeOption(argv.ide);
+    }
+
     if (argv.default) {
-        return initCommand(argv.appName, 'simple', 'ts', 'react');
+        return initCommand(argv.appName, 'simple', 'ts', 'react', argv.ide);
     }
 
     let params = [argv.project, argv.server, argv.client];
@@ -61,10 +73,10 @@ function commandHandler(argv) {
         }
     }
 
-    initCommand(argv.appName, argv.project, argv.server, argv.client);
+    initCommand(argv.appName, argv.project, argv.server, argv.client, argv.ide);
 }
 
-function initCommand(appName, project, serverTemplate, clientTemplate) {
+function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
     checkAppName(appName);
 
     let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
@@ -77,7 +89,7 @@ function initCommand(appName, project, serverTemplate, clientTemplate) {
     utils.log(`Init new project based on project "${project}".`);
     utils.log(`Server template: "${serverTemplate}".`);
     utils.log(`Client template: "${clientTemplate}".`);
-    utils.log(`App folder: "${pathHelper.getAppPath()}".`);
+    utils.log(`Project folder: "${pathHelper.getAppPath()}".`);
 
     if (!utils.isEmptyDir(root)) {
         utils.log('Project folder is not empty.', 'red');
@@ -107,7 +119,11 @@ function initCommand(appName, project, serverTemplate, clientTemplate) {
         .then(() => {
             copyAssets(appName);
 
-            utils.log('Project was initialized!', 'green');
+            if (ide) {
+                initIde(ide);
+            }
+
+            utils.log(`Project was initialized! Change directory to project folder '${appName}'.`, 'green');
         })
 }
 
@@ -208,4 +224,15 @@ function copyAssets(appName) {
     let appPackage = fs.readJsonSync(packagePath);
     appPackage.name = appName;
     fs.writeJSONSync(pathHelper.projectRelative('./package.json'), appPackage);
+}
+
+function checkIdeOption(ide) {
+    let ides = Object.keys(supportedIdes);
+    if (ides.indexOf(ide) === -1) {
+        utils.logAndExit(`Incorrect IDE value, supported IDEs are [${ides.join(', ')}].`)
+    }
+}
+
+function initIde(ide) {
+    console.log(`TODO: init IDE ${supportedIdes[ide]}...`);
 }
