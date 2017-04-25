@@ -6,6 +6,7 @@ import * as validateProjectName from 'validate-npm-package-name';
 
 import pathHelper from '../helpers/pathHelper';
 import utils from '../helpers/utils';
+import envHelper from '../helpers/envHelper';
 
 export default {
     command: 'init <app-name>',
@@ -119,7 +120,8 @@ function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
         .then(() => {
             copyAssets(appName);
 
-            if (ide) {
+            //TODO support JS
+            if (ide && envHelper.isTsServerLang()) {
                 initIde(ide);
             }
 
@@ -234,5 +236,20 @@ function checkIdeOption(ide) {
 }
 
 function initIde(ide) {
-    console.log(`TODO: init IDE ${supportedIdes[ide]}...`);
+    if (ide === 'ws') {
+        let lang = envHelper.isTsServerLang() ? 'ts' : 'js';
+        let jsLevel = envHelper.isReactUsed() ? 'JSX' : 'ES6';
+        let context = {
+            JS_LEVEL: jsLevel
+        };
+        let from = pathHelper.moduleRelative(`./assets/ide/ws/${lang}`);
+        let to = pathHelper.projectRelative('./.idea');
+        utils.copyTemplateFolder(from, to, context);
+    }
+    if (ide === 'code') {
+
+    }
+    else {
+        console.log(`TODO: init IDE ${supportedIdes[ide]}...`);
+    }
 }

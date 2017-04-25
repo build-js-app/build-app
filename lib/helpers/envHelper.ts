@@ -13,10 +13,9 @@ export default {
     getServerEntry,
     getTsBuildEntry,
     isTsServerLang,
-    isJsServerLang
+    isJsServerLang,
+    isReactUsed
 }
-
-let serverEntry = detectEntry();
 
 function checkTypeScript() {
     if (!utils.commandExists('tsc')) {
@@ -49,14 +48,17 @@ function checkFolderStructure() {
 }
 
 function isTsServerLang() {
+    let serverEntry = detectEntry();
     return _.endsWith(serverEntry, '.ts');
 }
 
 function isJsServerLang() {
+    let serverEntry = detectEntry();
     return _.endsWith(serverEntry, '.js');
 }
 
 function getServerEntry() {
+    let serverEntry = detectEntry();
     return serverEntry;
 }
 
@@ -117,4 +119,10 @@ function checkClientBuildWasGenerated() {
     if (!utils.dirHasContent(clientBuild)) {
         logError('Client build folder has not been generated.');
     }
+}
+
+function isReactUsed() {
+    let clientPkgPath = pathHelper.clientRelative('./package.json');
+    let pkg = fs.readJsonSync(clientPkgPath);
+    return pkg.dependencies && pkg.dependencies.react;
 }

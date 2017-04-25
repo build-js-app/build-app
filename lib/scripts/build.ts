@@ -138,7 +138,7 @@ function buildServerJs(callback) {
 }
 
 function buildClient() {
-    utils.log('Build client:', 'green');
+    utils.log('Client build:', 'green');
 
     let buildClient = true;
 

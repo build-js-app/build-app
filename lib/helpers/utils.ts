@@ -7,6 +7,7 @@ import * as rl from 'readline';
 import * as Promise from 'bluebird';
 import * as del from 'del';
 import * as archiver from 'archiver';
+import * as ejs from 'ejs';
 import {sync as commandExists} from 'command-exists';
 
 import pathHelper from './pathHelper';
@@ -30,7 +31,9 @@ export default {
     removeDir,
     getFormattedTimeInterval,
     archiveFolder,
-    readJsonFile
+    readJsonFile,
+    copyTemplate,
+    copyTemplateFolder
 };
 
 type Utils_CL_Color = 'red' | 'green' | 'cyan';
@@ -276,4 +279,24 @@ function archiveFolder(source, destination) {
 
 function readJsonFile(path) {
     return fs.readJsonSync(path);
+}
+
+function copyTemplate(from, to, context) {
+    fs.copySync(from, to);
+
+    let data = fs.readFileSync(to, 'utf8');
+    data = ejs.render(data, context);
+    fs.writeFileSync(to, data);
+}
+
+function copyTemplateFolder(from, to, context) {
+    fs.copySync(from, to);
+
+    let paths = klawSync(to);
+
+    for (let filePath of paths) {
+        let data = fs.readFileSync(filePath.path, 'utf8');
+        data = ejs.render(data, context);
+        fs.writeFileSync(filePath.path, data);
+    }
 }
