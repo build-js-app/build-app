@@ -289,8 +289,10 @@ function copyTemplate(from, to, context) {
     fs.writeFileSync(to, data);
 }
 
-function copyTemplateFolder(from, to, context) {
+function copyTemplateFolder(from, to, context = null) {
     fs.copySync(from, to);
+
+    if (!context) return;
 
     let paths = klawSync(to);
 

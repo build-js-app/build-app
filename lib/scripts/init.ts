@@ -236,8 +236,9 @@ function checkIdeOption(ide) {
 }
 
 function initIde(ide) {
+    let lang = envHelper.isTsServerLang() ? 'ts' : 'js';
+
     if (ide === 'ws') {
-        let lang = envHelper.isTsServerLang() ? 'ts' : 'js';
         let jsLevel = envHelper.isReactUsed() ? 'JSX' : 'ES6';
         let context = {
             JS_LEVEL: jsLevel
@@ -247,9 +248,8 @@ function initIde(ide) {
         utils.copyTemplateFolder(from, to, context);
     }
     if (ide === 'code') {
-
-    }
-    else {
-        console.log(`TODO: init IDE ${supportedIdes[ide]}...`);
+        let from = pathHelper.moduleRelative(`./assets/ide/code/${lang}`);
+        let to = pathHelper.projectRelative('./.vscode');
+        utils.copyTemplateFolder(from, to);
     }
 }
