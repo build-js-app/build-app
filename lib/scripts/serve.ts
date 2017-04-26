@@ -62,8 +62,13 @@ function serveServer() {
         );
     }
 
-    //TODO check global dependencies
-    // ts-node, typescript, nodemonshowOutput: true,
+    //TODO move versions to config
+    let missingGlobalDependencies = envHelper.detectMissingGlobalDependencies({
+        "ts-node": "3.0.2",
+        "nodemon": "1.11.0"
+    });
+
+    envHelper.reportMissingGlobalDependencies(missingGlobalDependencies);
 
     let debugMode = envHelper.isUsingVsCode() ? 'inspect' : 'debug';
     let entry = envHelper.getServerEntry();

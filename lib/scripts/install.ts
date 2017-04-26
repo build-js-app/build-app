@@ -1,6 +1,4 @@
 import * as _ from 'lodash';
-import * as globby from 'globby';
-import * as semver from 'semver';
 
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
@@ -80,80 +78,20 @@ function installAll() {
 
 function checkGlobalDependencies() {
     let getGlobalDependencies = (packagePath) => {
-        let globalDependencies = utils.readJsonFile(packagePath).globalDependencies;
-
-        if (!globalDependencies) return [];
-
-        return _.map(Object.keys(globalDependencies), key => {
-            return {
-                name: key,
-                version: globalDependencies[key]
-            };
-        });
+        return utils.readJsonFile(packagePath).globalDependencies;
     };
 
     let serverDependencies = getGlobalDependencies(pathHelper.serverRelative('./package.json'));
     let clientDependencies = getGlobalDependencies(pathHelper.clientRelative('./package.json'));
 
-    if (!serverDependencies.length && !clientDependencies.length) return;
+    if (_.isEmpty(serverDependencies) && _.isEmpty(clientDependencies)) return;
 
-    let globalPackages = getGlobalPackagesInfo();
+    let serverDependenciesToInstall = envHelper.detectMissingGlobalDependencies(serverDependencies);
+    let clientDependenciesToInstall = envHelper.detectMissingGlobalDependencies(clientDependencies);
 
-    let dependenciesToInstall = {};
-    let checkDependencies = (dependencies) => {
-        for (let dependency of dependencies) {
-            let installed = true;
+    let dependenciesToInstall = _.merge(serverDependenciesToInstall, clientDependenciesToInstall);
 
-            if (!globalPackages[dependency.name]) {
-                installed = false;
-            } else {
-                if (!dependency.version) {
-                    utils.logAndExit(`Global dependency version for ${dependency.name} should not be empty.`);
-                }
-
-                if (!semver.valid(dependency.version)) {
-                    utils.logAndExit(`Invalid global dependency version: ${dependency.name}: ${dependency.version}`);
-                }
-
-                if (semver.gt(dependency.version, globalPackages[dependency.name])) {
-                    installed = false;
-                }
-            }
-
-            if (!installed) {
-                dependenciesToInstall[dependency.name] = true;
-            }
-        }
-    };
-
-    checkDependencies(serverDependencies);
-    checkDependencies(clientDependencies);
-
-    if (!_.isEmpty(dependenciesToInstall)) {
-        let packagesStr = Object.keys(dependenciesToInstall).join(' ');
-
-        utils.log(`Some of global dependencies should be installed/updated.`);
-        utils.log(`Please run following command manually and run 'install' script again.`);
-        utils.logAndExit(`npm install -g ${packagesStr}`, 'cyan');
-    }
-
-}
-
-function getGlobalPackagesInfo() {
-    let globalModules = require('global-modules');
-
-    const GLOBBY_PACKAGE_JSON = '{*/package.json,@*/*/package.json}';
-    const installedPackages = globby.sync(GLOBBY_PACKAGE_JSON, {cwd: globalModules});
-
-    let result = _(installedPackages)
-        .map(pkgPath => {
-            let pkg = utils.readJsonFile(pathHelper.path.resolve(globalModules, pkgPath));
-            return [pkg.name, pkg.version];
-        })
-        .fromPairs()
-        .valueOf();
-
-    return result;
+    envHelper.reportMissingGlobalDependencies(dependenciesToInstall);
 }
 
 function installPackage(packageName, target) {
