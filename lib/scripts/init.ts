@@ -48,7 +48,7 @@ function commandBuilder(yargs) {
             description: 'Init with specified IDE settings'
         })
         .example('init my-app -p simple -s ts -c react', 'inits new app in "my-app" folder with templates "ts", "react" in project "simple"')
-        .example('init my-app --default', 'inits project with default templates')
+        .example('init my-app --default --ide code', 'inits project with default templates and VS Code settings')
         .example('init my-app --list', 'show list of all available templates grouped by project');
 }
 

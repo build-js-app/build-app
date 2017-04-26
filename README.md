@@ -4,7 +4,7 @@
 
 The aim of the project is to simplify development of modern full-stack JS applications, providing most of basic dev operations out of the box (build, run dev mode, lint, etc).
 
-Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choises such as React/Vue/Angular for client, Mongo/Postgres for storage, etc.
+Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choises such as React/Vue/Angular for client, Mongo/Postgres for storage.
 
 *Build App* works on macOS, Windows, and Linux.
 Project is in early stage of development. 
@@ -90,6 +90,11 @@ To seed project with particular templates use --project --server --client option
 ```sh
 app-scripts init my-app --project simple --server ts --client react
 ```
+To init basic IDE settings use option --ide (currently supported ws/code)
+
+```
+app-scripts init my-app --default --ide code
+```
 
 ### Install
 
@@ -115,12 +120,14 @@ Build command builds server and client separately and then combines them togethe
 
 ## Road map
 
-Project is in active development. The next planned features are:
+Project is in active development. The next big features are:
 
-* Custom dev mode for server (faster TS builds, build in linting)
+* Better JS support (ide, build in serve)
+
+* Linters for JS/TS
 
 * Deploy command
 
 * Unit tests
 
-You are welcome to submit a new feature request.
+New feature requests are welcome.
