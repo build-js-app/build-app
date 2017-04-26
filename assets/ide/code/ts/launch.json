@@ -20,7 +20,8 @@
             "request": "attach",
             "name": "Debug Server (attach)",
             "address": "localhost",
-            "port": 9999
+            "port": 9999,
+            "protocol": "inspector"
         }
     ]
 }
