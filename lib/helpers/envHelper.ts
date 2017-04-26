@@ -14,7 +14,8 @@ export default {
     getTsBuildEntry,
     isTsServerLang,
     isJsServerLang,
-    isReactUsed
+    isUsingReact,
+    isUsingVsCode
 }
 
 function checkTypeScript() {
@@ -121,8 +122,12 @@ function checkClientBuildWasGenerated() {
     }
 }
 
-function isReactUsed() {
+function isUsingReact() {
     let clientPkgPath = pathHelper.clientRelative('./package.json');
     let pkg = fs.readJsonSync(clientPkgPath);
     return pkg.dependencies && pkg.dependencies.react;
+}
+
+function isUsingVsCode() {
+    return utils.dirHasContent(pathHelper.projectRelative('./.vscode'));
 }

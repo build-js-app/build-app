@@ -136,7 +136,8 @@ interface Utils_RunCommandOptions {
     title?: string,
     path: string,
     ignoreError?: boolean,
-    showOutput?: boolean
+    showOutput?: boolean,
+    env?: Object
 }
 
 function commandExists(command) {
@@ -158,7 +159,8 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
 
     let start = new Date();
 
-    let env = _.assign({}, process.env);
+    let envValues = options.env ? options.env : {};
+    let env = _.assign(envValues, process.env);
     env.NODE_ENV = '';
 
     let stdio: any = ['ignore', 'ignore', 'pipe'];

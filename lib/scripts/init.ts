@@ -239,7 +239,7 @@ function initIde(ide) {
     let lang = envHelper.isTsServerLang() ? 'ts' : 'js';
 
     if (ide === 'ws') {
-        let jsLevel = envHelper.isReactUsed() ? 'JSX' : 'ES6';
+        let jsLevel = envHelper.isUsingReact() ? 'JSX' : 'ES6';
         let context = {
             JS_LEVEL: jsLevel
         };

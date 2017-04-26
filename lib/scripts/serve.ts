@@ -1,3 +1,4 @@
+import config from '../config/config';
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
 import envHelper from '../helpers/envHelper';
@@ -36,7 +37,7 @@ function handler(argv) {
         target = 'client';
     }
 
-    switch (target){
+    switch (target) {
         case 'server':
             serveServer();
             break;
@@ -50,10 +51,32 @@ function handler(argv) {
 
 function serveServer() {
     utils.clearConsole();
-    utils.runCommand('npm', ['run', 'start'], {
+
+    //TODO use babel-node
+    if (envHelper.isJsServerLang()) {
+        return utils.runCommand('npm', ['run', 'start'], {
+                title: 'Serve server',
+                path: pathHelper.serverRelative('./'),
+                showOutput: true,
+            }
+        );
+    }
+
+    //TODO check global dependencies
+    // ts-node, typescript, nodemonshowOutput: true,
+
+    let debugMode = envHelper.isUsingVsCode() ? 'inspect' : 'debug';
+    let entry = envHelper.getServerEntry();
+
+    utils.runCommand('nodemon', ['--watch', 'src', '--exec', 'ts-node', `--${debugMode}=${config.server.dev.debugPort}`, entry], {
         title: 'Serve server',
         path: pathHelper.serverRelative('./'),
-        showOutput: true
+        showOutput: true,
+        env: {
+            TS_NODE_COMPILER_OPTIONS: JSON.stringify({
+                inlineSourceMap: true
+            })
+        }
     });
 }
 
