@@ -58,7 +58,9 @@ function installAll() {
     let command = 'npm';
     let params = ['install'];
 
-    if (utils.commandExists('yarn')) {
+    if (utils.commandExists('pnpm')) {
+        command = 'pnpm';
+    } else if (utils.commandExists('yarn')) {
         command = 'yarn';
         params = ['--no-lockfile'];
     }
@@ -69,7 +71,7 @@ function installAll() {
         showOutput: true
     });
 
-    utils.runCommand('npm', ['install'], {
+    utils.runCommand(command, params, {
         title: 'Install client dependencies',
         path: pathHelper.projectRelative(config.paths.client.root),
         showOutput: true
@@ -98,7 +100,9 @@ function installPackage(packageName, target) {
     let command = 'npm';
     let params = ['install', packageName, '--save', '--save-exact'];
 
-    if (utils.commandExists('yarn')) {
+    if (utils.commandExists('pnpm')) {
+        command = 'pnpm';
+    } else if (utils.commandExists('yarn')) {
         command = 'yarn';
         params = ['add', packageName, '--no-lockfile'];
     }

@@ -98,7 +98,7 @@ app-scripts init my-app --default --ide code
 
 ### Install
 
-*install* command installs dependencies for both client and server project parts. It is using 'yarn' if available otherwise 'npm'.
+*install* command installs dependencies for both client and server project parts. It can use one of following package managers under the hood: npm, yarn, pnpm. If pnpm is installed globally it is used, then yarn used if available, then npm.
 
 The same can be done manually with
 
