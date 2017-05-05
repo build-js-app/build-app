@@ -1,12 +1,16 @@
 {
   "name": "build-app",
-  "version": "0.0.12",
+  "version": "0.1.0",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js"
   },
   "author": "Yegor Sytnyk",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/build-js-app/build-app.git"
+  },
   "engines": {
     "node": ">=4"
   },

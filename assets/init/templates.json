@@ -30,17 +30,17 @@
     "full": {
       "server": {
         "mongo": {
-          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-server.git",
+          "repo": "https://github.com/build-js-app/template-full-server",
           "branch": "mongo"
         }
       },
       "client": {
         "react": {
-          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
+          "repo": "https://github.com/build-js-app/template-full-client",
           "branch": "react"
         },
         "vue": {
-          "repo": "https://andrey_temchenko@bitbucket.org/andrey_temchenko/build-js-app-template-full-client.git",
+          "repo": "https://github.com/build-js-app/template-full-client",
           "branch": "vue"
         }
       }
