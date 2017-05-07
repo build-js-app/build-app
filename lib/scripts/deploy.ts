@@ -71,7 +71,7 @@ function deploy() {
 }
 
 function ensureBuild() {
-    return Promise.resolve(null);
+    //return Promise.resolve(null);
 
     installModule.installAll();
 
