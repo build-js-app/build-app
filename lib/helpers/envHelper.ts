@@ -19,7 +19,8 @@ export default {
     isTsServerLang,
     isJsServerLang,
     isUsingReact,
-    isUsingVsCode
+    isUsingVsCode,
+    getAppName
 }
 
 function checkTypeScript() {
@@ -203,4 +204,13 @@ function reportMissingGlobalDependencies(dependenciesToInstall) {
         utils.log(`Please run following command manually and run 'install' script again.`);
         utils.logAndExit(`npm install -g ${packagesStr}`, 'cyan');
     }
+}
+
+function getAppName() {
+    let rootPkg = fs.readJsonSync(pathHelper.projectRelative('./package.json'));
+    let result = rootPkg.name;
+    if (!result) {
+        utils.logAndExit(`Cannot find app name in package.json file.`)
+    }
+    return result;
 }

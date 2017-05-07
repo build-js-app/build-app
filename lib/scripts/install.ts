@@ -4,13 +4,15 @@ import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
 import config from '../config/config';
 import envHelper from '../helpers/envHelper';
+import packagesHelper from '../helpers/packagesHelper';
 
 export default {
     command: 'install [package]',
     describe: 'Install project dependencies',
     aliases: ['i'],
     handler: commandHandler,
-    builder: commandBuilder
+    builder: commandBuilder,
+    installAll
 };
 
 function commandBuilder(yargs) {
@@ -55,23 +57,15 @@ function installAll() {
         utils.log('Cannot check global dependencies.', 'red');
     }
 
-    let command = 'npm';
-    let params = ['install'];
+    let command = packagesHelper.getInstallPackagesCommand();
 
-    if (utils.commandExists('pnpm')) {
-        command = 'pnpm';
-    } else if (utils.commandExists('yarn')) {
-        command = 'yarn';
-        params = ['--no-lockfile'];
-    }
-
-    utils.runCommand(command, params, {
+    utils.runCommand(command.body, command.params, {
         title: 'Install server dependencies',
         path: pathHelper.projectRelative(config.paths.server.root),
         showOutput: true
     });
 
-    utils.runCommand(command, params, {
+    utils.runCommand(command.body, command.params, {
         title: 'Install client dependencies',
         path: pathHelper.projectRelative(config.paths.client.root),
         showOutput: true

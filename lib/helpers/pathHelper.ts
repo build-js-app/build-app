@@ -14,7 +14,8 @@ export default {
     projectRelative,
     serverRelative,
     clientRelative,
-    packageRelative,
+    buildRelative,
+    deployRelative,
     getAppPath: () => projectDir,
     //used in init command
     setAppPath: (newPath) => {
@@ -42,9 +43,14 @@ function clientRelative(relativePath) {
     return path.resolve(projectDir, config.paths.client.root, relativePath);
 }
 
-function packageRelative(relativePath) {
-    let packageDir = projectRelative(config.paths.buildPackage);
-    return path.resolve(packageDir, relativePath);
+function buildRelative(relativePath) {
+    let buildDir = projectRelative(config.paths.build.root);
+    return path.resolve(buildDir, relativePath);
+}
+
+function deployRelative(relativePath) {
+    let deployDir = projectRelative(config.paths.deploy.root);
+    return path.resolve(deployDir, relativePath);
 }
 
 function getModuleRoot() {

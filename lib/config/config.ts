@@ -4,7 +4,12 @@ import * as path from 'path';
 
 let config = {
     paths: {
-        buildPackage: './build',
+        build: {
+            root: './build'
+        },
+        deploy: {
+            root: './deploy'
+        },
         server: {
             root: './server',
             src: './src',

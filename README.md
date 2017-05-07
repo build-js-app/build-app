@@ -118,15 +118,17 @@ To start server run index.js file. You may need to install dependencies first.
 
 Build command builds server and client separately and then combines them together into build package.
 
+### Deploy
+
+*deploy* command creates and copies build package into deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
+
 ## Road map
 
-Project is in active development. The next big features are:
+Project is in active development. The next major features are:
 
 * Better JS support (ide, build in serve)
 
 * Linters for JS/TS
-
-* Deploy command
 
 * Unit tests
 

@@ -84,7 +84,7 @@ function prompt(question, isYesDefault) {
 
 function copyToPackage(from, to) {
     if (to.startsWith('.')) {
-        to = pathHelper.packageRelative(to);
+        to = pathHelper.buildRelative(to);
     }
 
     fs.copySync(from, to);
@@ -169,6 +169,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
         stdio[2] = 'inherit';
     }
 
+    //TODO check options.path exists
     let result = spawn(cmd, args, {
         stdio,
         cwd: options.path,

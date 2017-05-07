@@ -17,7 +17,8 @@ export default {
     command: 'build',
     describe: 'Build project for production',
     handler: commandHandler,
-    builder: commandBuilder
+    builder: commandBuilder,
+    build
 };
 
 function commandBuilder(yargs) {
@@ -36,9 +37,9 @@ function build() {
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-    utils.ensureEmptyDir(pathHelper.projectRelative(config.paths.buildPackage));
+    utils.ensureEmptyDir(pathHelper.projectRelative(config.paths.build.root));
 
-    buildServer()
+    return buildServer()
         .then(() => {
             return buildClient();
         })
@@ -60,27 +61,9 @@ function build() {
         })
         .then(() => {
             if (config.postBuild.archive) {
-                let archive = utils.archiveFolder(pathHelper.packageRelative('./'), pathHelper.packageRelative('./build.zip'));
+                let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
 
                 return utils.logOperationAsync('Archive build package', archive);
-            }
-        })
-        .then(() => {
-            if (config.postBuild.run) {
-                if (!config.server.build.bundleNodeModules) {
-                    utils.log('Installing dependencies...');
-
-                    utils.runCommand('npm', ['install'], {
-                        path: pathHelper.packageRelative('.'),
-                        title: 'Installing app dependencies'
-                    })
-                }
-
-                utils.log('Starting server...');
-
-                utils.runCommand('node', ['index.js'], {
-                    path: pathHelper.packageRelative('.')
-                });
             }
         });
 }
@@ -116,7 +99,7 @@ function buildServer() {
                     dependencies: serverPackageJson.dependencies
                 };
 
-                fs.outputJsonSync(pathHelper.packageRelative('./package.json'), buildPackageJson);
+                fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
             });
         });
 }
@@ -155,7 +138,7 @@ function buildClient() {
         utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
 
         if (config.server.build.removeMapFiles) {
-            let clientPath = pathHelper.packageRelative(config.paths.client.root);
+            let clientPath = pathHelper.buildRelative(config.paths.client.root);
             let files = klawSync(clientPath);
             for (let file of files) {
                 if (file.path.endsWith('.map')) {
@@ -171,5 +154,5 @@ function buildClient() {
 function copyDataFolder() {
     utils.copyToPackage(pathHelper.serverRelative(config.paths.server.data), './data/');
 
-    utils.ensureEmptyDir(pathHelper.packageRelative('./data/config'));
+    utils.ensureEmptyDir(pathHelper.buildRelative('./data/config'));
 }

@@ -8,8 +8,9 @@ import initModule from './scripts/init';
 import installModule from './scripts/install';
 import buildModule from './scripts/build';
 import serveModule from './scripts/serve';
+import deployModule from './scripts/deploy';
 
-let commands = ['init', 'install', 'build', 'serve'];
+let commands = ['init', 'install', 'build', 'serve', 'deploy'];
 
 let epilog = [
     'You can see specific help for each command. Run app-scripts <command> --help.',
@@ -24,6 +25,7 @@ yargs
     .command(installModule)
     .command(buildModule)
     .command(serveModule)
+    .command(deployModule)
     .command('*', '', () => {
         },
         (argv) => {
