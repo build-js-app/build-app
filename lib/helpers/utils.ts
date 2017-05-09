@@ -33,7 +33,8 @@ export default {
     archiveFolder,
     readJsonFile,
     copyTemplate,
-    copyTemplateFolder
+    copyTemplateFolder,
+    findGlobalCommandByPrecedence
 };
 
 type Utils_CL_Color = 'red' | 'green' | 'cyan';
@@ -304,4 +305,12 @@ function copyTemplateFolder(from, to, context = null) {
         data = ejs.render(data, context);
         fs.writeFileSync(filePath.path, data);
     }
+}
+
+function findGlobalCommandByPrecedence(commands) {
+    for (let command of commands) {
+        if (commandExists(command)) return command;
+    }
+
+    return null;
 }

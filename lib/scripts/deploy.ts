@@ -2,6 +2,7 @@ import * as fs from 'fs-extra';
 import * as Promise from 'bluebird';
 import * as _ from 'lodash';
 import * as klawSync from 'klaw-sync';
+import * as chalk from 'chalk';
 
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
@@ -61,8 +62,8 @@ function deploy() {
     });
 
     //install packages there
-    let installCommand = packagesHelper.getInstallPackagesCommand();
-    utils.runCommand(installCommand.body, installCommand.params, {
+    let installCommandInfo = packagesHelper.getInstallPackagesCommand();
+    utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
         title: 'Install production dependencies',
         path: deployDir,
     });
@@ -79,7 +80,7 @@ function ensureBuild() {
 }
 
 function detectProcessManager() {
-    let processManager = packagesHelper.findGlobalCommandByPrecedence(['pm2', 'forever']);
+    let processManager = utils.findGlobalCommandByPrecedence(['pm2', 'forever']);
 
     if (!processManager) {
         utils.logAndExit(`Install globally one of supported process managers: forever or pm2.`);
@@ -89,7 +90,15 @@ function detectProcessManager() {
 }
 
 function stopApp(processManager, appName) {
-    let params = ['stop', appName];
+    let params = [];
+
+    if (processManager === 'forever') {
+        params = ['stop', appName];
+    }
+
+    if (processManager === 'pm2') {
+        params = ['delete', appName];
+    }
 
     utils.runCommand(processManager, params, {
         path: pathHelper.projectRelative(config.paths.deploy.root),
@@ -113,4 +122,6 @@ function startApp(processManager, appName) {
         title: 'Start process',
         path: pathHelper.projectRelative(config.paths.deploy.root)
     });
+
+    utils.logAndExit(`Process has been started. By default it is available on ${chalk.cyan('localhost:5000')}.`)
 }

@@ -57,15 +57,15 @@ function installAll() {
         utils.log('Cannot check global dependencies.', 'red');
     }
 
-    let command = packagesHelper.getInstallPackagesCommand();
+    let commandInfo = packagesHelper.getInstallPackagesCommand();
 
-    utils.runCommand(command.body, command.params, {
+    utils.runCommand(commandInfo.command, commandInfo.params, {
         title: 'Install server dependencies',
         path: pathHelper.projectRelative(config.paths.server.root),
         showOutput: true
     });
 
-    utils.runCommand(command.body, command.params, {
+    utils.runCommand(commandInfo.command, commandInfo.params, {
         title: 'Install client dependencies',
         path: pathHelper.projectRelative(config.paths.client.root),
         showOutput: true
@@ -91,20 +91,12 @@ function checkGlobalDependencies() {
 }
 
 function installPackage(packageName, target) {
-    let command = 'npm';
-    let params = ['install', packageName, '--save', '--save-exact'];
-
-    if (utils.commandExists('pnpm')) {
-        command = 'pnpm';
-    } else if (utils.commandExists('yarn')) {
-        command = 'yarn';
-        params = ['add', packageName, '--no-lockfile'];
-    }
+    let commandInfo = packagesHelper.getInstallPackageCommand(packageName);
 
     let folder = target === 'server' ? pathHelper.serverRelative('./')
         : pathHelper.clientRelative('./');
 
-    utils.runCommand(command, params, {
+    utils.runCommand(commandInfo.command, commandInfo.params, {
         title: `Install package '${packageName}' into ${target}`,
         path: folder
     });
