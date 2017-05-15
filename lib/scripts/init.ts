@@ -16,8 +16,8 @@ export default {
 };
 
 const supportedIdes = {
-    'code': 'Visual Studio Code',
-    'ws': 'WebStorm'
+    code: 'Visual Studio Code',
+    ws: 'WebStorm'
 };
 
 function commandBuilder(yargs) {
@@ -101,7 +101,7 @@ function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
                 } else {
                     utils.logOperation('Empty project folder', () => {
                         utils.ensureEmptyDir(root);
-                    })
+                    });
                 }
             });
     } else {
@@ -126,7 +126,7 @@ function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
             }
 
             utils.log(`Project was initialized! Change directory to project folder '${appName}'.`, 'green');
-        })
+        });
 }
 
 function checkAppName(appName) {
@@ -206,7 +206,7 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
     return {
         serverTemplate: serverTemplateInfo,
         clientTemplate: clientTemplateInfo
-    }
+    };
 }
 
 function downloadTemplate(templateInfo, directory) {
@@ -231,7 +231,7 @@ function copyAssets(appName) {
 function checkIdeOption(ide) {
     let ides = Object.keys(supportedIdes);
     if (ides.indexOf(ide) === -1) {
-        utils.logAndExit(`Incorrect IDE value, supported IDEs are [${ides.join(', ')}].`)
+        utils.logAndExit(`Incorrect IDE value, supported IDEs are [${ides.join(', ')}].`);
     }
 }
 

@@ -2,7 +2,7 @@ import utils from './utils';
 
 export default {
     handleErrors
-}
+};
 
 function handleErrors(err, stats, exit = false) {
     if (err) {

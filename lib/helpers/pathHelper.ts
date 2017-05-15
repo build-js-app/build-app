@@ -56,4 +56,3 @@ function deployRelative(relativePath) {
 function getModuleRoot() {
     return fs.realpathSync(path.resolve(__dirname, '../..'));
 }
-

@@ -5,7 +5,7 @@ import * as semver from 'semver';
 
 import utils from './utils';
 import config from '../config/config';
-import pathHelper from  '../helpers/pathHelper';
+import pathHelper from '../helpers/pathHelper';
 
 export default {
     checkTypeScript,
@@ -21,7 +21,7 @@ export default {
     isUsingReact,
     isUsingVsCode,
     getAppName
-}
+};
 
 function checkTypeScript() {
     if (!utils.commandExists('tsc')) {
@@ -35,7 +35,7 @@ function checkFolderStructure() {
     let logError = (message) => {
         utils.log('Wrong project structure.', 'red');
         utils.log(message);
-        utils.logAndExit('Make sure current directory is correct project folder.')
+        utils.logAndExit('Make sure current directory is correct project folder.');
     };
 
     let serverFolderExists = fs.existsSync(pathHelper.serverRelative('./'));
@@ -101,7 +101,7 @@ function getTsBuildEntry() {
 function checkDependenciesInstalled() {
     let logError = (message) => {
         utils.log(message, 'red');
-        utils.logAndExit('Please make sure that you have installed server/client dependencies. Run app-scripts install.')
+        utils.logAndExit('Please make sure that you have installed server/client dependencies. Run app-scripts install.');
     };
 
     let serverDependencies = pathHelper.serverRelative('./node_modules');
@@ -118,7 +118,7 @@ function checkDependenciesInstalled() {
 function checkClientBuildWasGenerated() {
     let logError = (message) => {
         utils.log(message, 'red');
-        utils.logAndExit('Please make sure that you have built the client. Run app-scripts build.')
+        utils.logAndExit('Please make sure that you have built the client. Run app-scripts build.');
     };
 
     let clientBuild = pathHelper.clientRelative(config.paths.client.build);
@@ -210,7 +210,7 @@ function getAppName() {
     let rootPkg = fs.readJsonSync(pathHelper.projectRelative('./package.json'));
     let result = rootPkg.name;
     if (!result) {
-        utils.logAndExit(`Cannot find app name in package.json file.`)
+        utils.logAndExit(`Cannot find app name in package.json file.`);
     }
     return result;
 }

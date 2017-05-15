@@ -123,5 +123,5 @@ function startApp(processManager, appName) {
         path: pathHelper.projectRelative(config.paths.deploy.root)
     });
 
-    utils.logAndExit(`Process has been started. By default it is available on ${chalk.cyan('localhost:5000')}.`)
+    utils.logAndExit(`Process has been started. By default it is available on ${chalk.cyan('localhost:5000')}.`);
 }

@@ -3,7 +3,7 @@ import utils from './utils';
 export default {
     getInstallPackagesCommand,
     getInstallPackageCommand
-}
+};
 
 const packageManagers = ['pnpm', 'yarn', 'npm'];
 
@@ -26,7 +26,7 @@ function getInstallPackagesCommand() {
     return {
         command,
         params
-    }
+    };
 }
 
 function getInstallPackageCommand(packageName) {
@@ -48,5 +48,5 @@ function getInstallPackageCommand(packageName) {
     return {
         command,
         params
-    }
+    };
 }

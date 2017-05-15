@@ -7,7 +7,7 @@ import envHelper from '../helpers/envHelper';
 
 export default {
     loadWebpackConfig
-}
+};
 
 type Webpack_Profile = 'js_prod' | 'ts_prod' | 'js_dev'; //js_dev not supported yet
 
@@ -72,7 +72,7 @@ function getDefaultConfig() {
             rules: [
                 {
                     test: /\.json$/,
-                    loader: "json-loader"
+                    loader: 'json-loader'
                 }
             ]
         }
@@ -112,13 +112,13 @@ function loadExternals(webpackConfig, whitelist) {
     let nodeModules = {};
     let nodeModulesPath = pathHelper.serverRelative('./node_modules');
     fs.readdirSync(nodeModulesPath)
-        .filter(function (x) {
+        .filter((x) => {
             if (['.bin'].indexOf(x) !== -1) return false;
             if (whitelist.indexOf(x) !== -1) return false;
 
             return true;
         })
-        .forEach(function (mod) {
+        .forEach((mod) => {
             nodeModules[mod] = 'commonjs ' + mod;
         });
 

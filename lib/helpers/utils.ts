@@ -69,7 +69,7 @@ function prompt(question, isYesDefault) {
         let hint = isYesDefault === true ? '[Y/n]:' : '[y/N]:';
         let message = question + ' ' + hint;
 
-        rlInterface.question(message, function (answer) {
+        rlInterface.question(message, (answer) => {
             rlInterface.close();
 
             let useDefault = answer.trim().length === 0;
@@ -129,7 +129,7 @@ function getFormattedTimeInterval(start, end) {
     if (diff.minutes() > 0) {
         return diff.format('HH:mm:ss');
     } else {
-        return `${diff.format('ss.SS')} seconds`
+        return `${diff.format('ss.SS')} seconds`;
     }
 }
 
@@ -174,7 +174,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     let result = spawn(cmd, args, {
         stdio,
         cwd: options.path,
-        env: env
+        env
     });
 
     if (result.status !== 0) {
@@ -265,11 +265,11 @@ function archiveFolder(source, destination) {
         let output = fs.createWriteStream(destination);
         let archive = archiver('zip');
 
-        output.on('close', function () {
+        output.on('close', () => {
             return resolve(archive);
         });
 
-        archive.on('error', function (err) {
+        archive.on('error', (err) => {
             return reject(err);
         });
 

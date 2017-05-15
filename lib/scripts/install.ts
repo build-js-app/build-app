@@ -101,4 +101,3 @@ function installPackage(packageName, target) {
         path: folder
     });
 }
-

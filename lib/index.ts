@@ -17,7 +17,7 @@ let epilog = [
     'You can use napp as shorter alias for app-scripts.'
 ].join(os.EOL);
 
-let pkg = require('../package.json');
+let pkg = fs.readJSONSync('../package.json');
 
 yargs
     .usage('Usage: app-scripts <command> [options]')
@@ -26,8 +26,7 @@ yargs
     .command(buildModule)
     .command(serveModule)
     .command(deployModule)
-    .command('*', '', () => {
-        },
+    .command('*', '', () => {},
         (argv) => {
             let command = argv.command;
 

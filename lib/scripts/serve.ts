@@ -64,8 +64,8 @@ function serveServer() {
 
     //TODO move versions to config
     let missingGlobalDependencies = envHelper.detectMissingGlobalDependencies({
-        "ts-node": "3.0.2",
-        "nodemon": "1.11.0"
+        'ts-node': '3.0.2',
+        'nodemon': '1.11.0'
     });
 
     envHelper.reportMissingGlobalDependencies(missingGlobalDependencies);

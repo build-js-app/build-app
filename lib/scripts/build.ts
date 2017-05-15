@@ -84,7 +84,7 @@ function buildServer() {
     let buildServerJsAction = new Promise((resolve, reject) => {
         buildServerJs(() => {
             resolve();
-        })
+        });
     });
 
     return utils.logOperationAsync('Transpiling JavaScript', buildServerJsAction)
