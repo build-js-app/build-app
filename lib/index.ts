@@ -4,6 +4,7 @@ import * as os from 'os';
 
 initEnvVars();
 
+import pathHelper from './helpers/pathHelper';
 import initModule from './scripts/init';
 import installModule from './scripts/install';
 import buildModule from './scripts/build';
@@ -17,7 +18,7 @@ let epilog = [
     'You can use napp as shorter alias for app-scripts.'
 ].join(os.EOL);
 
-let pkg = fs.readJSONSync('../package.json');
+let pkg = fs.readJSONSync(pathHelper.moduleRelative('./package.json'));
 
 yargs
     .usage('Usage: app-scripts <command> [options]')

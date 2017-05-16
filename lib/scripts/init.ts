@@ -125,6 +125,8 @@ function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
                 initIde(ide);
             }
 
+            initLinter();
+
             utils.log(`Project was initialized! Change directory to project folder '${appName}'.`, 'green');
         });
 }
@@ -213,8 +215,8 @@ function downloadTemplate(templateInfo, directory) {
     fs.emptyDirSync(directory);
 
     return Git.Clone(templateInfo.repo, directory, {
-            checkoutBranch: templateInfo.branch
-        })
+        checkoutBranch: templateInfo.branch
+    })
         .then(() => {
             let gitFolderPath = pathHelper.path.join(directory, '.git');
             utils.removeDir(gitFolderPath);
@@ -251,5 +253,13 @@ function initIde(ide) {
         let from = pathHelper.moduleRelative(`./assets/ide/code/${lang}`);
         let to = pathHelper.projectRelative('./.vscode');
         utils.copyTemplateFolder(from, to);
+    }
+}
+
+function initLinter() {
+    if (envHelper.isTsServerLang) {
+        let from = pathHelper.moduleRelative('./assets/linter/tslint.json');
+        let to = pathHelper.serverRelative('./tslint.json');
+        fs.copySync(from, to);
     }
 }
