@@ -20,26 +20,40 @@ export default {
 };
 
 function commandBuilder(yargs) {
-    return yargs;
+    return yargs
+        .option('stop', {
+            description: 'Stop running application process'
+
+        })
+        .example('deploy', 'Deploy project for production (starts project with one of supported process managers).')
+        .example('deploy --stop', 'Stop running app (it is removed from process list and cannot be restarted again).');
 }
 
 function commandHandler(argv) {
     envHelper.checkFolderStructure();
 
+    let processManger = detectProcessManager();
+    let appName = envHelper.getAppName();
+
+    if (argv.stop) {
+        return utils.logOperation(`Stop '${appName}' application process`, () => {
+            stopApp(processManger, appName);
+        });
+    }
+
     ensureBuild()
         .then(() => {
-            deploy();
+            deploy(processManger, appName);
         });
 }
 
-function deploy() {
-    let processManger = detectProcessManager();
-    let appName = envHelper.getAppName();
+function deploy(processManager, appName) {
+
     let deployDir = pathHelper.projectRelative(config.paths.deploy.root);
     let buildDir = pathHelper.projectRelative(config.paths.build.root);
 
     if (fs.existsSync(deployDir)) {
-        stopApp(processManger, appName);
+        stopApp(processManager, appName);
     }
 
     utils.logOperation('Copy build assets', () => {
@@ -68,7 +82,7 @@ function deploy() {
         path: deployDir,
     });
 
-    startApp(processManger, appName);
+    startApp(processManager, appName);
 }
 
 function ensureBuild() {
@@ -111,7 +125,7 @@ function startApp(processManager, appName) {
     let params = [];
 
     if (processManager === 'forever') {
-        params = ['start', '--id',  appName, 'index.js'];
+        params = ['start', '--id', appName, 'index.js'];
     }
 
     if (processManager === 'pm2') {
