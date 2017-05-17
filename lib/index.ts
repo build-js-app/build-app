@@ -10,6 +10,7 @@ import installModule from './scripts/install';
 import buildModule from './scripts/build';
 import serveModule from './scripts/serve';
 import deployModule from './scripts/deploy';
+import extrasModule from './scripts/extras';
 
 let commands = ['init', 'install', 'build', 'serve', 'deploy'];
 
@@ -27,6 +28,7 @@ yargs
     .command(buildModule)
     .command(serveModule)
     .command(deployModule)
+    .command(extrasModule)
     .command('*', '', () => {},
         (argv) => {
             let command = argv.command;

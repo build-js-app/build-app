@@ -30,7 +30,6 @@ function builder(yargs) {
 function handler(argv) {
     envHelper.checkFolderStructure();
     envHelper.checkDependenciesInstalled();
-    envHelper.checkClientBuildWasGenerated();
 
     let target = 'server';
     if (argv.client) {
@@ -39,6 +38,7 @@ function handler(argv) {
 
     switch (target) {
         case 'server':
+            envHelper.checkClientBuildWasGenerated();
             serveServer();
             break;
         case 'client':

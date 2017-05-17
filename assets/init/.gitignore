@@ -2,3 +2,5 @@
 .vscode
 /deploy
 /build
+shrinkwrap.yaml
+node_modules

@@ -10,6 +10,9 @@ let config = {
         deploy: {
             root: './deploy'
         },
+        archive: {
+            root: './archive'
+        },
         server: {
             root: './server',
             src: './src',
