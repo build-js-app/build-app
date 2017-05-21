@@ -4,7 +4,6 @@ import * as _ from 'lodash';
 import * as klawSync from 'klaw-sync';
 import * as moment from 'moment';
 import * as rl from 'readline';
-import * as Promise from 'bluebird';
 import * as del from 'del';
 import * as archiver from 'archiver';
 import * as ejs from 'ejs';
@@ -19,7 +18,6 @@ export default {
     log,
     logAndExit,
     logOperation,
-    logOperationAsync,
     clearConsole,
     prompt,
     copyToPackage,
@@ -60,6 +58,7 @@ function prompt(question, isYesDefault) {
     if (typeof isYesDefault !== 'boolean') {
         throw new Error('Provide explicit boolean isYesDefault as second argument.');
     }
+
     return new Promise(resolve => {
         let rlInterface = rl.createInterface({
             input: process.stdin,
@@ -203,13 +202,17 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     return result;
 }
 
-function logOperation(title: string, operation: Function) {
+async function logOperation(title: string, operation: Function | Promise<any>) {
     process.stdout.write(`${title}... `);
 
     let start = new Date();
 
     try {
-        operation();
+        if (_.isFunction(operation)) {
+            operation();
+        } else {
+            await operation;
+        }
 
         let end = new Date();
         logDone(start, end);
@@ -217,28 +220,9 @@ function logOperation(title: string, operation: Function) {
         let message = 'operation failed.';
         log(message, 'red');
         //TODO log error (log file or console)
-        //console.log(err);
+        console.log(err);
         process.exit(1);
     }
-}
-
-function logOperationAsync(title: string, operation): any {
-    process.stdout.write(`${title}... `);
-    let start = new Date();
-
-    return operation
-        .then((result) => {
-            let end = new Date();
-            logDone(start, end);
-
-            return result;
-        })
-        .catch((err) => {
-            let message = 'operation failed.';
-            log(message, 'red');
-            console.log(err);
-            process.exit(1);
-        });
 }
 
 function logDone(start, end, multiLine = false) {

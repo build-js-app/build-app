@@ -3,7 +3,6 @@
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
-import * as Promise from 'bluebird';
 import * as klawSync from 'klaw-sync';
 
 import webpackConfigLoader from '../config/webpackConfigLoader';
@@ -25,47 +24,44 @@ function commandBuilder(yargs) {
     return yargs;
 }
 
-function commandHandler(argv) {
+async function commandHandler(argv) {
     envHelper.checkFolderStructure();
     envHelper.checkDependenciesInstalled();
 
-    build();
+    await build();
 }
 
-function build() {
+async function build() {
     let startTime = new Date();
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
     utils.ensureEmptyDir(pathHelper.projectRelative(config.paths.build.root));
 
-    return buildServer()
-        .then(() => {
-            return buildClient();
-        })
-        .then(() => {
-            utils.log('Post build:');
+    await buildServer();
 
-            utils.logOperation('Copying data folder', () => {
-                copyDataFolder();
+    buildClient();
 
-                //index file to run app with production env params
-                utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
-            });
+    utils.log('Post build:');
 
-            let endTime = new Date();
-            let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+    utils.logOperation('Copying data folder', () => {
+        copyDataFolder();
 
-            utils.log('Build package was created!', 'green');
-            utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
-        })
-        .then(() => {
-            if (config.postBuild.archive) {
-                let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
+        //index file to run app with production env params
+        utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
+    });
 
-                return utils.logOperationAsync('Archive build package', archive);
-            }
-        });
+    let endTime = new Date();
+    let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+
+    utils.log('Build package was created!', 'green');
+    utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+
+    if (config.postBuild.archive) {
+        let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
+
+        return utils.logOperation('Archive build package', archive);
+    }
 }
 
 function buildServer() {
@@ -87,7 +83,7 @@ function buildServer() {
         });
     });
 
-    return utils.logOperationAsync('Transpiling JavaScript', buildServerJsAction)
+    return utils.logOperation('Transpiling JavaScript', buildServerJsAction)
         .then(() => {
             utils.logOperation('Copying assets', () => {
                 utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');

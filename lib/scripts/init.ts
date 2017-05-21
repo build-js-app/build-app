@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra';
 import * as Git from 'nodegit';
-import * as Promise from 'bluebird';
 import * as chalk from 'chalk';
 import * as validateProjectName from 'validate-npm-package-name';
 
@@ -77,12 +76,11 @@ function commandHandler(argv) {
     initCommand(argv.appName, argv.project, argv.server, argv.client, argv.ide);
 }
 
-function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
+async function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
     checkAppName(appName);
 
     let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
 
-    let checkFolder = Promise.resolve(null);
     let root = pathHelper.projectRelative(`./${appName}`);
 
     pathHelper.setAppPath(root);
@@ -92,43 +90,41 @@ function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
     utils.log(`Client template: "${clientTemplate}".`);
     utils.log(`Project folder: "${pathHelper.getAppPath()}".`);
 
-    if (!utils.isEmptyDir(root)) {
-        utils.log('Project folder is not empty.', 'red');
-        checkFolder = utils.prompt('Do you want to empty the folder? All files will be deleted.', false)
-            .then((answer) => {
-                if (!answer) {
-                    process.exit(0);
-                } else {
-                    utils.logOperation('Empty project folder', () => {
-                        utils.ensureEmptyDir(root);
-                    });
-                }
-            });
-    } else {
+    //check app folder
+    if (utils.isEmptyDir(root)) {
         fs.ensureDirSync(root);
+    } else {
+        utils.log('Project folder is not empty.', 'red');
+
+        let answer = await utils.prompt('Do you want to empty the folder? All files will be deleted.', false);
+
+        if (!answer) {
+            process.exit(0);
+        } else {
+            utils.logOperation('Empty project folder', () => {
+                utils.ensureEmptyDir(root);
+            });
+        }
     }
 
-    checkFolder
-        .then(() => {
-            return utils.logOperationAsync('Downloading server template',
-                downloadTemplate(templatesInfo.serverTemplate, pathHelper.serverRelative('./')));
-        })
-        .then(() => {
-            return utils.logOperationAsync('Downloading client template',
-                downloadTemplate(templatesInfo.clientTemplate, pathHelper.clientRelative('./')));
-        })
-        .then(() => {
-            copyAssets(appName);
+    await utils.logOperation('Downloading server template',
+        downloadTemplate(templatesInfo.serverTemplate, pathHelper.serverRelative('./'))
+    );
 
-            //TODO support JS
-            if (ide && envHelper.isTsServerLang()) {
-                initIde(ide);
-            }
+    await utils.logOperation('Downloading client template',
+        downloadTemplate(templatesInfo.clientTemplate, pathHelper.clientRelative('./'))
+    );
 
-            initLinter();
+    copyAssets(appName);
 
-            utils.log(`Project was initialized! Change directory to project folder '${appName}'.`, 'green');
-        });
+    //TODO support JS
+    if (ide && envHelper.isTsServerLang()) {
+        initIde(ide);
+    }
+
+    initLinter();
+
+    utils.log(`Project was initialized! Change directory to project folder '${appName}'.`, 'green');
 }
 
 function checkAppName(appName) {
@@ -211,16 +207,15 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
     };
 }
 
-function downloadTemplate(templateInfo, directory) {
+async function downloadTemplate(templateInfo, directory) {
     fs.emptyDirSync(directory);
 
-    return Git.Clone(templateInfo.repo, directory, {
+    await Git.Clone(templateInfo.repo, directory, {
         checkoutBranch: templateInfo.branch
-    })
-        .then(() => {
-            let gitFolderPath = pathHelper.path.join(directory, '.git');
-            utils.removeDir(gitFolderPath);
-        });
+    });
+
+    let gitFolderPath = pathHelper.path.join(directory, '.git');
+    utils.removeDir(gitFolderPath);
 }
 
 function copyAssets(appName) {
