@@ -91,7 +91,15 @@ function buildServer() {
                 let serverPackagePath = pathHelper.serverRelative('./package.json');
                 let serverPackageJson = utils.readJsonFile(serverPackagePath);
 
+                let rootPackagePath = pathHelper.projectRelative('./package.json');
+                let rootPackage = utils.readJsonFile(rootPackagePath);
+
                 let buildPackageJson = {
+                    name: rootPackage.name,
+                    version: rootPackage.version,
+                    scripts: {
+                        start: 'node index.js'
+                    },
                     dependencies: serverPackageJson.dependencies
                 };
 
