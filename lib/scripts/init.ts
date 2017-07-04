@@ -1,9 +1,10 @@
 import * as fs from 'fs-extra';
-import * as Git from 'nodegit';
+
 import * as chalk from 'chalk';
 import * as validateProjectName from 'validate-npm-package-name';
 
 import pathHelper from '../helpers/pathHelper';
+import gitHelper from '../helpers/gitHelper';
 import utils from '../helpers/utils';
 import envHelper from '../helpers/envHelper';
 
@@ -208,14 +209,7 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
 }
 
 async function downloadTemplate(templateInfo, directory) {
-    fs.emptyDirSync(directory);
-
-    await Git.Clone(templateInfo.repo, directory, {
-        checkoutBranch: templateInfo.branch
-    });
-
-    let gitFolderPath = pathHelper.path.join(directory, '.git');
-    utils.removeDir(gitFolderPath);
+    await gitHelper.downloadGitRepository(templateInfo.origin, templateInfo.repo, templateInfo.branch, directory);
 }
 
 function copyAssets(appName) {

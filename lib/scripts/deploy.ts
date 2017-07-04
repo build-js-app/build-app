@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra';
-import * as Promise from 'bluebird';
 import * as _ from 'lodash';
 import * as klawSync from 'klaw-sync';
 import * as chalk from 'chalk';

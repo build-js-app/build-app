@@ -4,25 +4,26 @@
     "simple": {
       "server": {
         "ts": {
-          "repo": "https://github.com/build-js-app/template-simple-server",
+          "origin": "http://github.com",
+          "repo": "build-js-app/template-simple-server",
           "branch": "ts"
         },
         "js": {
-          "repo": "https://github.com/build-js-app/template-simple-server",
+          "repo": "build-js-app/template-simple-server",
           "branch": "js"
         }
       },
       "client": {
         "react": {
-          "repo": "https://github.com/build-js-app/template-simple-client",
+          "repo": "build-js-app/template-simple-client",
           "branch": "react"
         },
         "vue": {
-          "repo": "https://github.com/build-js-app/template-simple-client",
+          "repo": "build-js-app/template-simple-client",
           "branch": "vue"
         },
         "angular": {
-          "repo": "https://github.com/build-js-app/template-simple-client",
+          "repo": "build-js-app/template-simple-client",
           "branch": "angular"
         }
       }
@@ -30,17 +31,17 @@
     "full": {
       "server": {
         "mongo": {
-          "repo": "https://github.com/build-js-app/template-full-server",
+          "repo": "build-js-app/template-full-server",
           "branch": "mongo"
         }
       },
       "client": {
         "react": {
-          "repo": "https://github.com/build-js-app/template-full-client",
+          "repo": "build-js-app/template-full-client",
           "branch": "react"
         },
         "vue": {
-          "repo": "https://github.com/build-js-app/template-full-client",
+          "repo": "build-js-app/template-full-client",
           "branch": "vue"
         }
       }
