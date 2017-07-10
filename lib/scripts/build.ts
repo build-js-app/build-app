@@ -4,6 +4,7 @@ import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as klawSync from 'klaw-sync';
+import * as del from 'del';
 
 import webpackConfigLoader from '../config/webpackConfigLoader';
 import webpackHelper from '../helpers/webpackHelper';
@@ -36,7 +37,16 @@ async function build() {
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-    utils.ensureEmptyDir(pathHelper.projectRelative(config.paths.build.root));
+    let buildDir = config.paths.build.root;
+
+    //Delete all except .git folder (for Heroku integration)
+    del.sync([`${buildDir}/**`, `!${buildDir}/.git`], {
+        force: true
+    });
+
+    if (!fs.existsSync(buildDir)) {
+        fs.emptyDirSync(buildDir);
+    }
 
     await buildServer();
 
