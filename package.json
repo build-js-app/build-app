@@ -1,6 +1,6 @@
 {
   "name": "build-app",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js"
@@ -35,6 +35,7 @@
     "cli-clear": "^1.0.4",
     "command-exists": "^1.2.2",
     "cross-spawn": "^5.0.1",
+    "date-fns": "^1.28.5",
     "del": "^2.2.2",
     "download-git-repo": "^1.0.1",
     "ejs": "^2.5.6",

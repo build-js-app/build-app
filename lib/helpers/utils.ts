@@ -26,6 +26,7 @@ export default {
     ensureEmptyDir,
     isEmptyDir,
     dirHasContent,
+    clearDir,
     removeDir,
     getFormattedTimeInterval,
     archiveFolder,
@@ -96,6 +97,19 @@ function ensureEmptyDir(path) {
     });
 
     fs.emptyDirSync(path);
+}
+
+function clearDir(path, exclude) {
+    let paths = [];
+    paths.push(`${path}/**`);
+
+    for (let excludeDir of exclude) {
+        paths.push(`!${excludeDir}`);
+    }
+
+    del.sync(paths, {
+        force: true
+    });
 }
 
 //TODO combine isEmptyDir and dirHasContent

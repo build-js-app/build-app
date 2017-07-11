@@ -1,7 +1,6 @@
 import * as fs from 'fs-extra';
-import * as _ from 'lodash';
-import * as klawSync from 'klaw-sync';
 import * as chalk from 'chalk';
+import * as dateFns from 'date-fns';
 
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
@@ -21,8 +20,12 @@ export default {
 function commandBuilder(yargs) {
     return yargs
         .option('stop', {
-            description: 'Stop running application process'
+            description: 'Stop running application process for local deployment'
 
+        })
+        .option('target', {
+            alias: 't',
+            description: 'Deployment target, supported targets are heroku/now/local, local is deafult'
         })
         .example('deploy', 'Deploy project for production (starts project with one of supported process managers).')
         .example('deploy --stop', 'Stop running app (it is removed from process list and cannot be restarted again).');
@@ -40,13 +43,19 @@ function commandHandler(argv) {
         });
     }
 
+    let target = 'local';
+    if (argv.target) {
+        //TODO check target is one of supported values
+        target = argv.target;
+    }
+
     ensureBuild()
         .then(() => {
-            deploy(processManger, appName);
+            deploy(target, processManger, appName);
         });
 }
 
-function deploy(processManager, appName) {
+function deploy(target, processManager, appName) {
 
     let deployDir = pathHelper.projectRelative(config.paths.deploy.root);
     let buildDir = pathHelper.projectRelative(config.paths.build.root);
@@ -62,26 +71,44 @@ function deploy(processManager, appName) {
             utils.ensureEmptyDir(deployDir);
         } else {
             let localDir = pathHelper.deployRelative(config.paths.server.local);
-            let folderItem = klawSync(pathHelper.deployRelative('./'));
-            for (let item of folderItem) {
-                //skip local folder
-                if (_.startsWith(item.path, localDir)) continue;
+            let gitDir = `!${deployDir}/.git`;
 
-                fs.removeSync(item.path);
-            }
+            utils.clearDir(deployDir, [localDir, gitDir]);
         }
 
         fs.copySync(buildDir, deployDir);
     });
 
-    //install packages there
-    let installCommandInfo = packagesHelper.getInstallPackagesCommand();
-    utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
-        title: 'Install production dependencies',
-        path: deployDir,
-    });
+    switch (target){
+        case 'local':
+            //install packages there
+            let installCommandInfo = packagesHelper.getInstallPackagesCommand();
+            utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
+                title: 'Install production dependencies',
+                path: deployDir,
+            });
 
-    startApp(processManager, appName);
+            startApp(processManager, appName);
+            break;
+        case 'heroku':
+            utils.runCommand('git', ['add', '.'], {
+                title: 'Add files to git',
+                path: deployDir
+            });
+            utils.runCommand('git', ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`], {
+                title: 'Commit files to git',
+                path: deployDir
+            });
+            utils.runCommand('git', ['push', 'heroku', 'master'], {
+                title: 'Deploying to Heroku...',
+                showOutput: true,
+                path: deployDir
+            });
+            break;
+        default:
+            throw new Error(`Unsupported target: "${target}"`);
+            break;
+    }
 }
 
 function ensureBuild() {

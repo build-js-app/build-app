@@ -38,15 +38,7 @@ async function build() {
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
     let buildDir = config.paths.build.root;
-
-    //Delete all except .git folder (for Heroku integration)
-    del.sync([`${buildDir}/**`, `!${buildDir}/.git`], {
-        force: true
-    });
-
-    if (!fs.existsSync(buildDir)) {
-        fs.emptyDirSync(buildDir);
-    }
+    utils.ensureEmptyDir(buildDir);
 
     await buildServer();
 

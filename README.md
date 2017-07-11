@@ -122,6 +122,22 @@ Build command builds server and client separately and then combines them togethe
 
 *deploy* command creates and copies build package into deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
 
+Also it supports deployment to Heroku
+
+Run *deploy* with --target heroku
+
+```bash
+build-app deploy --target heroku
+```
+
+Before that, create heroku git repo in deploy folder
+
+```bash
+$ cd deploy/
+$ git init
+$ heroku git:remote -a {APP_ID}
+```
+
 ## Road map
 
 Project is in active development. The next major features are:
