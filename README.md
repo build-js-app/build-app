@@ -120,14 +120,26 @@ Build command builds server and client separately and then combines them togethe
 
 ### Deploy
 
-*deploy* command creates and copies build package into deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
+Deploys application in various modes (by using target parameter):
 
-Also it supports deployment to Heroku
+*local* deployments:
+
+```bash
+napp deploy
+```
+
+Build package copied to deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
+
+*heroku* deployments:
+
+```bash
+napp deploy --target heroku --remote dev
+```
 
 Run *deploy* with --target heroku
 
 ```bash
-build-app deploy --target heroku
+build-app deploy --target heroku --remote dev
 ```
 
 Before that, create heroku git repo in deploy folder
@@ -135,8 +147,10 @@ Before that, create heroku git repo in deploy folder
 ```bash
 $ cd deploy/
 $ git init
-$ heroku git:remote -a {APP_ID}
+$ heroku git:remote -a {APP_ID} -r {REMOTE_NAME}
 ```
+
+Note you can have multiple remotes corresponding to different environments (dev/stage)
 
 ## Road map
 
