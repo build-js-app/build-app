@@ -27,9 +27,15 @@ function commandBuilder(yargs) {
             boolean: true,
             description: 'install to client'
         })
+        .option('dev', {
+            alias: 'D',
+            boolean: true,
+            description: 'install as devDependency'
+        })
         .example('install', 'install all dependencies for server/client, check global dependencies')
         .example('install lodash -s', 'install lodash to server')
-        .example('install jquery -c', 'install jquery to client');
+        .example('install jquery -c', 'install jquery to client')
+        .example('install typescript -c -D', 'install typescript to server in in your devDependencies');
 }
 
 function commandHandler(argv) {
@@ -46,7 +52,7 @@ function commandHandler(argv) {
         target = 'client';
     }
 
-    return installPackage(argv.package, target);
+    return installPackage(argv.package, target, argv.dev);
 }
 
 function installAll() {
@@ -60,13 +66,13 @@ function installAll() {
     let commandInfo = packagesHelper.getInstallPackagesCommand();
 
     utils.runCommand(commandInfo.command, commandInfo.params, {
-        title: 'Install server dependencies',
+        title: `Install server dependencies with ${commandInfo.command}`,
         path: pathHelper.projectRelative(config.paths.server.root),
         showOutput: true
     });
 
     utils.runCommand(commandInfo.command, commandInfo.params, {
-        title: 'Install client dependencies',
+        title: `Install client dependencies with ${commandInfo.command}`,
         path: pathHelper.projectRelative(config.paths.client.root),
         showOutput: true
     });
@@ -90,14 +96,14 @@ function checkGlobalDependencies() {
     envHelper.reportMissingGlobalDependencies(dependenciesToInstall);
 }
 
-function installPackage(packageName, target) {
-    let commandInfo = packagesHelper.getInstallPackageCommand(packageName);
+function installPackage(packageName, target, isDevDependency) {
+    let commandInfo = packagesHelper.getInstallPackageCommand(packageName, isDevDependency);
 
     let folder = target === 'server' ? pathHelper.serverRelative('./')
         : pathHelper.clientRelative('./');
 
     utils.runCommand(commandInfo.command, commandInfo.params, {
-        title: `Install package '${packageName}' into ${target}`,
+        title: `Install package '${packageName}' into ${target} with ${commandInfo.command}`,
         path: folder
     });
 }

@@ -29,7 +29,7 @@ function getInstallPackagesCommand() {
     };
 }
 
-function getInstallPackageCommand(packageName) {
+function getInstallPackageCommand(packageName, isDevDependency) {
     let command = utils.findGlobalCommandByPrecedence(packageManagers);
     let params = [];
 
@@ -43,6 +43,10 @@ function getInstallPackageCommand(packageName) {
         case 'yarn':
             params = ['add', packageName, '--no-lockfile', '--exact'];
             break;
+    }
+
+    if (isDevDependency) {
+        params.push('-D'); //the same for all managers
     }
 
     return {
