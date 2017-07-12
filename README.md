@@ -139,7 +139,7 @@ napp deploy --target heroku --remote dev
 Run *deploy* with --target heroku
 
 ```bash
-build-app deploy --target heroku --remote dev
+napp deploy --target heroku --remote dev
 ```
 
 Before that, create heroku git repo in deploy folder
