@@ -132,25 +132,23 @@ Build package copied to deployment folder (./deploy by default) and starts the a
 
 *heroku* deployments:
 
+Initial setup 
+
+```bash
+cd deploy/
+git init
+heroku git:remote -a {APP_ID} -r {REMOTE_NAME}
+git fetch {REMOTE_NAME}
+git checkout {REMOTE_NAME}/master -b {REMOTE_NAME}
+```
+
+Note that that you can have multiple remotes corresponding to different environments (dev/staging)
+
+After that you can do:
+
 ```bash
 napp deploy --target heroku --remote dev
 ```
-
-Run *deploy* with --target heroku
-
-```bash
-napp deploy --target heroku --remote dev
-```
-
-Before that, create heroku git repo in deploy folder
-
-```bash
-$ cd deploy/
-$ git init
-$ heroku git:remote -a {APP_ID} -r {REMOTE_NAME}
-```
-
-Note you can have multiple remotes corresponding to different environments (dev/stage)
 
 ## Road map
 

@@ -22,17 +22,24 @@ export default {
 };
 
 function commandBuilder(yargs) {
-    return yargs;
+    return yargs
+        //you have to make sure client has been built already, to speed up rapid builds with no client changes
+        .option('skip-client-build', {
+            alias: 'scb',
+            description: 'Skip client build'
+        });
 }
 
 async function commandHandler(argv) {
     envHelper.checkFolderStructure();
     envHelper.checkDependenciesInstalled();
 
-    await build();
+    await build({
+        skipClientBuild: argv.skipClientBuild
+    });
 }
 
-async function build() {
+async function build(options) {
     let startTime = new Date();
 
     utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
@@ -42,7 +49,7 @@ async function build() {
 
     await buildServer();
 
-    buildClient();
+    buildClient(options.skipClientBuild);
 
     utils.log('Post build:');
 
@@ -126,12 +133,10 @@ function buildServerJs(callback) {
     });
 }
 
-function buildClient() {
+function buildClient(skipClientBuild) {
     utils.log('Client build:', 'green');
 
-    let buildClient = true;
-
-    if (buildClient) {
+    if (!skipClientBuild) {
         utils.runCommand('npm', ['run', 'build'], {
             title: 'Build client',
             path: pathHelper.clientRelative('./')

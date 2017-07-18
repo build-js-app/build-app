@@ -21,7 +21,6 @@ function commandBuilder(yargs) {
     return yargs
         .option('stop', {
             description: 'Stop running application process for local deployment'
-
         })
         .option('target', {
             alias: 't',
@@ -30,6 +29,10 @@ function commandBuilder(yargs) {
         .option('remote', {
             alias: 'r',
             description: 'For heroku only, specify remote name, heroku by default'
+        })
+        .option('skip-client-build', {
+            alias: 'scb',
+            description: 'Skip client build'
         })
         .example('deploy', 'Deploy project for production (starts project with one of supported process managers).')
         .example('deploy --stop', 'Stop running app (it is removed from process list and cannot be restarted again).')
@@ -52,9 +55,15 @@ function commandHandler(argv) {
     if (argv.target) {
         //TODO check target is one of supported values
         target = argv.target;
+
+        if (target === 'heroku') {
+            if (!argv.remote) {
+                utils.logAndExit('Specify remote for heroku deployments');
+            }
+        }
     }
 
-    ensureBuild()
+    ensureBuild(argv.skipClientBuild)
         .then(() => {
             deploy(target, processManger, appName, argv.remote);
         });
@@ -96,6 +105,16 @@ function deploy(target, processManager, appName, remote) {
             startApp(processManager, appName);
             break;
         case 'heroku':
+            utils.runCommand('git', ['checkout', remote], {
+                title: `Switch to "${remote}" branch`,
+                path: deployDir
+            });
+
+            utils.runCommand('git', ['pull', remote], {
+                title: `Pull changes from remote`,
+                path: deployDir
+            });
+
             utils.runCommand('git', ['add', '.'], {
                 title: 'Add files to git',
                 path: deployDir
@@ -103,11 +122,11 @@ function deploy(target, processManager, appName, remote) {
 
             utils.runCommand('git', ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`], {
                 title: 'Commit files to git',
+                ignoreError: true,
                 path: deployDir
             });
 
-            let remoteName = remote ? remote : 'heroku';
-            utils.runCommand('git', ['push', remoteName, 'master'], {
+            utils.runCommand('git', ['push', remote, `${remote}:master`], {
                 title: 'Deploying to Heroku...',
                 showOutput: true,
                 path: deployDir
@@ -119,12 +138,14 @@ function deploy(target, processManager, appName, remote) {
     }
 }
 
-function ensureBuild() {
+function ensureBuild(skipClientBuild) {
     //return Promise.resolve(null);
 
     installModule.installAll();
 
-    return buildModule.build();
+    return buildModule.build({
+        skipClientBuild
+    });
 }
 
 function detectProcessManager() {
