@@ -218,8 +218,8 @@ function copyAssets(appName) {
     appPackage.name = appName;
     fs.writeJSONSync(pathHelper.projectRelative('./package.json'), appPackage);
 
-    fs.copySync(pathHelper.moduleRelative('./assets/init/.gitignore'),
-        pathHelper.projectRelative('./gitignore'));
+    fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'),
+        pathHelper.projectRelative('./.gitignore'));
 }
 
 function checkIdeOption(ide) {
