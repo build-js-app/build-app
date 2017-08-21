@@ -39,15 +39,16 @@ function commandBuilder(yargs) {
         .example('deploy -t heroku -r dev', 'Deploys app to heroku server using dev remote.');
 }
 
-function commandHandler(argv) {
+async function commandHandler(argv) {
     envHelper.checkFolderStructure();
 
-    let processManger = detectProcessManager();
+    let processManager = detectProcessManager();
     let appName = envHelper.getAppName();
+    let remote = argv.remote;
 
     if (argv.stop) {
         return utils.logOperation(`Stop '${appName}' application process`, () => {
-            stopApp(processManger, appName);
+            stopApp(processManager, appName);
         });
     }
 
@@ -63,53 +64,81 @@ function commandHandler(argv) {
         }
     }
 
-    ensureBuild(argv.skipClientBuild)
-        .then(() => {
-            deploy(target, processManger, appName, argv.remote);
-        });
-}
-
-function deploy(target, processManager, appName, remote) {
-
     let deployDir = pathHelper.projectRelative(config.paths.deploy.root);
     let buildDir = pathHelper.projectRelative(config.paths.build.root);
 
-    if (fs.existsSync(deployDir)) {
-        stopApp(processManager, appName);
-    }
+    let deployParams = {
+        target,
+        appName,
+        deployDir,
+        buildDir,
+        processManager,
+        remote
+    };
 
-    utils.logOperation('Copy build assets', () => {
-        let isFirstDeploy = !fs.existsSync(deployDir);
+    try {
+        beforeDeploy(deployParams);
 
-        if (isFirstDeploy) {
-            utils.ensureEmptyDir(deployDir);
-        } else {
-            let localDir = pathHelper.deployRelative(config.paths.server.local);
-            let gitDir = `!${deployDir}/.git`;
+        await ensureBuild(argv.skipClientBuild);
 
-            utils.clearDir(deployDir, [localDir, gitDir]);
+        if (fs.existsSync(deployDir)) {
+            stopApp(processManager, appName);
         }
 
-        fs.copySync(buildDir, deployDir);
-    });
+        utils.logOperation('Copy build assets', () => {
+            let isFirstDeploy = !fs.existsSync(deployDir);
 
-    switch (target){
+            if (isFirstDeploy) {
+                utils.ensureEmptyDir(deployDir);
+            } else {
+                let localDir = pathHelper.deployRelative(config.paths.server.local);
+                let gitDir = `!${deployDir}/.git`;
+
+                utils.clearDir(deployDir, [localDir, gitDir]);
+            }
+
+            fs.copySync(buildDir, deployDir);
+        });
+
+        afterDeploy(deployParams);
+    } catch (err) {
+        utils.logAndExit(err);
+    }
+}
+
+function beforeDeploy(deployParams) {
+    const {target, processManager, appName, remote, deployDir} = deployParams;
+
+    switch (target) {
         case 'local':
-            //install packages there
-            let installCommandInfo = packagesHelper.getInstallPackagesCommand();
-            utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
-                title: 'Install production dependencies',
-                path: deployDir,
-            });
-
-            startApp(processManager, appName);
             break;
         case 'heroku':
             utils.runCommand('git', ['checkout', remote], {
                 title: `Switch to "${remote}" branch`,
                 path: deployDir
             });
+            break;
+        default:
+            throw new Error(`Unsupported target: "${target}"`);
+            break;
+    }
+}
 
+function afterDeploy(deployParams) {
+    const {target, processManager, appName, remote, deployDir} = deployParams;
+
+    switch (target) {
+        case 'local':
+            //install packages there
+            let installCommandInfo = packagesHelper.getInstallPackagesCommand();
+            utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
+                title: 'Install production dependencies',
+                path: deployParams.deployDir
+            });
+
+            startApp(processManager, appName);
+            break;
+        case 'heroku':
             utils.runCommand('git', ['pull', remote], {
                 title: `Pull changes from remote`,
                 path: deployDir
@@ -120,11 +149,15 @@ function deploy(target, processManager, appName, remote) {
                 path: deployDir
             });
 
-            utils.runCommand('git', ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`], {
-                title: 'Commit files to git',
-                ignoreError: true,
-                path: deployDir
-            });
+            utils.runCommand(
+                'git',
+                ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`],
+                {
+                    title: 'Commit files to git',
+                    ignoreError: true,
+                    path: deployDir
+                }
+            );
 
             utils.runCommand('git', ['push', remote, `${remote}:master`], {
                 title: 'Deploying to Heroku...',

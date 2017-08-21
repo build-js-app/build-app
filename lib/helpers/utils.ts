@@ -7,7 +7,7 @@ import * as rl from 'readline';
 import * as del from 'del';
 import * as archiver from 'archiver';
 import * as ejs from 'ejs';
-import {sync as commandExists} from 'command-exists';
+import {sync as commandExistsSync} from 'command-exists';
 
 import pathHelper from './pathHelper';
 
@@ -63,13 +63,13 @@ function prompt(question, isYesDefault) {
     return new Promise(resolve => {
         let rlInterface = rl.createInterface({
             input: process.stdin,
-            output: process.stdout,
+            output: process.stdout
         });
 
         let hint = isYesDefault === true ? '[Y/n]:' : '[y/N]:';
         let message = question + ' ' + hint;
 
-        rlInterface.question(message, (answer) => {
+        rlInterface.question(message, answer => {
             rlInterface.close();
 
             let useDefault = answer.trim().length === 0;
@@ -147,15 +147,15 @@ function getFormattedTimeInterval(start, end) {
 }
 
 interface Utils_RunCommandOptions {
-    title?: string,
-    path: string,
-    ignoreError?: boolean,
-    showOutput?: boolean,
-    env?: Object
+    title?: string;
+    path: string;
+    ignoreError?: boolean;
+    showOutput?: boolean;
+    env?: Object;
 }
 
 function commandExists(command) {
-    return commandExists(command);
+    return commandExistsSync(command);
 }
 
 function runCommand(cmd, args, options: Utils_RunCommandOptions) {
@@ -243,7 +243,7 @@ function logDone(start, end, multiLine = false) {
     let runTime = getFormattedTimeInterval(start, end);
     let instant = runTime === '00:00:00';
 
-    let logWithMessage = (msg) => {
+    let logWithMessage = msg => {
         if (instant) {
             log(`${msg}`, 'green');
         } else {
@@ -267,7 +267,7 @@ function archiveFolder(source, destination) {
             return resolve(archive);
         });
 
-        archive.on('error', (err) => {
+        archive.on('error', err => {
             return reject(err);
         });
 

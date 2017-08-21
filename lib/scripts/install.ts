@@ -79,7 +79,7 @@ function installAll() {
 }
 
 function checkGlobalDependencies() {
-    let getGlobalDependencies = (packagePath) => {
+    let getGlobalDependencies = packagePath => {
         return utils.readJsonFile(packagePath).globalDependencies;
     };
 
@@ -99,8 +99,7 @@ function checkGlobalDependencies() {
 function installPackage(packageName, target, isDevDependency) {
     let commandInfo = packagesHelper.getInstallPackageCommand(packageName, isDevDependency);
 
-    let folder = target === 'server' ? pathHelper.serverRelative('./')
-        : pathHelper.clientRelative('./');
+    let folder = target === 'server' ? pathHelper.serverRelative('./') : pathHelper.clientRelative('./');
 
     utils.runCommand(commandInfo.command, commandInfo.params, {
         title: `Install package '${packageName}' into ${target} with ${commandInfo.command}`,
