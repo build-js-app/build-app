@@ -20,7 +20,8 @@ export default {
     isJsServerLang,
     isUsingReact,
     isUsingVsCode,
-    getAppName
+    getAppName,
+    checkNpmScriptExists
 };
 
 function checkTypeScript() {
@@ -32,7 +33,7 @@ function checkTypeScript() {
 }
 
 function checkFolderStructure() {
-    let logError = (message) => {
+    let logError = message => {
         utils.log('Wrong project structure.', 'red');
         utils.log(message);
         utils.logAndExit('Make sure current directory is correct project folder.');
@@ -99,9 +100,11 @@ function getTsBuildEntry() {
 }
 
 function checkDependenciesInstalled() {
-    let logError = (message) => {
+    let logError = message => {
         utils.log(message, 'red');
-        utils.logAndExit('Please make sure that you have installed server/client dependencies. Run app-scripts install.');
+        utils.logAndExit(
+            'Please make sure that you have installed server/client dependencies. Run app-scripts install.'
+        );
     };
 
     let serverDependencies = pathHelper.serverRelative('./node_modules');
@@ -116,7 +119,7 @@ function checkDependenciesInstalled() {
 }
 
 function checkClientBuildWasGenerated() {
-    let logError = (message) => {
+    let logError = message => {
         utils.log(message, 'red');
         utils.logAndExit('Please make sure that you have built the client. Run app-scripts build.');
     };
@@ -196,7 +199,6 @@ function getGlobalPackagesInfo() {
 }
 
 function reportMissingGlobalDependencies(dependenciesToInstall) {
-
     if (!_.isEmpty(dependenciesToInstall)) {
         let packagesStr = Object.keys(dependenciesToInstall).join(' ');
 
@@ -212,5 +214,27 @@ function getAppName() {
     if (!result) {
         utils.logAndExit(`Cannot find app name in package.json file.`);
     }
+    return result;
+}
+
+function checkNpmScriptExists(location: 'client' | 'server', scriptName, shouldExist = false) {
+    let packagePath =
+        location === 'server'
+            ? pathHelper.serverRelative('./package.json')
+            : pathHelper.clientRelative('./package.json');
+    let packageJson = fs.readJsonSync(packagePath);
+
+    let result = true;
+
+    if (!packageJson.scripts) {
+        result = false;
+    } else {
+        if (!packageJson.scripts[scriptName]) result = false;
+    }
+
+    if (shouldExist && !result) {
+        utils.logAndExit(`Script "${scriptName}" does not exist in ${location} package.json file.`);
+    }
+
     return result;
 }

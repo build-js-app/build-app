@@ -22,12 +22,14 @@ export default {
 };
 
 function commandBuilder(yargs) {
-    return yargs
-        //you have to make sure client has been built already, to speed up rapid builds with no client changes
-        .option('skip-client-build', {
-            alias: 'scb',
-            description: 'Skip client build'
-        });
+    return (
+        yargs
+            //you have to make sure client has been built already, to speed up rapid builds with no client changes
+            .option('skip-client-build', {
+                alias: 'scb',
+                description: 'Skip client build'
+            })
+    );
 }
 
 async function commandHandler(argv) {
@@ -76,6 +78,13 @@ async function build(options) {
 function buildServer() {
     utils.log('Server build:', 'green');
 
+    if (envHelper.checkNpmScriptExists('server', 'pre-build')) {
+        utils.runCommand('npm', ['run', 'pre-build'], {
+            title: 'Running pre-build npm script',
+            path: pathHelper.serverRelative('./')
+        });
+    }
+
     if (envHelper.isTsServerLang()) {
         envHelper.checkTypeScript();
 
@@ -92,29 +101,28 @@ function buildServer() {
         });
     });
 
-    return utils.logOperation('Transpiling JavaScript', buildServerJsAction)
-        .then(() => {
-            utils.logOperation('Copying assets', () => {
-                utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
+    return utils.logOperation('Transpiling JavaScript', buildServerJsAction).then(() => {
+        utils.logOperation('Copying assets', () => {
+            utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
 
-                let serverPackagePath = pathHelper.serverRelative('./package.json');
-                let serverPackageJson = utils.readJsonFile(serverPackagePath);
+            let serverPackagePath = pathHelper.serverRelative('./package.json');
+            let serverPackageJson = utils.readJsonFile(serverPackagePath);
 
-                let rootPackagePath = pathHelper.projectRelative('./package.json');
-                let rootPackage = utils.readJsonFile(rootPackagePath);
+            let rootPackagePath = pathHelper.projectRelative('./package.json');
+            let rootPackage = utils.readJsonFile(rootPackagePath);
 
-                let buildPackageJson = {
-                    name: rootPackage.name,
-                    version: rootPackage.version,
-                    scripts: {
-                        start: 'node index.js'
-                    },
-                    dependencies: serverPackageJson.dependencies
-                };
+            let buildPackageJson = {
+                name: rootPackage.name,
+                version: rootPackage.version,
+                scripts: {
+                    start: 'node index.js'
+                },
+                dependencies: serverPackageJson.dependencies
+            };
 
-                fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
-            });
+            fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
         });
+    });
 }
 
 function buildServerJs(callback) {
