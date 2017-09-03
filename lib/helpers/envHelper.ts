@@ -21,7 +21,8 @@ export default {
   isUsingReact,
   isUsingVsCode,
   getAppName,
-  checkNpmScriptExists
+  checkNpmScriptExists,
+  getGlobalPackagesInfo
 };
 
 function checkTypeScript() {

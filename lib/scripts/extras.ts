@@ -16,18 +16,19 @@ export default {
 
 function commandBuilder(yargs) {
   return yargs.example('napp extras archive', 'Archive app sources');
+  return yargs.example('napp extras package-list-global', 'Show global packages');
 }
 
 async function commandHandler(argv) {
-  if (!argv.sub_command) return;
-
-  envHelper.checkFolderStructure();
-
   switch (argv.sub_command) {
     case 'archive':
+      envHelper.checkFolderStructure();
       await utils.logOperation('Archive app sources', archive);
       break;
+    case 'package-list-global':
+      await showGlobalPackages();
     default:
+      utils.logAndExit('Run with --help parameter to see available options');
       break;
   }
 }
@@ -66,4 +67,13 @@ async function archive() {
   await utils.archiveFolder(archiveDir, archivePath);
 
   utils.removeDir(archiveDir);
+}
+
+function showGlobalPackages() {
+  let globalPackagesInfo = envHelper.getGlobalPackagesInfo();
+
+  for (let packageName of Object.keys(globalPackagesInfo)) {
+    let version = globalPackagesInfo[packageName];
+    utils.log(`${packageName}: ${version}`);
+  }
 }
