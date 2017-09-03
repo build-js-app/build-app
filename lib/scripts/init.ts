@@ -121,6 +121,8 @@ async function initCommand(appName, project, serverTemplate, clientTemplate, ide
 
   copyAssets(appName);
 
+  if (!ide) ide = 'code'; //use vs code by default
+
   //TODO support JS
   if (ide && envHelper.isTsServerLang()) {
     initIde(ide);
@@ -240,6 +242,7 @@ function initIde(ide) {
     let to = pathHelper.projectRelative('./.idea');
     utils.copyTemplateFolder(from, to, context);
   }
+
   if (ide === 'code') {
     let from = pathHelper.moduleRelative(`./assets/ide/code/${lang}`);
     let to = pathHelper.projectRelative('./.vscode');
