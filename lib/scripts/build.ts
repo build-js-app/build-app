@@ -14,164 +14,164 @@ import envHelper from '../helpers/envHelper';
 import config from '../config/config';
 
 export default {
-    command: 'build',
-    describe: 'Build project for production',
-    handler: commandHandler,
-    builder: commandBuilder,
-    build
+  command: 'build',
+  describe: 'Build project for production',
+  handler: commandHandler,
+  builder: commandBuilder,
+  build
 };
 
 function commandBuilder(yargs) {
-    return (
-        yargs
-            //you have to make sure client has been built already, to speed up rapid builds with no client changes
-            .option('skip-client-build', {
-                alias: 'scb',
-                description: 'Skip client build'
-            })
-    );
+  return (
+    yargs
+      //you have to make sure client has been built already, to speed up rapid builds with no client changes
+      .option('skip-client-build', {
+        alias: 'scb',
+        description: 'Skip client build'
+      })
+  );
 }
 
 async function commandHandler(argv) {
-    envHelper.checkFolderStructure();
-    envHelper.checkDependenciesInstalled();
+  envHelper.checkFolderStructure();
+  envHelper.checkDependenciesInstalled();
 
-    await build({
-        skipClientBuild: argv.skipClientBuild
-    });
+  await build({
+    skipClientBuild: argv.skipClientBuild
+  });
 }
 
 async function build(options) {
-    let startTime = new Date();
+  let startTime = new Date();
 
-    utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
+  utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-    let buildDir = config.paths.build.root;
-    utils.ensureEmptyDir(buildDir);
+  let buildDir = config.paths.build.root;
+  utils.ensureEmptyDir(buildDir);
 
-    await buildServer();
+  await buildServer();
 
-    buildClient(options.skipClientBuild);
+  buildClient(options.skipClientBuild);
 
-    utils.log('Post build:');
+  utils.log('Post build:');
 
-    utils.logOperation('Copying data folder', () => {
-        copyDataFolder();
+  utils.logOperation('Copying data folder', () => {
+    copyDataFolder();
 
-        //index file to run app with production env params
-        utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
-    });
+    //index file to run app with production env params
+    utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
+  });
 
-    let endTime = new Date();
-    let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+  let endTime = new Date();
+  let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
 
-    utils.log('Build package was created!', 'green');
-    utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+  utils.log('Build package was created!', 'green');
+  utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
 
-    if (config.postBuild.archive) {
-        let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
+  if (config.postBuild.archive) {
+    let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
 
-        return utils.logOperation('Archive build package', archive);
-    }
+    return utils.logOperation('Archive build package', archive);
+  }
 }
 
 function buildServer() {
-    utils.log('Server build:', 'green');
+  utils.log('Server build:', 'green');
 
-    if (envHelper.checkNpmScriptExists('server', 'pre-build')) {
-        utils.runCommand('npm', ['run', 'pre-build'], {
-            title: 'Running pre-build npm script',
-            path: pathHelper.serverRelative('./')
-        });
-    }
-
-    if (envHelper.isTsServerLang()) {
-        envHelper.checkTypeScript();
-
-        utils.runCommand('tsc', [], {
-            path: pathHelper.serverRelative('./'),
-            title: 'Compiling TypeScript',
-            showOutput: true
-        });
-    }
-
-    let buildServerJsAction = new Promise((resolve, reject) => {
-        buildServerJs(() => {
-            resolve();
-        });
+  if (envHelper.checkNpmScriptExists('server', 'pre-build')) {
+    utils.runCommand('npm', ['run', 'pre-build'], {
+      title: 'Running pre-build npm script',
+      path: pathHelper.serverRelative('./')
     });
+  }
 
-    return utils.logOperation('Transpiling JavaScript', buildServerJsAction).then(() => {
-        utils.logOperation('Copying assets', () => {
-            utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
+  if (envHelper.isTsServerLang()) {
+    envHelper.checkTypeScript();
 
-            let serverPackagePath = pathHelper.serverRelative('./package.json');
-            let serverPackageJson = utils.readJsonFile(serverPackagePath);
-
-            let rootPackagePath = pathHelper.projectRelative('./package.json');
-            let rootPackage = utils.readJsonFile(rootPackagePath);
-
-            let buildPackageJson = {
-                name: rootPackage.name,
-                version: rootPackage.version,
-                scripts: {
-                    start: 'node index.js'
-                },
-                dependencies: serverPackageJson.dependencies
-            };
-
-            fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
-        });
+    utils.runCommand('tsc', [], {
+      path: pathHelper.serverRelative('./'),
+      title: 'Compiling TypeScript',
+      showOutput: true
     });
+  }
+
+  let buildServerJsAction = new Promise((resolve, reject) => {
+    buildServerJs(() => {
+      resolve();
+    });
+  });
+
+  return utils.logOperation('Transpiling JavaScript', buildServerJsAction).then(() => {
+    utils.logOperation('Copying assets', () => {
+      utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
+
+      let serverPackagePath = pathHelper.serverRelative('./package.json');
+      let serverPackageJson = utils.readJsonFile(serverPackagePath);
+
+      let rootPackagePath = pathHelper.projectRelative('./package.json');
+      let rootPackage = utils.readJsonFile(rootPackagePath);
+
+      let buildPackageJson = {
+        name: rootPackage.name,
+        version: rootPackage.version,
+        scripts: {
+          start: 'node index.js'
+        },
+        dependencies: serverPackageJson.dependencies
+      };
+
+      fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
+    });
+  });
 }
 
 function buildServerJs(callback) {
-    let webpackConfig = null;
+  let webpackConfig = null;
 
-    if (envHelper.isTsServerLang()) {
-        webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
-    } else {
-        webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
-    }
+  if (envHelper.isTsServerLang()) {
+    webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
+  } else {
+    webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
+  }
 
-    webpack(webpackConfig).run((err, stats) => {
-        webpackHelper.handleErrors(err, stats, true);
+  webpack(webpackConfig).run((err, stats) => {
+    webpackHelper.handleErrors(err, stats, true);
 
-        if (callback) callback();
-    });
+    if (callback) callback();
+  });
 }
 
 function buildClient(skipClientBuild) {
-    utils.log('Client build:', 'green');
+  utils.log('Client build:', 'green');
 
-    if (!skipClientBuild) {
-        utils.runCommand('npm', ['run', 'build'], {
-            title: 'Build client',
-            path: pathHelper.clientRelative('./')
-        });
-    } else {
-        utils.log(`Build client... ${chalk.yellow('skipped')}.`);
-    }
-
-    utils.logOperation('Copying assets', () => {
-        utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
-
-        if (config.server.build.removeMapFiles) {
-            let clientPath = pathHelper.buildRelative(config.paths.client.root);
-            let files = klawSync(clientPath);
-            for (let file of files) {
-                if (file.path.endsWith('.map')) {
-                    fs.removeSync(file.path);
-                }
-            }
-        }
+  if (!skipClientBuild) {
+    utils.runCommand('npm', ['run', 'build'], {
+      title: 'Build client',
+      path: pathHelper.clientRelative('./')
     });
+  } else {
+    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+  }
 
-    return Promise.resolve();
+  utils.logOperation('Copying assets', () => {
+    utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
+
+    if (config.server.build.removeMapFiles) {
+      let clientPath = pathHelper.buildRelative(config.paths.client.root);
+      let files = klawSync(clientPath);
+      for (let file of files) {
+        if (file.path.endsWith('.map')) {
+          fs.removeSync(file.path);
+        }
+      }
+    }
+  });
+
+  return Promise.resolve();
 }
 
 function copyDataFolder() {
-    utils.copyToPackage(pathHelper.serverRelative(config.paths.server.data), './data/');
+  utils.copyToPackage(pathHelper.serverRelative(config.paths.server.data), './data/');
 
-    utils.ensureEmptyDir(pathHelper.buildRelative('./data/config'));
+  utils.ensureEmptyDir(pathHelper.buildRelative('./data/config'));
 }

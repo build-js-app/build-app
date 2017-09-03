@@ -3,7 +3,9 @@
   "version": "0.3.8",
   "description": "Build system for full-stack JS applications",
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "format_all":
+      "prettier --single-quote --jsx-bracket-same-line --print-width 120 --no-bracket-spacing --write **/*.{js,ts,json}"
   },
   "author": "Yegor Sytnyk",
   "license": "MIT",

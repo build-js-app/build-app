@@ -1,56 +1,56 @@
 import utils from './utils';
 
 export default {
-    getInstallPackagesCommand,
-    getInstallPackageCommand
+  getInstallPackagesCommand,
+  getInstallPackageCommand
 };
 
 const packageManagers = ['pnpm', 'yarn', 'npm'];
 
 function getInstallPackagesCommand() {
-    let command = utils.findGlobalCommandByPrecedence(packageManagers);
-    let params = [];
+  let command = utils.findGlobalCommandByPrecedence(packageManagers);
+  let params = [];
 
-    switch (command){
-        case 'npm':
-            params = ['install'];
-            break;
-        case 'pnpm':
-            params = ['install', '--no-lock'];
-            break;
-        case 'yarn':
-            params = ['--no-lockfile'];
-            break;
-    }
+  switch (command) {
+    case 'npm':
+      params = ['install'];
+      break;
+    case 'pnpm':
+      params = ['install', '--no-lock'];
+      break;
+    case 'yarn':
+      params = ['--no-lockfile'];
+      break;
+  }
 
-    return {
-        command,
-        params
-    };
+  return {
+    command,
+    params
+  };
 }
 
 function getInstallPackageCommand(packageName, isDevDependency) {
-    let command = utils.findGlobalCommandByPrecedence(packageManagers);
-    let params = [];
+  let command = utils.findGlobalCommandByPrecedence(packageManagers);
+  let params = [];
 
-    switch (command){
-        case 'npm':
-            params = ['install', packageName, '--save', '--save-exact'];
-            break;
-        case 'pnpm':
-            params = ['install', packageName, '--save', '--save-exact', '--no-lock'];
-            break;
-        case 'yarn':
-            params = ['add', packageName, '--no-lockfile', '--exact'];
-            break;
-    }
+  switch (command) {
+    case 'npm':
+      params = ['install', packageName, '--save', '--save-exact'];
+      break;
+    case 'pnpm':
+      params = ['install', packageName, '--save', '--save-exact', '--no-lock'];
+      break;
+    case 'yarn':
+      params = ['add', packageName, '--no-lockfile', '--exact'];
+      break;
+  }
 
-    if (isDevDependency) {
-        params.push('-D'); //the same for all managers
-    }
+  if (isDevDependency) {
+    params.push('-D'); //the same for all managers
+  }
 
-    return {
-        command,
-        params
-    };
+  return {
+    command,
+    params
+  };
 }
