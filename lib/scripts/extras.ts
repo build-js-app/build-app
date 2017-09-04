@@ -15,8 +15,10 @@ export default {
 };
 
 function commandBuilder(yargs) {
-  return yargs.example('napp extras archive', 'Archive app sources');
-  return yargs.example('napp extras package-list-global', 'Show global packages');
+  return yargs
+    .example('napp extras archive', 'Archive app sources')
+    .example('napp extras package-list-global', 'Show global packages')
+    .example('napp extras package-updates', 'Show updates');
 }
 
 async function commandHandler(argv) {
@@ -27,6 +29,10 @@ async function commandHandler(argv) {
       break;
     case 'package-list-global':
       await showGlobalPackages();
+      break;
+    case 'package-updates':
+      runNpmCheckUpdates();
+      break;
     default:
       utils.logAndExit('Run with --help parameter to see available options');
       break;
@@ -76,4 +82,28 @@ function showGlobalPackages() {
     let version = globalPackagesInfo[packageName];
     utils.log(`${packageName}: ${version}`);
   }
+}
+
+function runNpmCheckUpdates() {
+  let checkerCommand = utils.findGlobalCommandByPrecedence(['npm-check', 'ncu']);
+
+  if (!checkerCommand) {
+    utils.logAndExit(`Please install 'npm-check-updates' or 'npm-check' package globally`);
+  }
+
+  utils.log('Server:', 'green');
+  utils.runCommand(checkerCommand, [], {
+    path: pathHelper.serverRelative('./'),
+    showOutput: true
+  });
+
+  utils.log('Client:', 'green');
+  utils.runCommand(checkerCommand, [], {
+    path: pathHelper.clientRelative('./'),
+    showOutput: true
+  });
+
+  utils.log('Note:', 'cyan');
+  utils.log(`To upgrade server/client packages run '${checkerCommand} -u' in server/client folder`);
+  checkerCommand;
 }
