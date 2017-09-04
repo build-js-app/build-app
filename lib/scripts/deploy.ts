@@ -176,9 +176,7 @@ function ensureBuild(skipClientBuild) {
 
   installModule.installAll();
 
-  return buildModule.build({
-    skipClientBuild
-  });
+  return buildModule.build(skipClientBuild ? 'server' : 'full');
 }
 
 function detectProcessManager() {

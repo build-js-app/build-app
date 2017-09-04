@@ -150,14 +150,14 @@ After that you can do:
 napp deploy --target heroku --remote dev
 ```
 
-## Road map
+## Npm Scripts
 
-Project is in active development. The next major features are:
+Some operations are expected to be configured as particular npm scripts:
 
-* Better JS support (ide, build in serve)
+Build client - 'build' script (in client folder)
 
-* Linters for JS/TS
+Serve client - 'start' script
 
-* Unit tests
+Serve server - 'start' script (in server folder)
 
-New feature requests are welcome.
+Also if pre-build/post-build scripts are defined in server/client package.json files corresponding scripts will be executed before/after server/client builds.

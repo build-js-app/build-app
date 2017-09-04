@@ -21,27 +21,36 @@ export default {
   build
 };
 
+type BUILD_TARGET = 'server' | 'client' | 'full';
+
 function commandBuilder(yargs) {
-  return (
-    yargs
-      //you have to make sure client has been built already, to speed up rapid builds with no client changes
-      .option('skip-client-build', {
-        alias: 'scb',
-        description: 'Skip client build'
-      })
-  );
+  return yargs
+    .option('server', {
+      alias: 's',
+      boolean: true,
+      description: 'build server'
+    })
+    .option('client', {
+      alias: 'c',
+      boolean: true,
+      description: 'build client'
+    });
 }
 
 async function commandHandler(argv) {
   envHelper.checkFolderStructure();
   envHelper.checkDependenciesInstalled();
 
-  await build({
-    skipClientBuild: argv.skipClientBuild
-  });
+  let target: BUILD_TARGET = 'full';
+
+  if (argv.server) target = 'server';
+  if (argv.client) target = 'client';
+  if (argv.server && argv.client) target = 'full';
+
+  await build(target);
 }
 
-async function build(options) {
+async function build(target: BUILD_TARGET = 'full') {
   let startTime = new Date();
 
   utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
@@ -49,9 +58,19 @@ async function build(options) {
   let buildDir = config.paths.build.root;
   utils.ensureEmptyDir(buildDir);
 
-  await buildServer();
+  if (target !== 'client') {
+    await buildServer();
+  } else {
+    utils.log(`Build server... ${chalk.yellow('skipped')}.`);
+  }
+  copyServerOutput();
 
-  buildClient(options.skipClientBuild);
+  if (target !== 'server') {
+    await buildClient();
+  } else {
+    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+  }
+  copyClientOutput();
 
   utils.log('Post build:');
 
@@ -75,15 +94,10 @@ async function build(options) {
   }
 }
 
-function buildServer() {
+async function buildServer() {
   utils.log('Server build:', 'green');
 
-  if (envHelper.checkNpmScriptExists('server', 'pre-build')) {
-    utils.runCommand('npm', ['run', 'pre-build'], {
-      title: 'Running pre-build npm script',
-      path: pathHelper.serverRelative('./')
-    });
-  }
+  runNpmScriptIfExists('pre-build', 'server');
 
   if (envHelper.isTsServerLang()) {
     envHelper.checkTypeScript();
@@ -95,64 +109,70 @@ function buildServer() {
     });
   }
 
-  let buildServerJsAction = new Promise((resolve, reject) => {
-    buildServerJs(() => {
+  await utils.logOperation('Transpiling JavaScript', buildServerJs);
+
+  runNpmScriptIfExists('post-build', 'server');
+}
+
+function copyServerOutput() {
+  utils.logOperation('Copying assets', () => {
+    utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
+
+    let serverPackagePath = pathHelper.serverRelative('./package.json');
+    let serverPackageJson = utils.readJsonFile(serverPackagePath);
+
+    let rootPackagePath = pathHelper.projectRelative('./package.json');
+    let rootPackage = utils.readJsonFile(rootPackagePath);
+
+    let buildPackageJson = {
+      name: rootPackage.name,
+      version: rootPackage.version,
+      scripts: {
+        start: 'node index.js'
+      },
+      dependencies: serverPackageJson.dependencies
+    };
+
+    fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
+  });
+}
+
+function buildServerJs() {
+  return new Promise((resolve, reject) => {
+    let webpackConfig = null;
+
+    if (envHelper.isTsServerLang()) {
+      webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
+    } else {
+      webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
+    }
+
+    webpack(webpackConfig).run((err, stats) => {
+      if (err) return reject(err);
+
+      webpackHelper.handleErrors(err, stats, true);
+
       resolve();
     });
   });
-
-  return utils.logOperation('Transpiling JavaScript', buildServerJsAction).then(() => {
-    utils.logOperation('Copying assets', () => {
-      utils.copyToPackage(pathHelper.serverRelative(config.paths.server.bundle), './server/server.js');
-
-      let serverPackagePath = pathHelper.serverRelative('./package.json');
-      let serverPackageJson = utils.readJsonFile(serverPackagePath);
-
-      let rootPackagePath = pathHelper.projectRelative('./package.json');
-      let rootPackage = utils.readJsonFile(rootPackagePath);
-
-      let buildPackageJson = {
-        name: rootPackage.name,
-        version: rootPackage.version,
-        scripts: {
-          start: 'node index.js'
-        },
-        dependencies: serverPackageJson.dependencies
-      };
-
-      fs.outputJsonSync(pathHelper.buildRelative('./package.json'), buildPackageJson);
-    });
-  });
 }
 
-function buildServerJs(callback) {
-  let webpackConfig = null;
-
-  if (envHelper.isTsServerLang()) {
-    webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
-  } else {
-    webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
-  }
-
-  webpack(webpackConfig).run((err, stats) => {
-    webpackHelper.handleErrors(err, stats, true);
-
-    if (callback) callback();
-  });
-}
-
-function buildClient(skipClientBuild) {
+function buildClient() {
   utils.log('Client build:', 'green');
 
-  if (!skipClientBuild) {
-    utils.runCommand('npm', ['run', 'build'], {
-      title: 'Build client',
-      path: pathHelper.clientRelative('./')
-    });
-  } else {
-    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
-  }
+  runNpmScriptIfExists('pre-build', 'client');
 
+  utils.runCommand('npm', ['run', 'build'], {
+    title: 'Build client',
+    path: pathHelper.clientRelative('./')
+  });
+
+  runNpmScriptIfExists('post-build', 'client');
+
+  return Promise.resolve();
+}
+
+function copyClientOutput() {
   utils.logOperation('Copying assets', () => {
     utils.copyToPackage(pathHelper.clientRelative(config.paths.client.build), './client');
 
@@ -166,12 +186,19 @@ function buildClient(skipClientBuild) {
       }
     }
   });
-
-  return Promise.resolve();
 }
 
 function copyDataFolder() {
   utils.copyToPackage(pathHelper.serverRelative(config.paths.server.data), './data/');
 
   utils.ensureEmptyDir(pathHelper.buildRelative('./data/config'));
+}
+
+function runNpmScriptIfExists(scriptName: string, target: 'server' | 'client') {
+  if (envHelper.checkNpmScriptExists(target, scriptName)) {
+    utils.runCommand('npm', ['run', scriptName], {
+      title: `Running ${scriptName} npm script`,
+      path: target === 'server' ? pathHelper.serverRelative('./') : pathHelper.clientRelative('./')
+    });
+  }
 }
