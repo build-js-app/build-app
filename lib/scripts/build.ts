@@ -109,7 +109,7 @@ async function buildServer() {
     });
   }
 
-  await utils.logOperation('Transpiling JavaScript', buildServerJs);
+  await utils.logOperation('Transpiling JavaScript', buildServerJs());
 
   runNpmScriptIfExists('post-build', 'server');
 }
