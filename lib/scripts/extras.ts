@@ -1,5 +1,7 @@
 import * as _ from 'lodash';
 import * as fs from 'fs-extra';
+import * as psList from 'ps-list';
+import * as fkill from 'fkill';
 
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
@@ -18,7 +20,8 @@ function commandBuilder(yargs) {
   return yargs
     .example('napp extras archive', 'Archive app sources')
     .example('napp extras package-list-global', 'Show global packages')
-    .example('napp extras package-updates', 'Show updates');
+    .example('napp extras package-updates', 'Show updates')
+    .example('napp extras kill-all', 'Kill all node processes');
 }
 
 async function commandHandler(argv) {
@@ -32,6 +35,9 @@ async function commandHandler(argv) {
       break;
     case 'package-updates':
       runNpmCheckUpdates();
+      break;
+    case 'kill-all':
+      await killAll();
       break;
     default:
       utils.logAndExit('Run with --help parameter to see available options');
@@ -106,4 +112,25 @@ function runNpmCheckUpdates() {
   utils.log('Note:', 'cyan');
   utils.log(`To upgrade server/client packages run '${checkerCommand} -u' in server/client folder`);
   checkerCommand;
+}
+
+async function killAll() {
+  try {
+    let processes = await psList();
+    let count = 0;
+    for (let pr of processes) {
+      if (pr.cmd === 'node.exe' || pr.cmd === 'node') {
+        if (pr.pid !== process.pid) {
+          try {
+            count++;
+            await fkill(pr.pid, {force: true, tree: true});
+          } catch (err) {}
+        }
+      }
+    }
+    let message = count ? `${count} node processes were terminated.` : `No other node processes are running.`;
+    utils.log(message);
+  } catch (err) {
+    utils.log(err);
+  }
 }
