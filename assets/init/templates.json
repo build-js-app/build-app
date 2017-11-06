@@ -33,6 +33,10 @@
         "mongo": {
           "repo": "build-js-app/template-full-server",
           "branch": "mongo"
+        },
+        "sql": {
+          "repo": "build-js-app/template-full-server",
+          "branch": "sequelize"
         }
       },
       "client": {
