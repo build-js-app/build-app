@@ -224,11 +224,12 @@ function copyAssets(appName) {
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
 
   //copy client build placeholder
-  utils.ensureEmptyDir(pathHelper.clientRelative(config.paths.client.build));
-  fs.copySync(
-    pathHelper.moduleRelative('./assets/init/clientBuildPlaceholder.html'),
-    pathHelper.clientRelative(config.paths.client.build, './index.html')
-  );
+  let clientIndexPath = pathHelper.clientRelative(config.paths.client.build, './index.html');
+
+  if (!fs.existsSync(clientIndexPath)) {
+    utils.ensureEmptyDir(pathHelper.clientRelative(config.paths.client.build));
+    fs.copySync(pathHelper.moduleRelative('./assets/init/clientBuildPlaceholder.html'), clientIndexPath);
+  }
 }
 
 function checkIdeOption(ide) {
