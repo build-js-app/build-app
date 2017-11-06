@@ -7,6 +7,7 @@ import pathHelper from '../helpers/pathHelper';
 import gitHelper from '../helpers/gitHelper';
 import utils from '../helpers/utils';
 import envHelper from '../helpers/envHelper';
+import config from '../config/config';
 
 export default {
   command: 'init <app-name>',
@@ -221,6 +222,13 @@ function copyAssets(appName) {
   fs.writeJSONSync(pathHelper.projectRelative('./package.json'), appPackage);
 
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
+
+  //copy client build placeholder
+  utils.ensureEmptyDir(pathHelper.clientRelative(config.paths.client.build));
+  fs.copySync(
+    pathHelper.moduleRelative('./assets/init/clientBuildPlaceholder.html'),
+    pathHelper.clientRelative(config.paths.client.build, './index.html')
+  );
 }
 
 function checkIdeOption(ide) {
