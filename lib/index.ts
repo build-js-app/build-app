@@ -11,6 +11,7 @@ import buildModule from './scripts/build';
 import serveModule from './scripts/serve';
 import deployModule from './scripts/deploy';
 import extrasModule from './scripts/extras';
+import seedModule from './scripts/seed';
 
 let commands = ['init', 'install', 'build', 'serve', 'deploy'];
 
@@ -29,6 +30,7 @@ yargs
   .command(serveModule)
   .command(deployModule)
   .command(extrasModule)
+  .command(seedModule)
   .command(
     '*',
     '',

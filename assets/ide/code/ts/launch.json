@@ -20,6 +20,16 @@
       "address": "localhost",
       "port": 9999,
       "protocol": "inspector"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Seed Data",
+      "program": "${workspaceRoot}/server/src/index.ts",
+      "args": ["run", "seed"],
+      "sourceMaps": true,
+      "outFiles": ["${workspaceRoot}/server/build/src/**/*"],
+      "preLaunchTask": "compile_ts"
     }
   ]
 }
