@@ -223,6 +223,11 @@ function copyAssets(appName) {
 
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
 
+  fs.copySync(
+    pathHelper.moduleRelative('./assets/init/quickTest'),
+    pathHelper.serverRelative(config.paths.server.src, './test.ts')
+  );
+
   //copy client build placeholder
   let clientIndexPath = pathHelper.clientRelative(config.paths.client.build, './index.html');
 
