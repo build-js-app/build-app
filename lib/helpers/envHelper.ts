@@ -188,7 +188,7 @@ function getGlobalPackagesInfo() {
 
   let result = _(installedPackages)
     .map(pkgPath => {
-      let pkg = utils.readJsonFile(pathHelper.path.resolve(globalModules, pkgPath));
+      let pkg = utils.readJsonFile(pathHelper.path.resolve(globalModules, pkgPath as string));
       return [pkg.name, pkg.version];
     })
     .fromPairs()

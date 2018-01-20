@@ -7,5 +7,5 @@
     "rootDir": "./lib",
     "allowUnreachableCode": true
   },
-  "exclude": ["node_modules", "dist", "templates"]
+  "exclude": ["node_modules", "dist", "templates", "assets"]
 }

@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
-
+import * as _ from 'lodash';
 import * as chalk from 'chalk';
+import * as inquirer from 'inquirer';
 import * as validateProjectName from 'validate-npm-package-name';
 
 import pathHelper from '../helpers/pathHelper';
@@ -10,11 +11,13 @@ import envHelper from '../helpers/envHelper';
 import config from '../config/config';
 
 export default {
-  command: 'init <app-name>',
+  command: 'init [app-name]',
   describe: 'Init new project',
   handler: commandHandler,
   builder: commandBuilder
 };
+
+const templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
 
 const supportedIdes = {
   code: 'Visual Studio Code',
@@ -59,28 +62,15 @@ function commandHandler(argv) {
     return showTemplatesList();
   }
 
-  if (argv.ide) {
-    checkIdeOption(argv.ide);
+  if (!argv.appName) {
+    interactiveInit();
+  } else {
+    cliInit(argv);
   }
-
-  if (argv.default) {
-    return initCommand(argv.appName, 'simple', 'ts', 'react', argv.ide);
-  }
-
-  let params = [argv.project, argv.server, argv.client];
-
-  for (let param of params) {
-    if (!param) {
-      console.log(`Please specify project, server and client options or use defaults with --default option.`);
-      return console.log(`Run init -h to get more information`);
-    }
-  }
-
-  initCommand(argv.appName, argv.project, argv.server, argv.client, argv.ide);
 }
 
 async function initCommand(appName, project, serverTemplate, clientTemplate, ide) {
-  checkAppName(appName);
+  if (!checkAppName(appName)) process.exit(1);
 
   let templatesInfo = getTemplatesInfo(project, serverTemplate, clientTemplate);
 
@@ -140,8 +130,9 @@ function checkAppName(appName) {
     console.error(`Could not create a project called ${chalk.red(`"${appName}"`)} because of npm naming restrictions:`);
     printValidationResults(validationResult.errors);
     printValidationResults(validationResult.warnings);
-    process.exit(1);
+    return false;
   }
+  return true;
 }
 
 function printValidationResults(results) {
@@ -153,8 +144,6 @@ function printValidationResults(results) {
 }
 
 function showTemplatesList() {
-  let templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
-
   let logWithTabs = (message, tabs) => {
     let tabStr = '';
     for (let i = 0; i <= tabs - 1; i++) tabStr += ' ';
@@ -179,8 +168,6 @@ function showTemplatesList() {
 }
 
 function getTemplatesInfo(project, serverTemplate, clientTemplate) {
-  let templateRegistry = utils.readJsonFile(pathHelper.moduleRelative('./assets/init/templates.json'));
-
   let params = [];
 
   if (!templateRegistry.projects[project]) {
@@ -224,7 +211,7 @@ function copyAssets(appName) {
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
 
   fs.copySync(
-    pathHelper.moduleRelative('./assets/init/quickTest'),
+    pathHelper.moduleRelative('./assets/init/quickTest.ts'),
     pathHelper.serverRelative(config.paths.server.src, './test.ts')
   );
 
@@ -270,4 +257,85 @@ function initLinter() {
     let to = pathHelper.serverRelative('./tslint.json');
     fs.copySync(from, to);
   }
+}
+
+function cliInit(argv) {
+  if (argv.ide) {
+    checkIdeOption(argv.ide);
+  }
+
+  if (argv.default) {
+    return initCommand(argv.appName, 'simple', 'ts', 'react', argv.ide);
+  }
+
+  let params = [argv.project, argv.server, argv.client];
+
+  for (let param of params) {
+    if (!param) {
+      console.log(`Please specify project, server and client options or use defaults with --default option.`);
+      return console.log(`Run init -h to get more information`);
+    }
+  }
+
+  initCommand(argv.appName, argv.project, argv.server, argv.client, argv.ide);
+}
+
+function interactiveInit() {
+  utils.log('Initialize new app:', 'cyan');
+
+  let getProjectChoices = () => {
+    let projects = Object.keys(templateRegistry.projects);
+    return projects.map(p => ({value: p, name: templateRegistry.projects[p].description}));
+  };
+
+  let getTemplatesOptions = (p, group) => {
+    let project = templateRegistry.projects[p];
+    return Object.keys(project[group]).map(t => ({
+      value: t,
+      name: project[group][t].description
+    }));
+  };
+
+  let questions = [
+    {
+      type: 'input',
+      name: 'appName',
+      message: 'What is you app name?',
+      validate: value => {
+        return checkAppName(value);
+      }
+    },
+    {
+      type: 'list',
+      name: 'project',
+      message: 'Choose from available projects',
+      choices: getProjectChoices()
+    },
+    {
+      type: 'list',
+      name: 'server',
+      message: 'Choose back-end template:',
+      choices: answers => getTemplatesOptions(answers.project, 'server')
+    },
+    {
+      type: 'list',
+      name: 'client',
+      message: 'Choose front-end template:',
+      choices: answers => getTemplatesOptions(answers.project, 'client')
+    },
+    {
+      type: 'list',
+      name: 'ide',
+      message: 'Choose front-end template:',
+      choices: answers => [
+        {name: 'VS Code', value: 'code'},
+        {name: 'WebStorm', value: 'ws'},
+        {name: 'None', value: 'none'}
+      ]
+    }
+  ];
+
+  inquirer.prompt(questions).then(answers => {
+    initCommand(answers.appName, answers.project, answers.server, answers.client, answers.ide);
+  });
 }
