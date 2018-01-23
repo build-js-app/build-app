@@ -5,10 +5,11 @@ export default {
   getInstallPackageCommand
 };
 
-const packageManagers = ['pnpm', 'yarn', 'npm'];
+export const packageManagers = ['pnpm', 'yarn', 'npm'];
 
-function getInstallPackagesCommand() {
-  let command = utils.findGlobalCommandByPrecedence(packageManagers);
+function getInstallPackagesCommand(packageManager = null) {
+  let command = getCommand(packageManager);
+
   let params = [];
 
   switch (command) {
@@ -29,8 +30,9 @@ function getInstallPackagesCommand() {
   };
 }
 
-function getInstallPackageCommand(packageName, isDevDependency) {
-  let command = utils.findGlobalCommandByPrecedence(packageManagers);
+function getInstallPackageCommand(packageName, isDevDependency, packageManager) {
+  let command = getCommand(packageManager);
+
   let params = [];
 
   switch (command) {
@@ -53,4 +55,10 @@ function getInstallPackageCommand(packageName, isDevDependency) {
     command,
     params
   };
+}
+
+function getCommand(packageManager) {
+  let commands = packageManager ? [packageManager] : packageManagers;
+
+  return utils.findGlobalCommandByPrecedence(commands);
 }
