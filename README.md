@@ -6,8 +6,8 @@ The aim of the project is to simplify development of modern full-stack JS applic
 
 Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choises such as React/Vue/Angular for client, Mongo/Postgres for storage.
 
-*Build App* works on macOS, Windows, and Linux.
-Project is in early stage of development. 
+_Build App_ works on macOS, Windows, and Linux.
+Project is in early stage of development.
 If something doesn’t work please file an issue.
 
 ## Getting started
@@ -19,26 +19,23 @@ npm install -g build-app
 # see list of available commands
 app-scripts --help
 
-# init empty project with default templates
-app-scripts init my-app --default
+# init new project
+app-scripts init
 
 # change directory to new project folder
 cd my-app
 
-# install project dependencies
-app-scripts install
-
-# build project for production (and before running in dev mode)
-app-scripts build
-
-# serve project in dev mode
-app-scripts serve --server (--client)
-
+# seed project
+app-scripts seed
 ```
+
+To run server: open project in IDE (preferably VS Code) and use available configuration alternatively you can run it with `app-script serve -s`
+
+To run client run in terminal: `app-scripts serve -c`
 
 ## Project structure
 
-*Build App* assumes some predifined project structure.
+_Build App_ assumes some predifined project structure.
 
 Project consists of server and client parts.
 
@@ -56,7 +53,7 @@ More details how to setup client-side build you can find in docs for particualr 
 
 React: [create-react-app](https://github.com/facebookincubator/create-react-app)
 
-Vue: [vbuild](https://github.com/egoist/vbuild)
+Vue: [poi](https://github.com/egoist/poi)
 
 Angular: [angular-cli](https://github.com/angular/angular-cli)
 
@@ -64,7 +61,7 @@ Angular: [angular-cli](https://github.com/angular/angular-cli)
 
 Both JS/TS js flavors are supported. For JS you can use latest language features like ES6, async/await and others. Code is compiled to ES5 during the build.
 
-Server entry file should be located at ./src/index (.ts or .js). 
+Server entry file should be located at ./src/index (.ts or .js).
 
 There are some special folders
 
@@ -74,10 +71,17 @@ There are some special folders
 
 ## app-script commands
 
-After build-app is installed globally app-scripts command is available globally. It has different commands (scripts).
+After build-app is installed globally app-scripts command is available globally. It has different commands (scripts). Note instead of 'app-scripts' command you can use 'napp' alias.
 
 ### Init
-*init* command seeds empty project. There are separate templates for server and client parts.
+
+_init_ command seeds empty project. There are separate templates for server and client parts.
+
+For interactive init run init command with no parameters:
+
+```sh
+app-scripts init
+```
 
 To see all available templates run:
 
@@ -90,15 +94,24 @@ To seed project with particular templates use --project --server --client option
 ```sh
 app-scripts init my-app --project simple --server ts --client react
 ```
+
 To init basic IDE settings use option --ide (currently supported ws/code)
 
 ```
 app-scripts init my-app --default --ide code
 ```
 
+### Seed
+
+_seed_ command do initial project setup. That includes installing dependencies, building server/client code, and running seed task if available in template. Note you can run install and build commands separately later.
+
+```
+app-scripts seed
+```
+
 ### Install
 
-*install* command installs dependencies for both client and server project parts. It can use one of following package managers under the hood: npm, yarn, pnpm. If pnpm is installed globally it is used, then yarn used if available, then npm.
+_install_ command installs dependencies for both client and server project parts. It can use one of following package managers under the hood: npm, yarn, pnpm. If pnpm is installed globally it is used, then yarn used if available, then npm.
 
 The same can be done manually with
 
@@ -108,11 +121,11 @@ npm install
 
 cd ../{client_dir}
 npm install
-``` 
+```
 
 ### Build
 
-*build* command creates production ready build in build folder (./build by default).
+_build_ command creates production ready build in build folder (./build by default).
 
 To start server run index.js file. You may need to install dependencies first.
 
@@ -122,7 +135,7 @@ Build command builds server and client separately and then combines them togethe
 
 Deploys application in various modes (by using target parameter):
 
-*local* deployments:
+_local_ deployments:
 
 ```bash
 napp deploy
@@ -130,9 +143,9 @@ napp deploy
 
 Build package copied to deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
 
-*heroku* deployments:
+_heroku_ deployments:
 
-Initial setup 
+Initial setup
 
 ```bash
 cd deploy/
