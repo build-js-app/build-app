@@ -4,7 +4,7 @@ import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
 import config from '../config/config';
 import envHelper from '../helpers/envHelper';
-import packagesHelper from '../helpers/packagesHelper';
+import packagesHelper, {packageManagers} from '../helpers/packagesHelper';
 
 export default {
   command: 'install [package]',
@@ -32,7 +32,11 @@ function commandBuilder(yargs) {
       boolean: true,
       description: 'install as devDependency'
     })
+    .option('with', {
+      description: 'specify package manager'
+    })
     .example('install', 'install all dependencies for server/client, check global dependencies')
+    .example('install --with npm', 'install all dependencies with npm package manager')
     .example('install lodash -s', 'install lodash to server')
     .example('install jquery -c', 'install jquery to client')
     .example('install typescript -c -D', 'install typescript to server in in your devDependencies');
@@ -41,8 +45,22 @@ function commandBuilder(yargs) {
 function commandHandler(argv) {
   envHelper.checkFolderStructure();
 
+  let packageManager = null;
+
+  if (argv.with) {
+    let isValidPackage = _.find(packageManagers, item => {
+      return item === argv.with;
+    });
+
+    if (!isValidPackage) {
+      utils.logAndExit(`Incorrect package manager '${argv.with}'. Valid values are: [${packageManagers.join(', ')}].`);
+    }
+
+    packageManager = argv.with;
+  }
+
   if (!argv.package) {
-    return installAll();
+    return installAll(packageManager);
   }
 
   //TODO demand -s or -c
@@ -52,10 +70,10 @@ function commandHandler(argv) {
     target = 'client';
   }
 
-  return installPackage(argv.package, target, argv.dev);
+  return installPackage(argv.package, target, argv.dev, packageManager);
 }
 
-function installAll() {
+function installAll(packageManager = null) {
   try {
     checkGlobalDependencies();
   } catch (err) {
@@ -63,7 +81,7 @@ function installAll() {
     utils.log('Cannot check global dependencies.', 'red');
   }
 
-  let commandInfo = packagesHelper.getInstallPackagesCommand();
+  let commandInfo = packagesHelper.getInstallPackagesCommand(packageManager);
 
   utils.runCommand(commandInfo.command, commandInfo.params, {
     title: `Install server dependencies with ${commandInfo.command}`,
@@ -96,8 +114,8 @@ function checkGlobalDependencies() {
   envHelper.reportMissingGlobalDependencies(dependenciesToInstall);
 }
 
-function installPackage(packageName, target, isDevDependency) {
-  let commandInfo = packagesHelper.getInstallPackageCommand(packageName, isDevDependency);
+function installPackage(packageName, target, isDevDependency, packageManager = null) {
+  let commandInfo = packagesHelper.getInstallPackageCommand(packageName, isDevDependency, packageManager);
 
   let folder = target === 'server' ? pathHelper.serverRelative('./') : pathHelper.clientRelative('./');
 
