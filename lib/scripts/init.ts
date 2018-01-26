@@ -172,7 +172,7 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
 
   if (!templateRegistry.projects[project]) {
     let projects = Object.keys(templateRegistry.projects);
-    utils.logAndExit(`Incorrect project name '${project}'. Valid values are: [${projects.join(', ')}].`);
+    utils.assertValueIsInTheList(project, projects, `Incorrect project name '${project}'.`);
   }
 
   let projectInfo = templateRegistry.projects[project];
@@ -180,7 +180,7 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
   let serverTemplateInfo = projectInfo.server[serverTemplate];
   if (!serverTemplateInfo) {
     let templates = Object.keys(projectInfo.server);
-    utils.logAndExit(`Incorrect server template '${serverTemplate}'. Valid values are: [${templates.join(', ')}].`);
+    utils.assertValueIsInTheList(serverTemplate, templates, `Incorrect server template '${serverTemplate}'.`);
   }
   serverTemplateInfo.name = serverTemplate;
 
@@ -188,7 +188,7 @@ function getTemplatesInfo(project, serverTemplate, clientTemplate) {
 
   if (!clientTemplateInfo) {
     let templates = Object.keys(projectInfo.client);
-    utils.logAndExit(`Incorrect client template '${clientTemplate}'. Valid values are: [${templates.join(', ')}].`);
+    utils.assertValueIsInTheList(clientTemplate, templates, `Incorrect client template '${clientTemplate}'.`);
   }
   clientTemplateInfo.name = clientTemplate;
 

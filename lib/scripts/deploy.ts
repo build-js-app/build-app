@@ -11,11 +11,18 @@ import installModule from '../scripts/install';
 import buildModule from '../scripts/build';
 
 export default {
-  command: 'deploy',
+  command: 'deploy [command]',
   describe: 'Deploy project for production',
   handler: commandHandler,
   builder: commandBuilder
 };
+
+const TARGET_HEROKU = 'heroku';
+const TARGET_LOCAL = 'local';
+const COMMAND_STOP = 'stop';
+const COMMAND_INIT = 'init';
+const VALID_TARGETS = [TARGET_LOCAL, TARGET_HEROKU];
+const VALID_COMMANDS = [COMMAND_STOP, COMMAND_INIT];
 
 function commandBuilder(yargs) {
   return yargs
@@ -26,9 +33,13 @@ function commandBuilder(yargs) {
       alias: 't',
       description: 'Deployment target, supported targets are heroku/now/local, local is deafult'
     })
-    .option('remote', {
-      alias: 'r',
-      description: 'For heroku only, specify remote name, heroku by default'
+    .option('instance', {
+      alias: 'i',
+      description: 'For heroku only, specify instance name (dev, production, etc)'
+    })
+    .option('heroku-app', {
+      alias: 'happ',
+      description: 'For heroku only, specify Heroku App ID'
     })
     .option('skip-client-build', {
       alias: 'scb',
@@ -36,7 +47,10 @@ function commandBuilder(yargs) {
     })
     .example('deploy', 'Deploy project for production (starts project with one of supported process managers).')
     .example('deploy --stop', 'Stop running app (it is removed from process list and cannot be restarted again).')
-    .example('deploy -t heroku -r dev', 'Deploys app to heroku server using dev remote.');
+    .example(
+      'deploy -t heroku -i dev -happ my-heroku-app',
+      'Deploys app to heroku server using dev instance, which corresponds to heroku APP_ID "my-heroku-app".'
+    );
 }
 
 async function commandHandler(argv) {
@@ -44,27 +58,17 @@ async function commandHandler(argv) {
 
   let processManager = detectProcessManager();
   let appName = envHelper.getAppName();
-  let remote = argv.remote;
+  let instance = argv.instance;
 
   if (argv.stop) {
     return utils.logOperation(`Stop '${appName}' application process`, () => {
-      stopApp(processManager, appName);
+      stopLocalApp(processManager, appName);
     });
   }
 
-  let target = 'local';
-  if (argv.target) {
-    //TODO check target is one of supported values
-    target = argv.target;
+  let target = getTarget(argv);
 
-    if (target === 'heroku') {
-      if (!argv.remote) {
-        utils.logAndExit('Specify remote for heroku deployments');
-      }
-    }
-  }
-
-  let deployDir = pathHelper.projectRelative(config.paths.deploy.root);
+  let deployDir = pathHelper.projectRelative(config.paths.deploy.root, target);
   let buildDir = pathHelper.projectRelative(config.paths.build.root);
 
   let deployParams = {
@@ -73,17 +77,20 @@ async function commandHandler(argv) {
     deployDir,
     buildDir,
     processManager,
-    remote
+    instance,
+    argv
   };
 
   try {
+    if (!utils.dirHasContent(deployDir)) {
+      utils.ensureEmptyDir(deployDir);
+    }
+
+    beforeDeployInit(deployParams);
+
     beforeDeploy(deployParams);
 
     await ensureBuild(argv.skipClientBuild);
-
-    if (fs.existsSync(deployDir)) {
-      stopApp(processManager, appName);
-    }
 
     utils.logOperation('Copy build assets', () => {
       let isFirstDeploy = !fs.existsSync(deployDir);
@@ -106,17 +113,89 @@ async function commandHandler(argv) {
   }
 }
 
-function beforeDeploy(deployParams) {
-  const {target, processManager, appName, remote, deployDir} = deployParams;
+function getTarget(argv) {
+  let target = TARGET_LOCAL;
+
+  if (argv.target) {
+    utils.assertValueIsInTheList(argv.target, VALID_TARGETS, `Invalid deploy target.`);
+    target = argv.target;
+
+    if (target === TARGET_HEROKU) {
+      if (!argv.instance) {
+        utils.logAndExit('Specify instance for heroku deployments');
+      }
+    }
+  }
+
+  return target;
+}
+
+function beforeDeployInit(deployParams) {
+  const {target, processManager, appName, instance, deployDir, argv} = deployParams;
 
   switch (target) {
-    case 'local':
+    case TARGET_LOCAL:
       break;
-    case 'heroku':
-      utils.runCommand('git', ['checkout', remote], {
-        title: `Switch to "${remote}" branch`,
-        path: deployDir
-      });
+    case TARGET_HEROKU:
+      let gitCommand = (args, title = '', allowError = false) =>
+        utils.runCommand('git', args, {
+          title,
+          path: deployDir,
+          ignoreError: true
+        });
+
+      let hasGitFolder = fs.existsSync(pathHelper.path.join(deployDir, '.git'));
+
+      if (!hasGitFolder) {
+        gitCommand(['init']);
+
+        let copyAsset = (from, to) => {
+          let assetName = `./assets/deploy/heroku/${from}`;
+          let fromPath = pathHelper.moduleRelative(assetName);
+          let toPath = pathHelper.path.join(deployDir, to);
+          fs.copySync(fromPath, toPath);
+        };
+
+        copyAsset('dummyPackage.json', 'package.json');
+        copyAsset('dummyServer.js', 'index.js');
+
+        gitCommand(['add', '.']);
+        gitCommand(['commit', '-am', 'initial (dummy) deployment']);
+      }
+
+      let remoteExists = () => {
+        let output = utils.getCommandOutput('git', ['rev-parse', '--verify', '--quiet', instance], deployDir);
+
+        return output.output ? true : false;
+      };
+
+      let remoteHasMaster = () => {
+        let output = utils.getCommandOutput('git', ['ls-remote', '--heads', instance, 'master'], deployDir);
+
+        return output.output ? true : false;
+      };
+
+      if (!remoteExists()) {
+        let herokuAppId = argv.herokuApp;
+        if (!herokuAppId) {
+          utils.logAndExit(
+            'Specify Heroku App ID (--heroku-app) for initial deployment (see "deploy" command help for more information)'
+          );
+        }
+
+        utils.runCommand('heroku', ['git:remote', '-a', herokuAppId, '-r', instance], {
+          title: `Init local branch for instance ${instance}`,
+          path: deployDir
+        });
+
+        if (!remoteHasMaster()) {
+          gitCommand(['push', instance, 'master'], 'Doing Heroku initial (dummy) deployment');
+        }
+
+        gitCommand(['fetch', instance]);
+
+        gitCommand(['checkout', `${instance}/master`, '-b', instance]);
+      }
       break;
     default:
       throw new Error(`Unsupported target: "${target}"`);
@@ -124,11 +203,27 @@ function beforeDeploy(deployParams) {
   }
 }
 
-function afterDeploy(deployParams) {
-  const {target, processManager, appName, remote, deployDir} = deployParams;
+function beforeDeploy(deployParams) {
+  const {target, processManager, appName, instance, deployDir} = deployParams;
 
   switch (target) {
-    case 'local':
+    case TARGET_LOCAL:
+      stopLocalApp(processManager, appName);
+      break;
+    case TARGET_HEROKU:
+      utils.runCommand('git', ['checkout', instance], {
+        title: `Switch to "${instance}" branch`,
+        path: deployDir
+      });
+      break;
+  }
+}
+
+function afterDeploy(deployParams) {
+  const {target, processManager, appName, instance, deployDir} = deployParams;
+
+  switch (target) {
+    case TARGET_LOCAL:
       //install packages there
       let installCommandInfo = packagesHelper.getInstallPackagesCommand();
       utils.runCommand(installCommandInfo.command, installCommandInfo.params, {
@@ -136,10 +231,10 @@ function afterDeploy(deployParams) {
         path: deployParams.deployDir
       });
 
-      startApp(processManager, appName);
+      startLocalApp(processManager, appName);
       break;
-    case 'heroku':
-      utils.runCommand('git', ['pull', remote], {
+    case TARGET_HEROKU:
+      utils.runCommand('git', ['pull', instance], {
         title: `Pull changes from remote`,
         path: deployDir
       });
@@ -159,7 +254,7 @@ function afterDeploy(deployParams) {
         }
       );
 
-      utils.runCommand('git', ['push', remote, `${remote}:master`], {
+      utils.runCommand('git', ['push', instance, `${instance}:master`], {
         title: 'Deploying to Heroku...',
         showOutput: true,
         path: deployDir
@@ -189,7 +284,7 @@ function detectProcessManager() {
   return processManager;
 }
 
-function stopApp(processManager, appName) {
+function stopLocalApp(processManager, appName) {
   let params = [];
 
   if (processManager === 'forever') {
@@ -201,13 +296,13 @@ function stopApp(processManager, appName) {
   }
 
   utils.runCommand(processManager, params, {
-    path: pathHelper.projectRelative(config.paths.deploy.root),
+    path: getLocalDeploymentDir(),
     ignoreError: true,
     showOutput: false
   });
 }
 
-function startApp(processManager, appName) {
+function startLocalApp(processManager, appName) {
   let params = [];
 
   if (processManager === 'forever') {
@@ -220,8 +315,12 @@ function startApp(processManager, appName) {
 
   utils.runCommand(processManager, params, {
     title: 'Start process',
-    path: pathHelper.projectRelative(config.paths.deploy.root)
+    path: getLocalDeploymentDir()
   });
 
-  utils.logAndExit(`Process has been started. By default it is available on ${chalk.cyan('localhost:5000')}.`);
+  utils.logAndExit(`Process has been started. By default it is available on ${chalk.cyan('http://localhost:5000')}.`);
+}
+
+function getLocalDeploymentDir() {
+  return pathHelper.projectRelative(config.paths.deploy.root, TARGET_LOCAL);
 }

@@ -48,13 +48,7 @@ function commandHandler(argv) {
   let packageManager = null;
 
   if (argv.with) {
-    let isValidPackage = _.find(packageManagers, item => {
-      return item === argv.with;
-    });
-
-    if (!isValidPackage) {
-      utils.logAndExit(`Incorrect package manager '${argv.with}'. Valid values are: [${packageManagers.join(', ')}].`);
-    }
+    utils.assertValueIsInTheList(argv.with, packageManagers, `Incorrect package manager '${argv.with}'.`);
 
     packageManager = argv.with;
   }

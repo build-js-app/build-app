@@ -23,6 +23,7 @@ export default {
   copyToPackage,
   commandExists,
   runCommand,
+  getCommandOutput,
   ensureEmptyDir,
   isEmptyDir,
   dirHasContent,
@@ -33,7 +34,8 @@ export default {
   readJsonFile,
   copyTemplate,
   copyTemplateFolder,
-  findGlobalCommandByPrecedence
+  findGlobalCommandByPrecedence,
+  assertValueIsInTheList
 };
 
 type Utils_CL_Color = 'red' | 'green' | 'cyan';
@@ -216,6 +218,33 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
   return result;
 }
 
+function getCommandOutput(cmd, args, path) {
+  let result = {
+    error: null,
+    output: null
+  };
+
+  try {
+    let commandResult = spawn(cmd, args, {
+      cwd: path
+    });
+
+    if (commandResult.status !== 0) {
+      if (!_.isEmpty(commandResult.error)) {
+        result.error = commandResult.error;
+      } else {
+        result.error = commandResult.output[2].toString('utf8');
+      }
+    } else {
+      commandResult.output[1].toString('utf8');
+    }
+  } catch (err) {
+    result.error = err;
+  }
+
+  return result;
+}
+
 async function logOperation(title: string, operation: Function | Promise<any>) {
   process.stdout.write(`${title}... `);
 
@@ -311,4 +340,15 @@ function findGlobalCommandByPrecedence(commands) {
   }
 
   return null;
+}
+
+function assertValueIsInTheList(value, list, message) {
+  let isValid = _.find(list, item => {
+    return item === value;
+  });
+
+  if (!isValid) {
+    log(message, 'red');
+    logAndExit(`Valid values are: [${list.join(', ')}].`);
+  }
 }

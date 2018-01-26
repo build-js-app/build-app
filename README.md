@@ -4,7 +4,16 @@
 
 The aim of the project is to simplify development of modern full-stack JS applications, providing most of basic dev operations out of the box (build, run dev mode, lint, etc).
 
-Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choises such as React/Vue/Angular for client, Mongo/Postgres for storage.
+Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choices such as React/Vue/Angular for client, Mongo/PostgreSQL for storage.
+
+However some technologies have primary support those are TypeScript for serer side language, Mongo/PostgreSQL for storage, React/Vue for client and VS Code as IDE.
+
+You can see deployed templates here:
+
+[React / PostgreSQL on Heroku](https://napp-full-tmp.herokuapp.com)
+[Vue / Mongo on Now](https://napp-full-tmp.now.sh)
+
+Use user_a@test.com / pas123 for login.
 
 _Build App_ works on macOS, Windows, and Linux.
 Project is in early stage of development.
@@ -129,11 +138,11 @@ _build_ command creates production ready build in build folder (./build by defau
 
 To start server run index.js file. You may need to install dependencies first.
 
-Build command builds server and client separately and then combines them together into build package.
+Build command builds server and client separately and then combines them together into deployable build package.
 
 ### Deploy
 
-Deploys application in various modes (by using target parameter):
+Deploys application to different sources (by using target parameter):
 
 _local_ deployments:
 
@@ -141,27 +150,29 @@ _local_ deployments:
 napp deploy
 ```
 
-Build package copied to deployment folder (./deploy by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
+Build package copied to deployment folder (./deploy/local by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
 
 _heroku_ deployments:
 
-Initial setup
+Create new heroku app
+
+Install heroku-cli and login locally
 
 ```bash
-cd deploy/
-git init
-heroku git:remote -a {APP_ID} -r {REMOTE_NAME}
-git fetch {REMOTE_NAME}
-git checkout {REMOTE_NAME}/master -b {REMOTE_NAME}
+npm i -g heroku-cli
+heroku login
 ```
 
-Note that that you can have multiple remotes corresponding to different environments (dev/staging)
-
-After that you can do:
+For deployment run
 
 ```bash
-napp deploy --target heroku --remote dev
+# specify heroku app id for initial deployment
+app-scripts deploy -t heroku -i dev --happ my-heroku-id-for-dev
+# for following deployment you can skip that
+app-scripts deploy -t heroku -i dev
 ```
+
+Note that that you can deploy to multiple instances corresponding to different environments (dev/staging), you have to create separate heroku apps for each
 
 ## Npm Scripts
 

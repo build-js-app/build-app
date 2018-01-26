@@ -1,10 +1,11 @@
 {
   "name": "build-app",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js",
-    "format_all": "prettier --single-quote --jsx-bracket-same-line --print-width 120 --no-bracket-spacing --write **/*.{js,ts,json}"
+    "format_all":
+      "prettier --single-quote --jsx-bracket-same-line --print-width 120 --no-bracket-spacing --write **/*.{js,ts,json}"
   },
   "author": "Yegor Sytnyk",
   "license": "MIT",
