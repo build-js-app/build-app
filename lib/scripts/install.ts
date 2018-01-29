@@ -2,9 +2,9 @@ import * as _ from 'lodash';
 
 import utils from '../helpers/utils';
 import pathHelper from '../helpers/pathHelper';
-import config from '../config/config';
+import config, {packageManagers} from '../config/config';
 import envHelper from '../helpers/envHelper';
-import packagesHelper, {packageManagers} from '../helpers/packagesHelper';
+import packagesHelper from '../helpers/packagesHelper';
 
 export default {
   command: 'install [package]',

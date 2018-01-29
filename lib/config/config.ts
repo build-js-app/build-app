@@ -2,6 +2,10 @@ import * as _ from 'lodash';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+import utils from '../helpers/utils';
+
+export const packageManagers = ['pnpm', 'yarn', 'npm'];
+
 let config = {
   paths: {
     build: {
@@ -28,6 +32,7 @@ let config = {
       build: './build'
     }
   },
+  packageManager: '',
   server: {
     //sourceLang: 'ts', //ts or js
     build: {
@@ -48,12 +53,35 @@ let config = {
   }
 };
 
+function tryToReadLocalConfigFile(configObj, relativeConfigPath) {
+  try {
+    let configPath = path.join(process.env.APP_DIR, relativeConfigPath);
+    if (!fs.existsSync(configPath)) return false;
+    let localConfig = fs.readJsonSync(configPath);
+
+    //TODO generic
+    let packageManager = localConfig.packageManager;
+    if (packageManager) {
+      utils.assertValueIsInTheList(
+        packageManager,
+        packageManagers,
+        `Local napp config has incorrect packageManager value: '${packageManager}'`
+      );
+      config.packageManager = packageManager;
+      let logConfigUse = false;
+      if (logConfigUse) utils.log(`Using config from '${relativeConfigPath}' file.`);
+    }
+  } catch (err) {
+    return false;
+  }
+}
+
 try {
-  let localConfig = fs.readJsonSync(path.join(process.env.APP_DIR, './app-build.json'));
-
-  _.merge(config, localConfig);
-
-  console.log('Using config from app-build.json file.');
+  let configFiles = ['build-app.json', 'napp.json'];
+  for (let configPath of configFiles) {
+    let wasUsed = tryToReadLocalConfigFile(config, configPath);
+    if (wasUsed) break;
+  }
 } catch (err) {}
 
 export default config;

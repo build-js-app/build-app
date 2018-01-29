@@ -1,11 +1,10 @@
 import utils from './utils';
+import config, {packageManagers} from '../config/config';
 
 export default {
   getInstallPackagesCommand,
   getInstallPackageCommand
 };
-
-export const packageManagers = ['pnpm', 'yarn', 'npm'];
 
 function getInstallPackagesCommand(packageManager = null) {
   let command = getCommand(packageManager);
@@ -17,7 +16,7 @@ function getInstallPackagesCommand(packageManager = null) {
       params = ['install'];
       break;
     case 'pnpm':
-      params = ['install', '--no-lock'];
+      params = ['install'];
       break;
     case 'yarn':
       params = ['--no-lockfile'];
@@ -58,6 +57,7 @@ function getInstallPackageCommand(packageName, isDevDependency, packageManager) 
 }
 
 function getCommand(packageManager) {
+  if (!packageManager) packageManager = config.packageManager;
   let commands = packageManager ? [packageManager] : packageManagers;
 
   return utils.findGlobalCommandByPrecedence(commands);

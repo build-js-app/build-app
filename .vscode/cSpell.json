@@ -8,7 +8,9 @@
     "words": [
         "fkill",
         "klaw",
-        "napp"
+        "napp",
+        "pnpm",
+        "postgre"
     ],
     // flagWords - list of words to be always considered incorrect
     // This is useful for offensive words and common spelling errors.

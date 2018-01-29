@@ -45,21 +45,21 @@ To run client run in terminal: `app-scripts serve -c`
 
 ## Project structure
 
-_Build App_ assumes some predifined project structure.
+_Build App_ assumes some predefined project structure.
 
 Project consists of server and client parts.
 
 By default server part is located in {root}/server folder and client in {root}/client.
 
-Those values can be overriden in build-app.config.
+Those values can be overridden in build-app.config.
 
 ### Client:
 
-Client is SPA written in one modern JS front-end frameworks. Officially supported are React, Vue and Angular2. They are using existing client side build systems (create-react-app, vbuild and angular-cli respectively).
+Client is SPA written in one modern JS front-end frameworks. Officially supported are React, Vue and Angular2. They are using existing client side build systems (create-react-app, poi and angular-cli respectively).
 
 Build system expects to be able to create client build by running 'npm run build' command in client folder. Output is expected in {client}/build folder and index.html starts client SPA application.
 
-More details how to setup client-side build you can find in docs for particualr build system:
+More details how to setup client-side build you can find in docs for particular build system:
 
 React: [create-react-app](https://github.com/facebookincubator/create-react-app)
 
@@ -77,7 +77,7 @@ There are some special folders
 
 **data**: folder with data assets like data json files, email templates, etc.
 
-**local**: folder where server writes data to, here you can have logs output, local overrided values for config file, file uploads, etc.
+**local**: folder where server writes data to, here you can have logs output, local overridden values for config file, file uploads, etc.
 
 ## app-script commands
 
@@ -168,7 +168,7 @@ For deployment run
 
 ```bash
 # specify heroku app id for initial deployment
-app-scripts deploy -t heroku -i dev --happ my-heroku-id-for-dev
+app-scripts deploy -t heroku -i dev --heroku-app my-heroku-id-for-dev
 # for following deployment you can skip that
 app-scripts deploy -t heroku -i dev
 ```
