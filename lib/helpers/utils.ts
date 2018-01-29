@@ -236,7 +236,7 @@ function getCommandOutput(cmd, args, path) {
         result.error = commandResult.output[2].toString('utf8');
       }
     } else {
-      commandResult.output[1].toString('utf8');
+      result.output = commandResult.output[1].toString('utf8');
     }
   } catch (err) {
     result.error = err;

@@ -11,6 +11,7 @@ However some technologies have primary support those are TypeScript for serer si
 You can see deployed templates here:
 
 [React / PostgreSQL on Heroku](https://napp-full-tmp.herokuapp.com)
+
 [Vue / Mongo on Now](https://napp-full-tmp.now.sh)
 
 Use user_a@test.com / pas123 for login.
@@ -144,7 +145,7 @@ Build command builds server and client separately and then combines them togethe
 
 Deploys application to different sources (by using target parameter):
 
-_local_ deployments:
+#### _local_ deployments:
 
 ```bash
 napp deploy
@@ -152,7 +153,7 @@ napp deploy
 
 Build package copied to deployment folder (./deploy/local by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
 
-_heroku_ deployments:
+#### _heroku_ deployments:
 
 Create new heroku app
 
@@ -173,6 +174,18 @@ app-scripts deploy -t heroku -i dev
 ```
 
 Note that that you can deploy to multiple instances corresponding to different environments (dev/staging), you have to create separate heroku apps for each
+
+#### _now_ deployments:
+
+In deployment folder (deploy/now) create now.json config. Specify name parameter and optionally alias. Read more details [now config](https://zeit.co/docs/features/configuration) and [now aliases](https://zeit.co/docs/features/aliases).
+
+After that run:
+
+```bash
+app-scripts deploy -t now
+```
+
+Note it will remove all pervious instances of the app (having the same name). Use now alias to have constant URL name.
 
 ## Npm Scripts
 

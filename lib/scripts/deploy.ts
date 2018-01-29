@@ -9,6 +9,7 @@ import config from '../config/config';
 import packagesHelper from '../helpers/packagesHelper';
 import installModule from '../scripts/install';
 import buildModule from '../scripts/build';
+import {exists} from 'fs-extra';
 
 export default {
   command: 'deploy [command]',
@@ -19,9 +20,10 @@ export default {
 
 const TARGET_HEROKU = 'heroku';
 const TARGET_LOCAL = 'local';
+const TARGET_NOW = 'now';
 const COMMAND_STOP = 'stop';
 const COMMAND_INIT = 'init';
-const VALID_TARGETS = [TARGET_LOCAL, TARGET_HEROKU];
+const VALID_TARGETS = [TARGET_LOCAL, TARGET_HEROKU, TARGET_NOW];
 const VALID_COMMANDS = [COMMAND_STOP, COMMAND_INIT];
 
 function commandBuilder(yargs) {
@@ -100,8 +102,13 @@ async function commandHandler(argv) {
       } else {
         let localDir = pathHelper.deployRelative(config.paths.server.local);
         let gitDir = `!${deployDir}/.git`;
+        let ignoreList = [localDir, gitDir];
 
-        utils.clearDir(deployDir, [localDir, gitDir]);
+        if (target === TARGET_NOW) {
+          ignoreList.push('now.json');
+        }
+
+        utils.clearDir(deployDir, ignoreList);
       }
 
       fs.copySync(buildDir, deployDir);
@@ -197,9 +204,6 @@ function beforeDeployInit(deployParams) {
         gitCommand(['checkout', `${instance}/master`, '-b', instance]);
       }
       break;
-    default:
-      throw new Error(`Unsupported target: "${target}"`);
-      break;
   }
 }
 
@@ -213,6 +217,16 @@ function beforeDeploy(deployParams) {
     case TARGET_HEROKU:
       utils.runCommand('git', ['checkout', instance], {
         title: `Switch to "${instance}" branch`,
+        path: deployDir
+      });
+      break;
+    case TARGET_NOW:
+      let nowConfig = getNowConfig(deployDir);
+      let nowAppName = nowConfig.name;
+      if (!nowAppName) utils.logAndExit('Specify now deployment name in now.json config.');
+
+      utils.runCommand('now', ['rm', nowAppName, '-y'], {
+        title: `Remove previous now deployments`,
         path: deployDir
       });
       break;
@@ -260,8 +274,20 @@ function afterDeploy(deployParams) {
         path: deployDir
       });
       break;
-    default:
-      throw new Error(`Unsupported target: "${target}"`);
+    case TARGET_NOW:
+      utils.runCommand('now', ['-y', '--public'], {
+        path: deployDir,
+        title: 'Deploy to Now',
+        showOutput: true
+      });
+      let nowConfig = getNowConfig(deployDir);
+      if (nowConfig.alias) {
+        utils.runCommand('now', ['alias'], {
+          path: deployDir,
+          title: 'Add alias',
+          showOutput: true
+        });
+      }
       break;
   }
 }
@@ -323,4 +349,13 @@ function startLocalApp(processManager, appName) {
 
 function getLocalDeploymentDir() {
   return pathHelper.projectRelative(config.paths.deploy.root, TARGET_LOCAL);
+}
+
+function getNowConfig(deployDir) {
+  let nowConfigPath = pathHelper.path.join(deployDir, 'now.json');
+  if (!fs.existsSync(nowConfigPath)) utils.logAndExit('Create now.json configuration file in deployment folder.');
+
+  let nowConfig = fs.readJsonSync(nowConfigPath);
+
+  return nowConfig;
 }
