@@ -47,7 +47,7 @@
           "branch": "mongo"
         },
         "sql": {
-          "description": "SQL DB (PostgreSQL)",
+          "description": "SQL DB (SQLite|PostgreSQL|MySQL)",
           "repo": "build-js-app/template-full-server",
           "branch": "sequelize"
         }

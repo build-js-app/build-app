@@ -210,9 +210,14 @@ function copyAssets(appName) {
 
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
 
+  let tsconfigPath = pathHelper.serverRelative('./tsconfig.json');
+  if (!fs.existsSync(tsconfigPath)) {
+    fs.copySync(pathHelper.moduleRelative('./assets/init/tsconfig.json'), tsconfigPath);
+  }
+
   fs.copySync(
     pathHelper.moduleRelative('./assets/init/quickTest.ts'),
-    pathHelper.serverRelative(config.paths.server.src, './test.ts')
+    pathHelper.serverRelative(config.paths.server.src, './quickTest.ts')
   );
 
   //copy client build placeholder
@@ -326,7 +331,7 @@ function interactiveInit() {
     {
       type: 'list',
       name: 'ide',
-      message: 'Choose front-end template:',
+      message: 'Choose IDE/editor:',
       choices: answers => [
         {name: 'VS Code', value: 'code'},
         {name: 'WebStorm', value: 'ws'},

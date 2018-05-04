@@ -35,7 +35,7 @@
       "type": "node",
       "request": "launch",
       "name": "Quick Test",
-      "program": "${workspaceRoot}/server/src/test.ts",
+      "program": "${workspaceRoot}/server/src/quickTest.ts",
       "sourceMaps": true,
       "outFiles": ["${workspaceRoot}/server/build/src/**/*"],
       "preLaunchTask": "compile_ts"

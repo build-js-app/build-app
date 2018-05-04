@@ -4,9 +4,9 @@
 
 The aim of the project is to simplify development of modern full-stack JS applications, providing most of basic dev operations out of the box (build, run dev mode, lint, etc).
 
-Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choices such as React/Vue/Angular for client, Mongo/PostgreSQL for storage.
+Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choices such as React/Vue/Angular for client, Mongo/SQL DB for storage.
 
-However some technologies have primary support those are TypeScript for serer side language, Mongo/PostgreSQL for storage, React/Vue for client and VS Code as IDE.
+However some technologies have primary support those are TypeScript for serer side language, Mongo/SQL DB for storage, React/Vue for client and VS Code as IDE.
 
 You can see deployed templates here:
 
