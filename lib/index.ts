@@ -1,6 +1,7 @@
 import * as yargs from 'yargs';
 import * as fs from 'fs-extra';
 import * as os from 'os';
+import * as updateNotifier from 'update-notifier';
 
 initEnvVars();
 
@@ -21,6 +22,8 @@ let epilog = [
 ].join(os.EOL);
 
 let pkg = fs.readJSONSync(pathHelper.moduleRelative('./package.json'));
+
+updateNotifier({pkg}).notify();
 
 yargs
   .usage('Usage: app-scripts <command> [options]')

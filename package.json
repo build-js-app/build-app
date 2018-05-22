@@ -1,6 +1,6 @@
 {
   "name": "build-app",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js",
@@ -52,6 +52,7 @@
     "nodemon": "1.11.0",
     "ps-list": "4.0.0",
     "semver": "5.3.0",
+    "update-notifier": "2.5.0",
     "validate-npm-package-name": "3.0.0",
     "webpack": "2.2.1",
     "yargs": "7.0.2"
