@@ -5,7 +5,8 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./lib",
-    "allowUnreachableCode": true
+    "allowUnreachableCode": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist", "templates", "assets"]
 }
