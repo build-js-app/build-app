@@ -334,7 +334,8 @@ function interactiveInit() {
       message: 'Choose IDE/editor:',
       choices: answers => [
         {name: 'VS Code', value: 'code'},
-        {name: 'WebStorm', value: 'ws'},
+        //TODO enable when ready
+        //{name: 'WebStorm', value: 'ws'},
         {name: 'None', value: 'none'}
       ]
     }

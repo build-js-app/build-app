@@ -1,6 +1,33 @@
 {
   "defaults": ["simple", "server_ts", "client_react"],
   "projects": {
+    "full": {
+      "description": "Full: full-stack project with all infrastructure",
+      "server": {
+        "sql": {
+          "description": "SQL DB (SQLite|PostgreSQL|MySQL)",
+          "repo": "build-js-app/template-full-server",
+          "branch": "sequelize"
+        },
+        "mongo": {
+          "description": "Mongo DB",
+          "repo": "build-js-app/template-full-server",
+          "branch": "mongo"
+        }
+      },
+      "client": {
+        "react": {
+          "description": "React",
+          "repo": "build-js-app/template-full-client",
+          "branch": "react"
+        },
+        "vue": {
+          "description": "Vue",
+          "repo": "build-js-app/template-full-client",
+          "branch": "vue"
+        }
+      }
+    },
     "simple": {
       "description": "Simple: basic setup with a few APIs",
       "server": {
@@ -35,33 +62,6 @@
           "description": "Angular",
           "repo": "build-js-app/template-simple-client",
           "branch": "angular"
-        }
-      }
-    },
-    "full": {
-      "description": "Full: full-stack project with all infrastructure",
-      "server": {
-        "mongo": {
-          "description": "Mongo DB",
-          "repo": "build-js-app/template-full-server",
-          "branch": "mongo"
-        },
-        "sql": {
-          "description": "SQL DB (SQLite|PostgreSQL|MySQL)",
-          "repo": "build-js-app/template-full-server",
-          "branch": "sequelize"
-        }
-      },
-      "client": {
-        "react": {
-          "description": "React",
-          "repo": "build-js-app/template-full-client",
-          "branch": "react"
-        },
-        "vue": {
-          "description": "Vue",
-          "repo": "build-js-app/template-full-client",
-          "branch": "vue"
         }
       }
     }

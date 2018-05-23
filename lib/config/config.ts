@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import utils from '../helpers/utils';
 
-export const packageManagers = ['pnpm', 'yarn', 'npm'];
+export const packageManagers = ['npm', 'yarn', 'pnpm'];
 
 let config = {
   paths: {
