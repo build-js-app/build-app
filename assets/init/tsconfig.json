@@ -5,6 +5,7 @@
     "sourceMap": true,
     "outDir": "build/src",
     "rootDir": "src",
+    "baseUrl": "./src",
     "allowUnreachableCode": true,
     "skipLibCheck": true
   },
