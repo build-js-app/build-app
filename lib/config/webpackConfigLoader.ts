@@ -52,7 +52,10 @@ function getDefaultConfig() {
     },
     resolve: {
       extensions: ['.js', '.json'],
-      modules: [pathHelper.moduleRelative('./node_modules')]
+      modules: [
+        pathHelper.moduleRelative('./node_modules'),
+        pathHelper.serverRelative(config.paths.server.build, config.paths.server.src)
+      ]
     },
     resolveLoader: {
       modules: [pathHelper.moduleRelative('./node_modules')]
@@ -105,8 +108,7 @@ function initBabel(webpackConfig, presetName) {
 function loadExternals(webpackConfig, whitelist) {
   let nodeModules = {};
   let nodeModulesPath = pathHelper.serverRelative('./node_modules');
-  fs
-    .readdirSync(nodeModulesPath)
+  fs.readdirSync(nodeModulesPath)
     .filter(x => {
       if (['.bin'].indexOf(x) !== -1) return false;
       if (whitelist.indexOf(x) !== -1) return false;
