@@ -1,6 +1,6 @@
 {
   "name": "build-app",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js",
@@ -54,6 +54,7 @@
     "update-notifier": "2.5.0",
     "validate-npm-package-name": "3.0.0",
     "webpack": "2.2.1",
+    "webpack-node-externals": "1.7.2",
     "yargs": "7.0.2"
   },
   "devDependencies": {

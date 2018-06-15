@@ -1,5 +1,6 @@
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
+import * as nodeExternals from 'webpack-node-externals';
 
 import pathHelper from '../helpers/pathHelper';
 import config from './config';
@@ -108,16 +109,9 @@ function initBabel(webpackConfig, presetName) {
 function loadExternals(webpackConfig, whitelist) {
   let nodeModules = {};
   let nodeModulesPath = pathHelper.serverRelative('./node_modules');
-  fs.readdirSync(nodeModulesPath)
-    .filter(x => {
-      if (['.bin'].indexOf(x) !== -1) return false;
-      if (whitelist.indexOf(x) !== -1) return false;
 
-      return true;
-    })
-    .forEach(mod => {
-      nodeModules[mod] = 'commonjs ' + mod;
-    });
-
-  webpackConfig.externals = nodeModules;
+  webpackConfig.externals = nodeExternals({
+    whitelist,
+    modulesDir: nodeModulesPath
+  });
 }
