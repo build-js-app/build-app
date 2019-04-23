@@ -1,5 +1,4 @@
 .idea
-.vscode
 /deploy
 /build
 shrinkwrap.yaml

@@ -14,7 +14,7 @@ import deployModule from './scripts/deploy';
 import extrasModule from './scripts/extras';
 import seedModule from './scripts/seed';
 
-let commands = ['init', 'install', 'build', 'serve', 'deploy'];
+let commands = ['init', 'install', 'seed', 'build', 'serve', 'deploy'];
 
 let epilog = [
   'You can see specific help for each command. Run app-scripts <command> --help.',
