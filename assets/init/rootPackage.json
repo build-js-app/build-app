@@ -2,5 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "format": "prettier \"(server|client)/src/**/*.{js,json,css}\" --write --config .prettierrc"
+  }
 }

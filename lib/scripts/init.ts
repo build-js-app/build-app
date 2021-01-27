@@ -210,6 +210,8 @@ function copyAssets(appName) {
 
   fs.copySync(pathHelper.moduleRelative('./assets/init/_gitignore'), pathHelper.projectRelative('./.gitignore'));
 
+  fs.copySync(pathHelper.moduleRelative('./assets/init/.prettierrc'), pathHelper.projectRelative('./.prettierrc'));
+
   let tsconfigPath = pathHelper.serverRelative('./tsconfig.json');
   if (!fs.existsSync(tsconfigPath)) {
     fs.copySync(pathHelper.moduleRelative('./assets/init/tsconfig.json'), tsconfigPath);
