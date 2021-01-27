@@ -4,21 +4,15 @@
 
 The aim of the project is to simplify development of modern full-stack JS applications, providing most of basic dev operations out of the box (build, run dev mode, lint, etc).
 
-Besides that it provides number of build in starter templates which will help you get started ASAP. There are number of technology choices such as React/Vue/Angular for client, Mongo/SQL DB for storage.
+It is provided with starter templates for Client/Server which you can combine to seed you project with technologies of your choice.
 
-However some technologies have primary support those are TypeScript for serer side language, Mongo/SQL DB for storage, React/Vue for client and VS Code as IDE.
-
-You can see deployed templates here:
+See deployed template here:
 
 [React / PostgreSQL on Heroku](https://napp-full-tmp.herokuapp.com)
 
-[Vue / Mongo on Now](https://napp-full-tmp.now.sh)
-
 Use user_a@test.com / pas123 for login.
 
-_Build App_ works on macOS, Windows, and Linux.
-Project is in early stage of development.
-If something doesn’t work please file an issue.
+_Build App_ works is OS-agnostic.
 
 ## Getting started
 
@@ -55,18 +49,13 @@ Those values can be overridden in build-app.config.
 
 ### Client:
 
-Client is SPA written in one modern JS front-end frameworks. Officially supported are React, Vue and Angular2. They are using existing client side build systems (create-react-app, poi and angular-cli respectively).
+Client is SPA written in one modern JS front-end frameworks (React/Angular/vue). They are using existing client side build systems (like create-react-app for React).
 
 Build system expects to be able to create client build by running 'npm run build' command in client folder. Output is expected in {client}/build folder and index.html starts client SPA application.
 
 More details how to setup client-side build you can find in docs for particular build system:
 
 React: [create-react-app](https://github.com/facebookincubator/create-react-app)
-
-Vue: [poi](https://github.com/egoist/poi)
-
-Angular: [angular-cli](https://github.com/angular/angular-cli)
-
 ### Server:
 
 Both JS/TS js flavors are supported. For JS you can use latest language features like ES6, async/await and others. Code is compiled to ES5 during the build.
@@ -148,7 +137,7 @@ Deploys application to different sources (by using target parameter):
 #### _local_ deployments:
 
 ```bash
-napp deploy
+app-scripts deploy
 ```
 
 Build package copied to deployment folder (./deploy/local by default) and starts the application with one of supported process managers (forever or pm2). Following deployments will stop application first and clear all deploy folder content except local folder.
@@ -174,19 +163,6 @@ app-scripts deploy -t heroku -i dev
 ```
 
 Note that that you can deploy to multiple instances corresponding to different environments (dev/staging), you have to create separate heroku apps for each
-
-#### _now_ deployments:
-
-In deployment folder (deploy/now) create now.json config. Specify name parameter and optionally alias. Read more details [now config](https://zeit.co/docs/features/configuration) and [now aliases](https://zeit.co/docs/features/aliases).
-
-After that run:
-
-```bash
-app-scripts deploy -t now
-```
-
-Note it will remove all pervious instances of the app (having the same name). Use now alias to have constant URL name.
-
 ## Npm Scripts
 
 Some operations are expected to be configured as particular npm scripts:
