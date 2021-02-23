@@ -1,12 +1,12 @@
 {
   "name": "build-app",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Build system for full-stack JS applications",
   "scripts": {
     "build": "node scripts/build.js",
     "format_all": "prettier --single-quote --jsx-bracket-same-line --print-width 120 --no-bracket-spacing --write **/*.{js,ts,json}"
   },
-  "author": "Yegor Sytnyk",
+  "author": "Erik Sytnyk",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@types/fs-extra": "2.0.0",
-    "@types/node": "6.0.79",
-    "@types/lodash": "4.14.55"
+    "@types/lodash": "4.14.55",
+    "@types/node": "6.0.79"
   }
 }

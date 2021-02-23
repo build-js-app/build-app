@@ -46,12 +46,15 @@ function checkFolderStructure() {
     logError('Server folder does not exists.');
   }
 
-  //TODO check for entry file, other checks
-
   let clientFolderExists = fs.existsSync(pathHelper.clientRelative('./'));
 
   if (!clientFolderExists) {
     logError('Client folder does not exists.');
+  }
+
+  let rootPackageFileExists = fs.existsSync(pathHelper.projectRelative('./package.json')); 
+  if (!rootPackageFileExists) {
+    logError('Please add "package.json" file with app name and version to the root folder.');
   }
 }
 

@@ -128,7 +128,7 @@ function getTarget(argv) {
     target = argv.target;
 
     if (target === TARGET_HEROKU) {
-      if (!argv.instance) {
+      if (!argv.instance || argv.instance === true) {
         utils.logAndExit('Specify instance for heroku deployments');
       }
     }
