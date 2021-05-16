@@ -24,7 +24,7 @@ function download(origin, repository, branch, directory) {
     downloadGitRepo(repoPath, directory, err => {
       if (err) return reject(err);
 
-      return resolve();
+      return resolve(undefined);
     });
   });
 }

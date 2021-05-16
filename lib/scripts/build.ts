@@ -152,7 +152,7 @@ function buildServerJs() {
 
       webpackHelper.handleErrors(err, stats, true);
 
-      resolve();
+      resolve(undefined);
     });
   });
 }

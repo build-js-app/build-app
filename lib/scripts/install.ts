@@ -68,12 +68,7 @@ function commandHandler(argv) {
 }
 
 function installAll(packageManager = null) {
-  try {
-    checkGlobalDependencies();
-  } catch (err) {
-    //TODO
-    utils.log('Cannot check global dependencies.', 'red');
-  }
+  //checkGlobalDependencies();
 
   let commandInfo = packagesHelper.getInstallPackagesCommand(packageManager);
 

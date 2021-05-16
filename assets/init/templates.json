@@ -2,7 +2,7 @@
   "defaults": ["simple", "server_ts", "client_react"],
   "projects": {
     "full": {
-      "description": "Full: full-stack project with all infrastructure",
+      "description": "Full: full-stack project with all basic infrastructure",
       "server": {
         "sql": {
           "description": "SQL DB (SQLite|PostgreSQL|MySQL)",
@@ -17,51 +17,9 @@
       },
       "client": {
         "react": {
-          "description": "React",
+          "description": "React with TypeScript",
           "repo": "build-js-app/template-full-client",
           "branch": "react"
-        },
-        "vue": {
-          "description": "Vue",
-          "repo": "build-js-app/template-full-client",
-          "branch": "vue"
-        }
-      }
-    },
-    "simple": {
-      "description": "Simple: basic setup with a few APIs",
-      "server": {
-        "ts": {
-          "description": "TypeScript",
-          "repo": "build-js-app/template-simple-server",
-          "branch": "ts"
-        },
-        "js": {
-          "description": "JavaScript",
-          "repo": "build-js-app/template-simple-server",
-          "branch": "js"
-        }
-      },
-      "client": {
-        "empty": {
-          "description": "Empty: client placeholder",
-          "repo": "build-js-app/template-simple-client",
-          "branch": "empty"
-        },
-        "react": {
-          "description": "React",
-          "repo": "build-js-app/template-simple-client",
-          "branch": "react"
-        },
-        "vue": {
-          "description": "Vue",
-          "repo": "build-js-app/template-simple-client",
-          "branch": "vue"
-        },
-        "angular": {
-          "description": "Angular",
-          "repo": "build-js-app/template-simple-client",
-          "branch": "angular"
         }
       }
     }

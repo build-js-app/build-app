@@ -16,6 +16,8 @@ function commandBuilder(yargs) {
 }
 
 async function commandHandler(argv) {
+  envHelper.checkFolderStructure();
+  
   installModule.installAll();
 
   await buildModule.build('full');
