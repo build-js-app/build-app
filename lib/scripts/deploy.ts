@@ -58,17 +58,17 @@ function commandBuilder(yargs) {
 async function commandHandler(argv) {
   envHelper.checkFolderStructure();
 
-  let processManager = detectProcessManager();
+  let target = getTarget(argv);
   let appName = envHelper.getAppName();
   let instance = argv.instance;
+  let processManager = null;
 
-  if (argv.stop) {
+  if (target === TARGET_LOCAL && argv.stop) {
+    processManager = detectProcessManager();
     return utils.logOperation(`Stop '${appName}' application process`, () => {
       stopLocalApp(processManager, appName);
     });
   }
-
-  let target = getTarget(argv);
 
   let deployDir = pathHelper.projectRelative(config.paths.deploy.root, target);
   let buildDir = pathHelper.projectRelative(config.paths.build.root);
@@ -138,7 +138,7 @@ function getTarget(argv) {
 }
 
 function beforeDeployInit(deployParams) {
-  const {target, processManager, appName, instance, deployDir, argv} = deployParams;
+  const {target, instance, deployDir, argv} = deployParams;
 
   switch (target) {
     case TARGET_LOCAL:
@@ -215,8 +215,23 @@ function beforeDeploy(deployParams) {
       stopLocalApp(processManager, appName);
       break;
     case TARGET_HEROKU:
-      utils.runCommand('git', ['checkout', instance], {
+      utils.runCommand('git', ['checkout', instance, '--force'], {
         title: `Switch to "${instance}" branch`,
+        path: deployDir
+      });
+
+      utils.runCommand('git', ['clean', '-df'], {
+        title: `Remove untracked files`,
+        path: deployDir
+      });
+
+      utils.runCommand('git', ['checkout', '--', '.'], {
+        title: `Revert local changes`,
+        path: deployDir
+      });
+
+      utils.runCommand('git', ['pull', instance], {
+        title: `Pull changes from remote`,
         path: deployDir
       });
       break;
@@ -248,11 +263,6 @@ function afterDeploy(deployParams) {
       startLocalApp(processManager, appName);
       break;
     case TARGET_HEROKU:
-      utils.runCommand('git', ['pull', instance], {
-        title: `Pull changes from remote`,
-        path: deployDir
-      });
-
       utils.runCommand('git', ['add', '.'], {
         title: 'Add files to git',
         path: deployDir

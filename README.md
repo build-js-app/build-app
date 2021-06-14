@@ -174,3 +174,11 @@ Serve client - 'start' script
 Serve server - 'start' script (in server folder)
 
 Also if pre-build/post-build scripts are defined in server/client package.json files corresponding scripts will be executed before/after server/client builds.
+
+## Local development
+
+For local development run
+
+```bash
+npm link #(in package dir)
+```
