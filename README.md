@@ -146,10 +146,10 @@ Build package copied to deployment folder (./deploy/local by default) and starts
 
 Create new heroku app
 
-Install heroku-cli and login locally
+Install heroku and login locally
 
 ```bash
-npm i -g heroku-cli
+npm i -g heroku
 heroku login
 ```
 

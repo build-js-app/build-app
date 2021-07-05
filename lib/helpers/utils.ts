@@ -154,6 +154,7 @@ interface Utils_RunCommandOptions {
   ignoreError?: boolean;
   showOutput?: boolean;
   env?: Object;
+  userError?: string;
 }
 
 function commandExists(command) {
@@ -206,6 +207,7 @@ function runCommand(cmd, args, options: Utils_RunCommandOptions) {
     }
 
     if (!options.ignoreError) {
+      if (options.userError) log(options.userError, 'red');
       process.exit(1);
     }
   } else {

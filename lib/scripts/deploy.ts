@@ -273,7 +273,7 @@ function afterDeploy(deployParams) {
         ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`],
         {
           title: 'Commit files to git',
-          ignoreError: true,
+          userError: 'It seems that you have deployed the current code already',
           path: deployDir
         }
       );
