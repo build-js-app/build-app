@@ -51,46 +51,50 @@ async function commandHandler(argv) {
 }
 
 async function build(target: BUILD_TARGET = 'full') {
-  let startTime = new Date();
+  try {
+    let startTime = new Date();
 
-  utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
+    utils.log('Build project in ' + chalk.cyan(pathHelper.getAppPath()) + '.');
 
-  let buildDir = config.paths.build.root;
-  utils.ensureEmptyDir(buildDir);
+    let buildDir = config.paths.build.root;
+    utils.ensureEmptyDir(buildDir);
 
-  if (target !== 'client') {
-    await buildServer();
-  } else {
-    utils.log(`Build server... ${chalk.yellow('skipped')}.`);
-  }
-  copyServerOutput();
+    if (target !== 'client') {
+      await buildServer();
+    } else {
+      utils.log(`Build server... ${chalk.yellow('skipped')}.`);
+    }
+    copyServerOutput();
 
-  if (target !== 'server') {
-    await buildClient();
-  } else {
-    utils.log(`Build client... ${chalk.yellow('skipped')}.`);
-  }
-  copyClientOutput();
+    if (target !== 'server') {
+      await buildClient();
+    } else {
+      utils.log(`Build client... ${chalk.yellow('skipped')}.`);
+    }
+    copyClientOutput();
 
-  utils.log('Post build:');
+    utils.log('Post build:');
 
-  utils.logOperation('Copying data folder', () => {
-    copyDataFolder();
+    utils.logOperation('Copying data folder', () => {
+      copyDataFolder();
 
-    //index file to run app with production env params
-    utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
-  });
+      //index file to run app with production env params
+      utils.copyToPackage(pathHelper.moduleRelative('./assets/build/serverIndex.js'), './index.js');
+    });
 
-  let endTime = new Date();
-  let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
+    let endTime = new Date();
+    let compilationTime = utils.getFormattedTimeInterval(startTime, endTime);
 
-  utils.log('Build package was created!', 'green');
-  utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
+    utils.log('Build package was created!', 'green');
+    utils.log('Compilation time: ' + chalk.cyan(compilationTime) + '.');
 
-  if (config.postBuild.archive) {
-    let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
+    if (config.postBuild.archive) {
+      let archive = utils.archiveFolder(pathHelper.buildRelative('./'), pathHelper.buildRelative('./build.zip'));
 
-    return utils.logOperation('Archive build package', archive);
+      return utils.logOperation('Archive build package', archive);
+    }
+  } catch (err) {
+    utils.logAndExit(err);
   }
 }
 
