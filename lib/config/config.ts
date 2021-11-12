@@ -37,7 +37,7 @@ let config = {
     //sourceLang: 'ts', //ts or js
     build: {
       nodeVersion: '6', //0, 4, 5, 6, 7
-      removeMapFiles: true,
+      removeMapFiles: false,
       //make sure source is ES5, that should include external npm packages too
       minify: false,
       bundleNodeModules: false
