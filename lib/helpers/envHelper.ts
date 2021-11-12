@@ -52,7 +52,7 @@ function checkFolderStructure() {
     logError('Client folder does not exists.');
   }
 
-  let rootPackageFileExists = fs.existsSync(pathHelper.projectRelative('./package.json')); 
+  let rootPackageFileExists = fs.existsSync(pathHelper.projectRelative('./package.json'));
   if (!rootPackageFileExists) {
     logError('Please add "package.json" file with app name and version to the root folder.');
   }
