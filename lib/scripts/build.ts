@@ -1,13 +1,11 @@
 (process as any).noDeprecation = true;
 
 import * as fs from 'fs-extra';
-import * as webpack from 'webpack';
 import * as chalk from 'chalk';
 import * as klawSync from 'klaw-sync';
-import * as del from 'del';
+import * as esbuild from 'esbuild';
+import {nodeExternalsPlugin} from 'esbuild-node-externals';
 
-import webpackConfigLoader from '../config/webpackConfigLoader';
-import webpackHelper from '../helpers/webpackHelper';
 import pathHelper from './../helpers/pathHelper';
 import utils from './../helpers/utils';
 import envHelper from '../helpers/envHelper';
@@ -142,23 +140,25 @@ function copyServerOutput() {
 }
 
 function buildServerJs() {
-  return new Promise((resolve, reject) => {
-    let webpackConfig = null;
+  const buildConfig: any = {
+    bundle: true,
+    platform: 'node',
+    target: ['node10.4'],
+    plugins: [
+      nodeExternalsPlugin({
+        packagePath: pathHelper.serverRelative('./package.json')
+      })
+    ]
+  };
 
-    if (envHelper.isTsServerLang()) {
-      webpackConfig = webpackConfigLoader.loadWebpackConfig('ts_prod');
-    } else {
-      webpackConfig = webpackConfigLoader.loadWebpackConfig('js_prod');
-    }
+  if (envHelper.isTsServerLang()) {
+    buildConfig.entryPoints = [envHelper.getTsBuildEntry()];
+    buildConfig.outfile = pathHelper.serverRelative(config.paths.server.build, 'server.js');
+  } else {
+    throw new Error('JS server builds are not supported yet');
+  }
 
-    webpack(webpackConfig).run((err, stats) => {
-      if (err) return reject(err);
-
-      webpackHelper.handleErrors(err, stats, true);
-
-      resolve(undefined);
-    });
-  });
+  return esbuild.build(buildConfig);
 }
 
 function buildClient() {
