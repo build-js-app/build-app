@@ -9,7 +9,6 @@ import config from '../config/config';
 import packagesHelper from '../helpers/packagesHelper';
 import installModule from '../scripts/install';
 import buildModule from '../scripts/build';
-import {exists} from 'fs-extra';
 
 export default {
   command: 'deploy [command]',
@@ -25,6 +24,7 @@ const COMMAND_STOP = 'stop';
 const COMMAND_INIT = 'init';
 const VALID_TARGETS = [TARGET_LOCAL, TARGET_HEROKU, TARGET_NOW];
 const VALID_COMMANDS = [COMMAND_STOP, COMMAND_INIT];
+const HEROKU_INSTANCE = 'heroku';
 
 function commandBuilder(yargs) {
   return yargs
@@ -34,10 +34,6 @@ function commandBuilder(yargs) {
     .option('target', {
       alias: 't',
       description: 'Deployment target, supported targets are heroku/now/local, local is deafult'
-    })
-    .option('instance', {
-      alias: 'i',
-      description: 'For heroku only, specify instance name (dev, production, etc)'
     })
     .option('heroku-app', {
       alias: 'happ',
@@ -49,10 +45,7 @@ function commandBuilder(yargs) {
     })
     .example('deploy', 'Deploy project for production (starts project with one of supported process managers).')
     .example('deploy --stop', 'Stop running app (it is removed from process list and cannot be restarted again).')
-    .example(
-      'deploy -t heroku -i dev -happ my-heroku-app',
-      'Deploys app to heroku server using dev instance, which corresponds to heroku APP_ID "my-heroku-app".'
-    );
+    .example('deploy -t heroku -happ my-heroku-app', 'Deploys app to heroku with APP_ID: "my-heroku-app".');
 }
 
 async function commandHandler(argv) {
@@ -60,7 +53,6 @@ async function commandHandler(argv) {
 
   let target = getTarget(argv);
   let appName = envHelper.getAppName();
-  let instance = argv.instance;
   let processManager = null;
 
   if (target === TARGET_LOCAL && argv.stop) {
@@ -79,16 +71,11 @@ async function commandHandler(argv) {
     deployDir,
     buildDir,
     processManager,
-    instance,
     argv
   };
 
   try {
-    if (!utils.dirHasContent(deployDir)) {
-      utils.ensureEmptyDir(deployDir);
-    }
-
-    beforeDeployInit(deployParams);
+    utils.ensureEmptyDir(deployDir);
 
     beforeDeploy(deployParams);
 
@@ -128,8 +115,8 @@ function getTarget(argv) {
     target = argv.target;
 
     if (target === TARGET_HEROKU) {
-      if (!argv.instance || argv.instance === true) {
-        utils.logAndExit('Specify instance for heroku deployments');
+      if (!argv.herokuApp) {
+        utils.logAndExit('Specify heroku APP ID for heroku deployments');
       }
     }
   }
@@ -137,103 +124,15 @@ function getTarget(argv) {
   return target;
 }
 
-function beforeDeployInit(deployParams) {
-  const {target, instance, deployDir, argv} = deployParams;
-
-  switch (target) {
-    case TARGET_LOCAL:
-      break;
-    case TARGET_HEROKU:
-      let gitCommand = (args, title = '', allowError = false) =>
-        utils.runCommand('git', args, {
-          title,
-          path: deployDir,
-          ignoreError: true
-        });
-
-      let hasGitFolder = fs.existsSync(pathHelper.path.join(deployDir, '.git'));
-
-      if (!hasGitFolder) {
-        gitCommand(['init']);
-
-        let copyAsset = (from, to) => {
-          let assetName = `./assets/deploy/heroku/${from}`;
-          let fromPath = pathHelper.moduleRelative(assetName);
-          let toPath = pathHelper.path.join(deployDir, to);
-          fs.copySync(fromPath, toPath);
-        };
-
-        copyAsset('dummyPackage.json', 'package.json');
-        copyAsset('dummyServer.js', 'index.js');
-
-        gitCommand(['add', '.']);
-        gitCommand(['commit', '-am', 'initial (dummy) deployment']);
-      }
-
-      let remoteExists = () => {
-        let output = utils.getCommandOutput('git', ['rev-parse', '--verify', '--quiet', instance], deployDir);
-
-        return output.output ? true : false;
-      };
-
-      let remoteHasMaster = () => {
-        let output = utils.getCommandOutput('git', ['ls-remote', '--heads', instance, 'master'], deployDir);
-
-        return output.output ? true : false;
-      };
-
-      if (!remoteExists()) {
-        let herokuAppId = argv.herokuApp;
-        if (!herokuAppId) {
-          utils.logAndExit(
-            'Specify Heroku App ID (--heroku-app) for initial deployment (see "deploy" command help for more information)'
-          );
-        }
-
-        utils.runCommand('heroku', ['git:remote', '-a', herokuAppId, '-r', instance], {
-          title: `Init local branch for instance ${instance}`,
-          path: deployDir
-        });
-
-        if (!remoteHasMaster()) {
-          gitCommand(['push', instance, 'master'], 'Doing Heroku initial (dummy) deployment');
-        }
-
-        gitCommand(['fetch', instance]);
-
-        gitCommand(['checkout', `${instance}/master`, '-b', instance]);
-      }
-      break;
-  }
-}
-
 function beforeDeploy(deployParams) {
-  const {target, processManager, appName, instance, deployDir} = deployParams;
+  const {target, processManager, appName, deployDir} = deployParams;
 
   switch (target) {
     case TARGET_LOCAL:
       stopLocalApp(processManager, appName);
       break;
     case TARGET_HEROKU:
-      utils.runCommand('git', ['checkout', instance, '--force'], {
-        title: `Switch to "${instance}" branch`,
-        path: deployDir
-      });
-
-      utils.runCommand('git', ['clean', '-df'], {
-        title: `Remove untracked files`,
-        path: deployDir
-      });
-
-      utils.runCommand('git', ['checkout', '--', '.'], {
-        title: `Revert local changes`,
-        path: deployDir
-      });
-
-      utils.runCommand('git', ['pull', instance], {
-        title: `Pull changes from remote`,
-        path: deployDir
-      });
+      beforeDeployHeroku(deployParams);
       break;
     case TARGET_NOW:
       let nowConfig = getNowConfig(deployDir);
@@ -248,8 +147,47 @@ function beforeDeploy(deployParams) {
   }
 }
 
+function beforeDeployHeroku(deployParams) {
+  const {deployDir, argv} = deployParams;
+
+  const remoteHasMaster = () => {
+    let output = utils.getCommandOutput('git', ['ls-remote', '--heads', HEROKU_INSTANCE, 'master'], deployDir);
+
+    return output.output ? true : false;
+  };
+
+  const gitCommand = (args, title = '', allowError = false) =>
+    utils.runCommand('git', args, {
+      title,
+      path: deployDir,
+      ignoreError: true
+    });
+
+  gitCommand(['init']);
+  gitCommand(['config', 'user.email', 'napp.heroku@gmail.com']);
+  gitCommand(['config', 'user.name', 'Napp Deploy']);
+
+  const herokuAppId = argv.herokuApp;
+  if (!herokuAppId) {
+    utils.logAndExit(
+      'Specify Heroku App ID (--heroku-app) for initial deployment (see "deploy" command help for more information)'
+    );
+  }
+
+  utils.runCommand('heroku', ['git:remote', '-a', herokuAppId, '-r', HEROKU_INSTANCE], {
+    title: `Init heroku remote "${HEROKU_INSTANCE}"`,
+    path: deployDir
+  });
+
+  if (remoteHasMaster()) {
+    gitCommand(['fetch', HEROKU_INSTANCE]);
+
+    gitCommand(['checkout', `${HEROKU_INSTANCE}/master`, '-b', HEROKU_INSTANCE]);
+  }
+}
+
 function afterDeploy(deployParams) {
-  const {target, processManager, appName, instance, deployDir} = deployParams;
+  const {target, processManager, appName, deployDir} = deployParams;
 
   switch (target) {
     case TARGET_LOCAL:
@@ -263,6 +201,11 @@ function afterDeploy(deployParams) {
       startLocalApp(processManager, appName);
       break;
     case TARGET_HEROKU:
+      utils.runCommand('git', ['checkout', '-b', HEROKU_INSTANCE], {
+        path: deployDir,
+        ignoreError: true
+      });
+
       utils.runCommand('git', ['add', '.'], {
         title: 'Add files to git',
         path: deployDir
@@ -273,12 +216,12 @@ function afterDeploy(deployParams) {
         ['commit', '-m', `"Deployment at ${dateFns.format(new Date(), 'YYYY-MM-DDTHH:mm:ss')}"`],
         {
           title: 'Commit files to git',
-          userError: 'It seems that you have deployed the current code already',
+          userError: 'It seems that you have deployed the current code already. Make some changes and try again.',
           path: deployDir
         }
       );
 
-      utils.runCommand('git', ['push', instance, `${instance}:master`], {
+      utils.runCommand('git', ['push', HEROKU_INSTANCE, `${HEROKU_INSTANCE}:master`], {
         title: 'Deploying to Heroku...',
         showOutput: true,
         path: deployDir
