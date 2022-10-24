@@ -56,6 +56,7 @@ Build system expects to be able to create client build by running 'npm run build
 More details how to setup client-side build you can find in docs for particular build system:
 
 React: [create-react-app](https://github.com/facebookincubator/create-react-app)
+
 ### Server:
 
 Both JS/TS js flavors are supported. For JS you can use latest language features like ES6, async/await and others. Code is compiled to ES5 during the build.
@@ -94,7 +95,7 @@ To seed project with particular templates use --project --server --client option
 app-scripts init my-app --project simple --server ts --client react
 ```
 
-To init basic IDE settings use option --ide (currently supported ws/code)
+To init basic IDE settings use option --ide (currently supported vs code only)
 
 ```
 app-scripts init my-app --default --ide code
@@ -180,5 +181,5 @@ Also if pre-build/post-build scripts are defined in server/client package.json f
 For local development run
 
 ```bash
-npm link #(in package dir)
+sudo npm link #(in package dir)
 ```

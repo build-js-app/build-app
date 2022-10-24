@@ -38,10 +38,6 @@ function commandBuilder(yargs) {
       alias: 'c',
       description: 'Client template'
     })
-    .option('default', {
-      alias: 'df',
-      description: 'Init with default templates'
-    })
     .option('list', {
       alias: 'ls',
       description: 'Show list of templates'
@@ -53,7 +49,7 @@ function commandBuilder(yargs) {
       'init my-app -p simple -s ts -c react',
       'inits new app in "my-app" folder with templates "ts", "react" in project "simple"'
     )
-    .example('init my-app --default --ide code', 'inits project with default templates and VS Code settings')
+    .example('init', 'inits project with manual options selection')
     .example('init my-app --list', 'show list of all available templates grouped by project');
 }
 
@@ -271,15 +267,11 @@ function cliInit(argv) {
     checkIdeOption(argv.ide);
   }
 
-  if (argv.default) {
-    return initCommand(argv.appName, 'simple', 'ts', 'react', argv.ide);
-  }
-
   let params = [argv.project, argv.server, argv.client];
 
   for (let param of params) {
     if (!param) {
-      console.log(`Please specify project, server and client options or use defaults with --default option.`);
+      console.log(`Please specify project, server and client options.`);
       return console.log(`Run init -h to get more information`);
     }
   }

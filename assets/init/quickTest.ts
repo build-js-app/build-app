@@ -3,7 +3,7 @@
 // (you may use vscode launch configuration to run this file)
 
 const run = async () => {
-  let testPass = false;
+  let testPass = true;
   let asyncMessage = () => Promise.resolve('Test OK!');
   let asyncError = () => Promise.reject('Test fail.');
 
