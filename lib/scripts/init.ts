@@ -25,32 +25,34 @@ const supportedIdes = {
 };
 
 function commandBuilder(yargs) {
-  return yargs
-    .option('project', {
-      alias: 'p',
-      description: 'Templates project'
-    })
-    .option('server', {
-      alias: 's',
-      description: 'Server template'
-    })
-    .option('client', {
-      alias: 'c',
-      description: 'Client template'
-    })
-    .option('list', {
-      alias: 'ls',
-      description: 'Show list of templates'
-    })
-    .option('ide', {
-      description: 'Init with specified IDE settings'
-    })
-    .example(
-      'init my-app -p simple -s ts -c react',
-      'inits new app in "my-app" folder with templates "ts", "react" in project "simple"'
-    )
-    .example('init', 'inits project with manual options selection')
-    .example('init my-app --list', 'show list of all available templates grouped by project');
+  return (
+    yargs
+      .option('project', {
+        alias: 'p',
+        description: 'Templates project'
+      })
+      .option('server', {
+        alias: 's',
+        description: 'Server template'
+      })
+      .option('client', {
+        alias: 'c',
+        description: 'Client template'
+      })
+      .option('list', {
+        alias: 'ls',
+        description: 'Show list of templates'
+      })
+      // .option('ide', {
+      //   description: 'Init with specified IDE settings'
+      // })
+      .example(
+        'init my-app -p simple -s ts -c react',
+        'inits new app in "my-app" folder with templates "ts", "react" in project "simple"'
+      )
+      .example('init', 'inits project with manual options selection')
+      .example('init my-app --list', 'show list of all available templates grouped by project')
+  );
 }
 
 function commandHandler(argv) {
