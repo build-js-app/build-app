@@ -5,20 +5,20 @@
       "server": {
         "mongo_or_sql": {
           "description": "Universal: Mongo DB | SQL (sqlite|postgres)",
-          "repo": "build-js-app/template-full-server",
-          "branch": "universal_data_access"
+          "repo": "Orbios/tmp_em_server",
+          "branch": "master"
         }
       },
       "client": {
         "react": {
           "description": "React with TypeScript",
-          "repo": "build-js-app/template-full-client",
-          "branch": "react"
+          "repo": "Orbios/tmp_em_react",
+          "branch": "master"
         },
         "vue": {
           "description": "Vue with TypeScript",
-          "repo": "build-js-app/template-full-client",
-          "branch": "vue"
+          "repo": "Orbios/tmp_em_vue",
+          "branch": "master"
         }
       }
     }
